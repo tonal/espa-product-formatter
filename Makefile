@@ -1,4 +1,4 @@
-SUBDIRS	= py_modules scripts # src
+SUBDIRS	= py_modules scripts src
 
 all:
 	@for dir in $(SUBDIRS); do \
