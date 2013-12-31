@@ -22,6 +22,7 @@ History:
   Created Oct/2013 by Ron Dilley, USGS/EROS
 '''
 
+
 '''
 The global variable that is the file handle to the log file.  Only used when
 using a file for the log.
@@ -29,7 +30,14 @@ using a file for the log.
 __LOG_HANDLER__ = None
 
 
-def open_log_handler(file_name):
+'''
+The global variable used for determining wether or not to output debug log
+messages.
+'''
+__DEBUG_ON__ = False
+
+
+def open_log_handler (file_name):
     '''
     Description:
       Opens the log file handle for appending
@@ -71,7 +79,7 @@ def close_log_handler():
 # END close_log_handler
 
 
-def build_log_message(message, filename, line):
+def build_log_message (message, filename, line):
     '''
     Desacription:
       Builds a standardized log message
@@ -84,21 +92,22 @@ def build_log_message(message, filename, line):
     Returns:
         Returns an ESPA standard log message
     '''
-
     now = datetime.datetime.now()
-    return "%s-%s-%s %s:%s.%s [%s]:%d %s" % (now.year,
+    pid = os.getpid()
+    return "%s-%s-%s %s:%s.%s %d [%s]:%d %s" % (now.year,
         str(now.month).zfill(2),
         str(now.day).zfill(2),
         str(now.hour).zfill(2),
         str(now.minute).zfill(2),
         str(now.second).zfill(2),
+        pid,
         filename,
         line,
         message)
 # END build_log_message
 
 
-def log(message, file=None, line=None):
+def log (message, file=None, line=None):
     '''
     Description:
       Logs a message in the ESPA standard log format to STDOUT or a log file
@@ -132,4 +141,40 @@ def log(message, file=None, line=None):
     else:
         __LOG_HANDLER__.write (message_string + '\n')
 # END log
+
+
+def set_debug (on=True):
+    '''
+    Description:
+      Used for turning debug messaging on or off
+    '''
+    global __DEBUG_ON__
+
+    __DEBUG_ON__ = on
+# END set_debug
+
+
+def debug (message, file=None, line=None):
+    '''
+    Description:
+      Write the message to the log it debug is turned on
+    '''
+    global __DEBUG_ON__
+
+    if __DEBUG_ON__:
+        # Get information about the calling code for the filename and line_number
+        (frame, filename, line_number, function_name, lines, index) = \
+            inspect.getouterframes(inspect.currentframe())[1]
+        filename = os.path.basename(filename)
+
+        # Use the one provided
+        if line != None:
+            line_number = line
+
+        # Use the one provided
+        if file != None:
+            filename = file
+
+        log (message, filename, line_number)
+# END debug
 
