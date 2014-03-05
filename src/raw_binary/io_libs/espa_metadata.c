@@ -186,6 +186,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/18/2013   Gail Schmidt     Original development
+2/25/2014    Gail Schmidt     Added support for source and category attributes
+                              for the band metadata
 
 NOTES:
   1. Initializes the bitmap_description and class_values for each band to NULL
@@ -228,7 +230,9 @@ int allocate_band_metadata
         bmeta[i].class_values = NULL;
 
         strcpy (bmeta[i].product, ESPA_STRING_META_FILL);
+        strcpy (bmeta[i].source, ESPA_STRING_META_FILL);
         strcpy (bmeta[i].name, ESPA_STRING_META_FILL);
+        strcpy (bmeta[i].category, ESPA_STRING_META_FILL);
         bmeta[i].data_type = ESPA_UINT8;
         bmeta[i].nlines = ESPA_INT_META_FILL;
         bmeta[i].nsamps = ESPA_INT_META_FILL;

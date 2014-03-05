@@ -24,7 +24,7 @@ NOTES:
 #define ERROR 1
 
 /* Common string size definition */
-#define STR_SIZE 1024
+#define STR_SIZE 2048
 
 /* Prototypes */
 

@@ -31,6 +31,7 @@ NOTES:
 #include "espa_hdf.h"
 #include "espa_hdf_eos.h"
 #include "envi_header.h"
+#include "raw_binary_io.h"
 
 /* Defines */
 #define HDF_ERROR -1

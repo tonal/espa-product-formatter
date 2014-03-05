@@ -35,7 +35,8 @@ NOTES:
 #define ESPA_SCHEMA_VERSION "1.0.0"
 #define ESPA_NS "http://espa.cr.usgs.gov/v1.0"
 #define ESPA_SCHEMA_LOCATION "http://espa.cr.usgs.gov/v1.0"
-#define ESPA_SCHEMA "http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd"
+//#define ESPA_SCHEMA "http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd"
+#define ESPA_SCHEMA "/media/sf_Software_SandBox/xml_test/espa_internal_metadata_v1_0.xsd"
 
 /* Data types */
 enum Espa_data_type
@@ -81,7 +82,7 @@ typedef struct
                              for multi-res products) */
     double lr_corner[2];  /* projection LR x, y (store center of the pixel
                              for multi-res products) */
-    char grid_origin[STR_SIZE];  /* origin of the gridded data (UL, center) */
+    char grid_origin[STR_SIZE];  /* origin of the gridded data (UL, CENTER) */
 
     /* UTM projection parameters */
     int utm_zone;         /* UTM zone; use a negative number if this is a
@@ -129,7 +130,9 @@ typedef struct
 typedef struct
 {
     char product[STR_SIZE];      /* product type */
+    char source[STR_SIZE];       /* source type (level1, toa_refl, sr_refl) */
     char name[STR_SIZE];         /* band name */
+    char category[STR_SIZE];     /* category type (image, qa, browse, index) */
     enum Espa_data_type data_type;  /* data type of this band */
     int nlines;                  /* number of lines in the dataset */
     int nsamps;                  /* number of samples in the dataset */

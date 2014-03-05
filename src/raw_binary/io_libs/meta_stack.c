@@ -109,9 +109,13 @@ int push
     char FUNC_NAME[] = "push";   /* function name */
     char errmsg[STR_SIZE];       /* error message */
     int count;                   /* number of chars copied in snprintf */
+    int stack_top;               /* value for the top of the stack */
+
+    /* Capture the stack top */
+    stack_top = *top_of_stack;
 
     /* If the stack isn't full, then add the item to the stack */
-    if (*top_of_stack == (MAX_STACK_SIZE - 1))
+    if (stack_top == MAX_STACK_SIZE - 1)
     {
         sprintf (errmsg, "Stack is full. Can't add any additional items to "
             "the stack. Failed to push %s.", strval);
@@ -120,18 +124,23 @@ int push
     }
     else
     {
-        (*top_of_stack)++;
-        count = snprintf (stack[*top_of_stack], STR_SIZE, "%s", strval);
+        stack_top++;
+        count = snprintf (stack[stack_top], STR_SIZE, "%s", strval);
         if (count < 0 || count >= STR_SIZE)
         {
-            sprintf (errmsg, "Overflow of stack[*top_of_stack] string");
+            sprintf (errmsg, "Overflow of current stack string at top %d",
+                stack_top);
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
         }
     }
 
+    /* Update the stack top */
+    *top_of_stack = stack_top;
+
     return (SUCCESS);
 }
+
 
 /******************************************************************************
 MODULE:  pop
@@ -160,10 +169,14 @@ char *pop
 {
     char FUNC_NAME[] = "pop";    /* function name */
     char errmsg[STR_SIZE];       /* error message */
+    int stack_top;               /* value for the top of the stack */
+
+    /* Capture the stack top */
+    stack_top = *top_of_stack;
 
     /* If the stack is empty, then return an error.  Otherwise pop the next
        item from the stack. */
-    if (*top_of_stack == -1)
+    if (stack_top == -1)
     {
         sprintf (errmsg, "No more elements on the stack to pop.");
         error_handler (true, FUNC_NAME, errmsg);
@@ -171,7 +184,10 @@ char *pop
     }
     else
     {
-        return (stack[(*top_of_stack)--]);
+        /* Update the stack top to the value after we pop this one off */
+        *top_of_stack = stack_top-1;
+
+        return (stack[stack_top]);
     }
 }
 

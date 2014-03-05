@@ -35,7 +35,7 @@ NOTES:
 #define NPROJ_PARAM 15
 
 /* size of the metadata string for defining the HDF-EOS metadata */
-#define ESPA_MAX_METADATA_SIZE 10000
+#define ESPA_MAX_METADATA_SIZE 10240
 
 /* Prototypes */
 bool append_meta

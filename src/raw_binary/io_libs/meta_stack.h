@@ -26,7 +26,7 @@ NOTES:
 #include "error_handler.h"
 
 /* Defines */
-#define MAX_STACK_SIZE 1000
+#define MAX_STACK_SIZE 500
 
 /* Prototypes */
 int init_stack

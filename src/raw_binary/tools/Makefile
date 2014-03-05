@@ -5,7 +5,7 @@
 # Set up compile options
 CC = gcc
 RM = rm -f
-EXTRA = -Wall -O2
+EXTRA = -Wall -g -O2
 
 # Define the include files
 INC = 

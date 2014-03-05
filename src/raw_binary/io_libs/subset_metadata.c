@@ -14,6 +14,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/10/2014    Gail Schmidt     Original development
+2/25/2014    Gail Schmidt     Added support for source and category attributes
+                              for the band metadata
 
 NOTES:
   1. The XML metadata format written via this library follows the ESPA internal
@@ -267,11 +269,31 @@ int subset_metadata_by_product
             return (ERROR);
         }
 
+        count = snprintf (outmeta->band[iband].source,
+            sizeof (outmeta->band[iband].source), "%s", inmeta->band[i].source);
+        if (count < 0 || count >= sizeof (outmeta->band[iband].source))
+        {
+            sprintf (errmsg, "Overflow of outmeta->band[iband].source string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         count = snprintf (outmeta->band[iband].name,
             sizeof (outmeta->band[iband].name), "%s", inmeta->band[i].name);
         if (count < 0 || count >= sizeof (outmeta->band[iband].name))
         {
             sprintf (errmsg, "Overflow of outmeta->band[iband].name string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        count = snprintf (outmeta->band[iband].category,
+            sizeof (outmeta->band[iband].category), "%s",
+            inmeta->band[i].category);
+        if (count < 0 || count >= sizeof (outmeta->band[iband].category))
+        {
+            sprintf (errmsg, "Overflow of outmeta->band[iband].category "
+                "string");
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
         }
@@ -360,8 +382,7 @@ int subset_metadata_by_product
                 count = snprintf (outmeta->band[iband].bitmap_description[k],
                     sizeof (outmeta->band[iband].bitmap_description[k]),
                     "%s", inmeta->band[i].bitmap_description[k]);
-                if (count < 0 ||
-                  count >= sizeof (outmeta->band[iband].bitmap_description[k]))
+                if (count < 0 || count >= STR_SIZE)
                 {
                     sprintf (errmsg, "Overflow of "
                         "outmeta->band[iband].bitmap_description[k] string");
@@ -692,12 +713,32 @@ int subset_metadata_by_band
             return (ERROR);
         }
 
+        count = snprintf (outmeta->band[iband].source,
+            sizeof (outmeta->band[iband].source), "%s", inmeta->band[i].source);
+        if (count < 0 || count >= sizeof (outmeta->band[iband].source))
+        {
+            sprintf (errmsg, "Overflow of outmeta->band[iband].source string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         count = snprintf (outmeta->band[iband].name,
             sizeof (outmeta->band[iband].name), "%s",
             inmeta->band[j].name);
         if (count < 0 || count >= sizeof (outmeta->band[iband].name))
         {
             sprintf (errmsg, "Overflow of outmeta->band[iband].name string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        count = snprintf (outmeta->band[iband].category,
+            sizeof (outmeta->band[iband].category), "%s",
+            inmeta->band[i].category);
+        if (count < 0 || count >= sizeof (outmeta->band[iband].category))
+        {
+            sprintf (errmsg, "Overflow of outmeta->band[iband].category "
+                "string");
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
         }

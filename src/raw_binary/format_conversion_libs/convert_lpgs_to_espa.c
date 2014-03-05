@@ -41,6 +41,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/30/2013   Gail Schmidt     Original development
+2/28/2014    Gail Schmidt     Added support for the band category; band source
+                              will be left blank for the L1 LPGS data
 
 NOTES:
 1. The new MTL files contain the gain and bias coefficients for the TOA
@@ -724,6 +726,7 @@ int read_lpgs_mtl
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
         }
+        strcpy (bmeta[i].category, "image");
 
         count = snprintf (bmeta[i].app_version, sizeof (bmeta[i].app_version),
             "%s", tmp_bmeta.app_version);

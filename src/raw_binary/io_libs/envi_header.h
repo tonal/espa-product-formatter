@@ -37,8 +37,8 @@ NOTES:
 #define ENVI_WGS84 12
 
 /* most of the time there will be only one band per ENVI file, but define
-   the maximum to be 10 just in case */
-#define MAX_ENVI_BANDS 10
+   the maximum to be 50 for the HDF ENVI headers */
+#define MAX_ENVI_BANDS 50
 
 /* Structure to contain the ENVI header information */
 typedef struct {

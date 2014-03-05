@@ -13,6 +13,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/26/2013   Gail Schmidt     Original development
+2/25/2014    Gail Schmidt     Added support for source and category attributes
+                              for the band metadata
 
 NOTES:
   1. The XML metadata format written via this library follows the ESPA internal
@@ -207,15 +209,24 @@ int write_metadata
             case ESPA_FLOAT64: strcpy (my_dtype, "FLOAT64"); break;
             default: strcpy (my_dtype, "undefined"); break;
         }
-        fprintf (fptr,
-            "        <band product=\"%s\" name=\"%s\" data_type=\"%s\" "
-            "nlines=\"%d\"\n"
-            "              nsamps=\"%d\" fill_value=\"%ld\"",
-            bmeta[i].product, bmeta[i].name, my_dtype, bmeta[i].nlines,
-            bmeta[i].nsamps, bmeta[i].fill_value);
+
+        if (!strcmp (bmeta[i].source, ESPA_STRING_META_FILL)) /*no source type*/
+            fprintf (fptr,
+                "        <band product=\"%s\" name=\"%s\" category=\"%s\" "
+                "data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\" "
+                "fill_value=\"%ld\"", bmeta[i].product, bmeta[i].name,
+                bmeta[i].category, my_dtype, bmeta[i].nlines,
+                bmeta[i].nsamps, bmeta[i].fill_value);
+        else  /* contains a source type */
+            fprintf (fptr,
+                "        <band product=\"%s\" source=\"%s\" name=\"%s\" "
+                "category=\"%s\" data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\" "
+                "fill_value=\"%ld\"", bmeta[i].product, bmeta[i].source,
+                bmeta[i].name, bmeta[i].category, my_dtype, bmeta[i].nlines,
+                bmeta[i].nsamps, bmeta[i].fill_value);
 
         if (bmeta[i].saturate_value != ESPA_INT_META_FILL)
-            fprintf (fptr, " saturate_value=\"%d\"\n             ",
+            fprintf (fptr, " saturate_value=\"%d\"",
             bmeta[i].saturate_value);
         if (fabs (bmeta[i].saturate_value-ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
             fprintf (fptr, " scale_factor=\"%f\"", bmeta[i].scale_factor);
@@ -418,15 +429,24 @@ int append_metadata
             case ESPA_FLOAT64: strcpy (my_dtype, "FLOAT64"); break;
             default: strcpy (my_dtype, "undefined"); break;
         }
-        fprintf (fptr,
-            "        <band product=\"%s\" name=\"%s\" data_type=\"%s\" "
-            "nlines=\"%d\"\n"
-            "              nsamps=\"%d\" fill_value=\"%ld\"",
-            bmeta[i].product, bmeta[i].name, my_dtype, bmeta[i].nlines,
-            bmeta[i].nsamps, bmeta[i].fill_value);
+
+        if (!strcmp (bmeta[i].source, ESPA_STRING_META_FILL)) /*no source type*/
+            fprintf (fptr,
+                "        <band product=\"%s\" name=\"%s\" category=\"%s\" "
+                "data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\" "
+                "fill_value=\"%ld\"", bmeta[i].product, bmeta[i].name,
+                bmeta[i].category, my_dtype, bmeta[i].nlines,
+                bmeta[i].nsamps, bmeta[i].fill_value);
+        else  /* contains a source type */
+            fprintf (fptr,
+                "        <band product=\"%s\" source=\"%s\" name=\"%s\" "
+                "category=\"%s\" data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\" "
+                "fill_value=\"%ld\"", bmeta[i].product, bmeta[i].source,
+                bmeta[i].name, bmeta[i].category, my_dtype, bmeta[i].nlines,
+                bmeta[i].nsamps, bmeta[i].fill_value);
 
         if (bmeta[i].saturate_value != ESPA_INT_META_FILL)
-            fprintf (fptr, " saturate_value=\"%d\"\n             ",
+            fprintf (fptr, " saturate_value=\"%d\"",
             bmeta[i].saturate_value);
         if (fabs (bmeta[i].scale_factor-ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
             fprintf (fptr, " scale_factor=\"%f\"", bmeta[i].scale_factor);
@@ -629,7 +649,9 @@ void print_metadata_struct
     {
         printf ("  Band %d -->\n", i+1);
         printf ("    product: %s\n", metadata->band[i].product);
+        printf ("    source: %s\n", metadata->band[i].source);
         printf ("    name: %s\n", metadata->band[i].name);
+        printf ("    category: %s\n", metadata->band[i].category);
         printf ("    data_type: ");
         switch (metadata->band[i].data_type)
         {

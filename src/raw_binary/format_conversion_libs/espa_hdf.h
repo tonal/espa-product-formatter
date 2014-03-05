@@ -28,6 +28,7 @@ NOTES:
 /* Defines */
 /* maximum number of attribute values expected */
 #define MYHDF_MAX_NATTR_VAL (3000)
+#define MYHDF_MAX_STRING (9000)
 #define HDF_ERROR -1
 
 /* structure to store information about the HDF attribute */

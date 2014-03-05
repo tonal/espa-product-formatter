@@ -12,6 +12,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/26/2013   Gail Schmidt     Original development
+2/25/2014    Gail Schmidt     Added support for source and category attributes
+                              for the band metadata
 
 NOTES:
   1. The XML metadata format parsed or written via this library follows the
@@ -1303,6 +1305,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/27/2013   Gail Schmidt     Original development
+2/25/2014    Gail Schmidt     Added support for source and category attributes
 
 NOTES:
 ******************************************************************************/
@@ -1351,6 +1354,17 @@ int add_band_metadata
                 return (ERROR);
             }
         }
+        else if (xmlStrEqual (attr->name, (const xmlChar *) "source"))
+        {
+            count = snprintf (bmeta->source, sizeof (bmeta->source),
+                "%s", (const char *) attr_val);
+            if (count < 0 || count >= sizeof (bmeta->source))
+            {
+                sprintf (errmsg, "Overflow of bmeta->source string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+        }
         else if (xmlStrEqual (attr->name, (const xmlChar *) "name"))
         {
             count = snprintf (bmeta->name, sizeof (bmeta->name),
@@ -1358,6 +1372,17 @@ int add_band_metadata
             if (count < 0 || count >= sizeof (bmeta->name))
             {
                 sprintf (errmsg, "Overflow of bmeta->name string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+        }
+        else if (xmlStrEqual (attr->name, (const xmlChar *) "category"))
+        {
+            count = snprintf (bmeta->category, sizeof (bmeta->category),
+                "%s", (const char *) attr_val);
+            if (count < 0 || count >= sizeof (bmeta->category))
+            {
+                sprintf (errmsg, "Overflow of bmeta->category string");
                 error_handler (true, FUNC_NAME, errmsg);
                 return (ERROR);
             }
@@ -1722,7 +1747,7 @@ int parse_xml_into_struct
         {
             /* Push the element to the stack and turn the booleans on if this
                is either the global_metadata or the bands elements */
-            //printf ("***Pushed %s\n", cur_node->name);
+            //printf ("***Pushed %s\n", cur_node->name); fflush (stdout);
             if (push (top_of_stack, stack, (const char *) cur_node->name))
             {
                 sprintf (errmsg, "Pushing element '%s' to the stack.",
@@ -1790,7 +1815,7 @@ int parse_xml_into_struct
                 //printf (" @%s=%s ", attr->name, v);
                 xmlFree (v);
             }
-            //printf ("\n");
+            //printf ("\n"); fflush (stdout);
 
             /* If we are IN the global metadata (don't process the actual
                global_metadata element) then consume this node and add the
@@ -1861,7 +1886,7 @@ int parse_xml_into_struct
                 error_handler (true, FUNC_NAME, errmsg);
                 return (ERROR);
             }
-            //printf ("***Popped %s\n", curr_stack_element);
+            //printf ("***Popped %s\n", curr_stack_element); fflush (stdout);
 
             if (!strcmp (curr_stack_element, "global_metadata"))
                 global_metadata = false;

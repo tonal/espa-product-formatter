@@ -285,9 +285,9 @@ int put_attr_string
     char errmsg[STR_SIZE];   /* error message */
     int i;                   /* looping variable for the number of values */
     void *buf = NULL;        /* void pointer to actual data array */
-    char8 val_char8[MYHDF_MAX_NATTR_VAL];
+    char8 val_char8[MYHDF_MAX_STRING];
 
-    if (attr->nval <= 0 || attr->nval > MYHDF_MAX_NATTR_VAL) 
+    if (attr->nval <= 0 || attr->nval > MYHDF_MAX_STRING) 
     {
         sprintf (errmsg, "Invalid number of attribute values");
         error_handler (true, FUNC_NAME, errmsg);

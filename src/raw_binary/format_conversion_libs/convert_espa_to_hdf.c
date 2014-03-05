@@ -740,6 +740,9 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/6/2014     Gail Schmidt     Original development
+3/5/2014     Gail Schmidt     Updated to correctly support the external raw
+                              binary files, which need to be in big endian
+                              vs. little endian (as is the case with Linux)
 
 NOTES:
   1. The ESPA products are 2D thus only 2D products are supported.
@@ -754,17 +757,27 @@ int create_hdf_metadata
 )
 {
     char FUNC_NAME[] = "create_hdf_metadata";  /* function name */
-    char errmsg[STR_SIZE];      /* error message */
-    char dim_name[2][STR_SIZE]; /* array of dimension names */
-    int i;                      /* looping variable for each SDS */
-    int dim;                    /* looping variable for dimensions */
-    int count;                  /* number of chars copied in snprintf */
-    int32 hdf_id;               /* HDF file ID */
-    int32 sds_id;               /* ID for each SDS */
-    int32 dim_id;               /* ID for current dimension in SDS */
-    int32 data_type;            /* data type for HDF file */
-    int32 rank = 2;             /* rank of the SDS; set for 2D products */
-    int32 dims[2];              /* array for dimension sizes; only 2D prods */
+    char errmsg[STR_SIZE];        /* error message */
+    char bendian_file[STR_SIZE];  /* name of output big endian img file */
+    char dim_name[2][STR_SIZE];   /* array of dimension names */
+    char *cptr = NULL;            /* pointer to the file extension */
+    int i;                        /* looping variable for each SDS */
+    int nbytes;                   /* number of bytes in the data type */
+    int nlines;                   /* number of lines in the band */
+    int nsamps;                   /* number of samples in the band */
+    int dim;                      /* looping variable for dimensions */
+    int count;                    /* number of chars copied in snprintf */
+    int32 hdf_id;                 /* HDF file ID */
+    int32 sds_id;                 /* ID for each SDS */
+    int32 dim_id;                 /* ID for current dimension in SDS */
+    int32 data_type;              /* data type for HDF file */
+    int32 rank = 2;               /* rank of the SDS; set for 2D products */
+    int32 dims[2];                /* array for dimension sizes; only 2D prods */
+    int32 start[2];               /* starting location to write the HDF data */
+    int32 edge[2];                /* number of values to write the HDF data */
+    int32 stride[2];              /* stride for writing the HDF data */
+    FILE *fp_rb = NULL;           /* file pointer for the raw binary file */
+    void *file_buf = NULL;        /* pointer to correct input file buffer */
 
     /* Open the HDF file for creation (overwriting if it exists) */
     hdf_id = SDstart (hdf_file, DFACC_CREATE);
@@ -779,26 +792,102 @@ int create_hdf_metadata
        external SDS in this HDF file */
     for (i = 0; i < xml_metadata->nbands; i++)
     {
+        /* Provide the status of processing */
+        printf ("Processing SDS: %s\n", xml_metadata->band[i].name);
+
+        /* Open the file for this band of data to allow for reading */
+        fp_rb = open_raw_binary (xml_metadata->band[i].file_name, "rb");
+        if (fp_rb == NULL)
+        {
+            sprintf (errmsg, "Opening the input raw binary file: %s",
+                xml_metadata->band[i].file_name);
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        /* Define the dimensions for this band */
+        nlines = xml_metadata->band[i].nlines;
+        nsamps = xml_metadata->band[i].nsamps;
+        dims[0] = nlines;
+        dims[1] = nsamps;
+
         /* Determine the HDF data type */
         switch (xml_metadata->band[i].data_type)
         {
-            case (ESPA_INT8): data_type = DFNT_INT8; break;
-            case (ESPA_UINT8): data_type = DFNT_UINT8; break;
-            case (ESPA_INT16): data_type = DFNT_INT16; break;
-            case (ESPA_UINT16): data_type = DFNT_UINT16; break;
-            case (ESPA_INT32): data_type = DFNT_INT32; break;
-            case (ESPA_UINT32): data_type = DFNT_UINT32; break;
-            case (ESPA_FLOAT32): data_type = DFNT_FLOAT32; break;
-            case (ESPA_FLOAT64): data_type = DFNT_FLOAT64; break;
+            case (ESPA_INT8):
+                data_type = DFNT_INT8;
+                nbytes = 1;
+                break;
+            case (ESPA_UINT8):
+                data_type = DFNT_UINT8;
+                nbytes = 1;
+                break;
+            case (ESPA_INT16):
+                data_type = DFNT_INT16;
+                nbytes = 2;
+                break;
+            case (ESPA_UINT16):
+                data_type = DFNT_UINT16;
+                nbytes = 2;
+                break;
+            case (ESPA_INT32):
+                data_type = DFNT_INT32;
+                nbytes = 4;
+                break;
+            case (ESPA_UINT32):
+                data_type = DFNT_UINT32;
+                nbytes = 4;
+                break;
+            case (ESPA_FLOAT32):
+                data_type = DFNT_FLOAT32;
+                nbytes = 4;
+                break;
+            case (ESPA_FLOAT64):
+                data_type = DFNT_FLOAT64;
+                nbytes = 8;
+                break;
             default:
                 sprintf (errmsg, "Unsupported ESPA data type.");
                 error_handler (true, FUNC_NAME, errmsg);
                 return (ERROR);
         }
 
-        /* Define the dimensions for this band */
-        dims[0] = xml_metadata->band[i].nlines;
-        dims[1] = xml_metadata->band[i].nsamps;
+        /* Allocate memory for the file buffer */
+        file_buf = calloc (nlines * nsamps, nbytes);
+        if (file_buf == NULL)
+        {
+            sprintf (errmsg, "Error allocating memory for the file buffer.");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        /* Read the data from the raw binary file */
+        if (read_raw_binary (fp_rb, nlines, nsamps, nbytes, file_buf) !=
+            SUCCESS)
+        {
+            sprintf (errmsg, "Reading image data from the raw binary file");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        /* Find the location of the file extension, then modify the filename
+           a bit to depict the big endian version of the imagery needed for
+           the HDF files.  (It's assumed we are running on Linux, thus the
+           current output files will be little endian.  HDF uses big endian
+           for their byte order.) */
+        count = snprintf (bendian_file, sizeof (bendian_file), "%s",
+            xml_metadata->band[i].file_name);
+        if (count < 0 || count >= sizeof (bendian_file))
+        {
+            sprintf (errmsg, "Overflow of bendian_file string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        cptr = strrchr (bendian_file, '.');
+        if (cptr != NULL)
+            *cptr = '\0';
+        strcpy (cptr, "_hdf.img");
 
         /* Select/create the SDS index for the current band */
         sds_id = SDcreate (hdf_id, xml_metadata->band[i].name, data_type,
@@ -866,11 +955,25 @@ int create_hdf_metadata
 
         /* Identify the external dataset for this SDS, starting at byte
            location 0 since these are raw binary files without any headers */
-        if (SDsetexternalfile (sds_id,
-            xml_metadata->band[i].file_name, 0 /* offset */) == HDF_ERROR)
+        if (SDsetexternalfile (sds_id, bendian_file, 0 /* offset */) ==
+            HDF_ERROR)
         {
             sprintf (errmsg, "Setting the external dataset for this SDS (%d): "
-                "%s.", i, xml_metadata->band[i].file_name);
+                "%s.", i, bendian_file);
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        /* Write the new big endian data to the SDS.  Start writing at the
+           beginning of the SDS, write every element, and write all the
+           elements in both dimensions. */
+        start[0] = start[1] = 0;
+        edge[0] = dims[0];
+        edge[1] = dims[1];
+        if (SDwritedata (sds_id, start, NULL, edge, file_buf) == HDF_ERROR)
+        {
+            sprintf (errmsg, "Writing the external dataset for this SDS (%d): "
+                "%s.", i, bendian_file);
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
         }
@@ -885,6 +988,10 @@ int create_hdf_metadata
 
         /* Terminate access to the data set and SD interface */
         SDendaccess (sds_id);
+
+        /* Free the file buffer */
+        free (file_buf);
+        file_buf = NULL;
     }
 
     /* Write the global metadata */
@@ -998,6 +1105,17 @@ int convert_espa_to_hdf
             return (ERROR);
         }
 
+        /* Make sure the number of bands being written doesn't exceed the
+           maximum defined ENVI header bands */
+        if (xml_metadata.nbands > MAX_ENVI_BANDS)
+        {
+            sprintf (errmsg, "Number of bands being written exceeds the "
+                "predefined maximum of bands in envi_header.h: %d",
+                MAX_ENVI_BANDS);
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         /* Update a few of the parameters in the header file since this is
            a multiband product */
         envi_hdr.nbands = xml_metadata.nbands;
@@ -1037,6 +1155,12 @@ int convert_espa_to_hdf
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
         }
+    }
+    else
+    {
+        sprintf (errmsg, "Multiresolution image and therefore no ENVI "
+            "header file has been written for the HDF file.");
+        error_handler (false, FUNC_NAME, errmsg);
     }
 
     /* Free the metadata structure */
