@@ -18,10 +18,6 @@ NOTES:
 *****************************************************************************/
 
 #include "espa_hdf_eos.h"
-/*#include "proj.h"
-#include "myproj.h"
-#include "myproj_const.h"
-*/
 
 #define OUTPUT_HDFEOS_VERSION ("HDFEOSVersion");
 #define OUTPUT_STRUCT_METADATA ("StructMetadata.0");

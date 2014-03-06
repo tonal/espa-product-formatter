@@ -585,10 +585,10 @@ int write_sds_attributes
 
     if (bmeta->scale_factor != ESPA_INT_META_FILL)
     {
-        attr.type = DFNT_FLOAT64;
+        attr.type = DFNT_FLOAT32;
         attr.nval = 1;
         attr.name = OUTPUT_SCALE_FACTOR;
-        dval[0] = (double) bmeta->scale_factor;
+        dval[0] = (float) bmeta->scale_factor;
         if (put_attr_double (sds_id, &attr, dval) != SUCCESS)
         {
             sprintf (errmsg, "Writing attribute (scale factor) to SDS: %s",
