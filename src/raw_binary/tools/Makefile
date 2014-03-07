@@ -10,7 +10,7 @@ EXTRA = -Wall -g -O2
 # Define the include files
 INC = 
 INCDIR  = -I. -I$(ESPAINC) -I$(XML2INC) -I$(TIFFINC) -I$(GEOTIFF_INC) \
-    -I$(HDFINC) -I$(HDFEOS_INC) -I$(JBIGINC)
+    -I$(HDFINC) -I$(HDFEOS_INC) -I$(JBIGINC) -I$(LZMAINC)
 NCFLAGS = $(EXTRA) $(INCDIR)
 
 # Define the source code and object files
@@ -33,7 +33,7 @@ OBJ5 = $(SRC5:.c=.o)
 LIB1   = \
     -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(GEOTIFF_LIB) -lgeotiff -L$(TIFFLIB) -ltiff \
-    -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -llzma \
+    -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -L$(LZMALIB) -llzma \
     -L$(HDFEOS_GCTPLIB) -lGctp -lz -lm
 
 LIB2   = \
@@ -41,22 +41,22 @@ LIB2   = \
     -L$(XML2LIB) -lxml2 \
     -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lGctp \
     -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
-    -llzma -lz -lm
+    -L$(LZMALIB) -llzma -lz -lm
 
 LIB3   = \
     -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
-    -llzma -lz -lm
+    -L$(LZMALIB) -llzma -lz -lm
 
 LIB4   = \
     -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
-    -llzma -lz -lm
+    -L$(LZMALIB) -llzma -lz -lm
 
 LIB5   = \
     -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
-    -llzma -lz -lm
+    -L$(LZMALIB) -llzma -lz -lm
 
 # Define the executable
 EXE = convert_lpgs_to_espa convert_espa_to_hdf convert_espa_to_gtif \
