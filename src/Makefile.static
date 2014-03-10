@@ -1,13 +1,24 @@
 #------------------------------------------------------------------------------
 # Makefile
-#
-# Simple makefile for installing the scripts.
 #------------------------------------------------------------------------------
 
-# Target for the executable
+SUBDIRS = raw_binary
+
+# Build the common libraries and applications
 all:
+	@for dir in $(SUBDIRS); do \
+        echo "make all in $$dir..."; \
+        (cd $$dir; $(MAKE) -f Makefile.static); done
 
-install:
+# Install the common libraries and applications
+install: all
+	@for dir in $(SUBDIRS); do \
+        echo "make install in $$dir..."; \
+        (cd $$dir; $(MAKE) -f Makefile.static install); done
 
+# Cleanup
 clean:
+	@for dir in $(SUBDIRS); do \
+        echo "make clean in $$dir..."; \
+        (cd $$dir; $(MAKE) -f Makefile.static clean); done
 
