@@ -33,30 +33,25 @@ OBJ5 = $(SRC5:.c=.o)
 LIB1   = \
     -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(GEOTIFF_LIB) -lgeotiff -L$(TIFFLIB) -ltiff \
-    -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -L$(LZMALIB) -llzma \
-    -L$(HDFEOS_GCTPLIB) -lGctp -lz -lm
+    -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -L$(HDFEOS_GCTPLIB) -lGctp -lz -lm
 
 LIB2   = \
     -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 \
     -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lGctp \
-    -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
-    -L$(LZMALIB) -llzma -lz -lm
+    -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
 
 LIB3   = \
     -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
-    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
-    -L$(LZMALIB) -llzma -lz -lm
+    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
 
 LIB4   = \
     -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
-    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
-    -L$(LZMALIB) -llzma -lz -lm
+    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
 
 LIB5   = \
     -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
-    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
-    -L$(LZMALIB) -llzma -lz -lm
+    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
 
 # Define the executable
 EXE = convert_lpgs_to_espa convert_espa_to_hdf convert_espa_to_gtif \
@@ -92,7 +87,6 @@ $(OBJ2): $(INC)
 $(OBJ3): $(INC)
 $(OBJ4): $(INC)
 $(OBJ5): $(INC)
-$(OBJ6): $(INC)
 .c.o:
 	$(CC) $(NCFLAGS) -c $<
 
