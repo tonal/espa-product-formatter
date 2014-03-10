@@ -24,4 +24,4 @@ clean:
 	@for dir in $(LIBDIRS) $(EXEDIRS); do \
         echo "make clean in $$dir..."; \
         (cd $$dir; $(MAKE) clean); done
-
+	rm -r include lib

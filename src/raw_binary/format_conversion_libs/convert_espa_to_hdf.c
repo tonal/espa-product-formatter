@@ -775,7 +775,6 @@ int create_hdf_metadata
     int32 dims[2];                /* array for dimension sizes; only 2D prods */
     int32 start[2];               /* starting location to write the HDF data */
     int32 edge[2];                /* number of values to write the HDF data */
-    int32 stride[2];              /* stride for writing the HDF data */
     FILE *fp_rb = NULL;           /* file pointer for the raw binary file */
     void *file_buf = NULL;        /* pointer to correct input file buffer */
 
