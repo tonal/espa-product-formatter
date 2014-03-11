@@ -81,6 +81,42 @@ int init_stack
 
 
 /******************************************************************************
+MODULE:  free_stack
+
+PURPOSE:  Frees memory for the stack of strings.
+
+RETURN VALUE:
+Type = None
+
+HISTORY:
+Date         Programmer       Reason
+----------   --------------   -------------------------------------
+3/11/2014    Gail Schmidt     Original development
+
+NOTES:
+  1. Uses the MAX_STACK_SIZE variable in meta_stack.h to specify the size
+     of the stack of strings.
+******************************************************************************/
+void free_stack
+(
+    char ***stack       /* I: pointer to the array of strings in the stack;
+                              memory will be freed for this pointer */
+)
+{
+    int i;                             /* looping variable */
+
+
+    /* Free memory for each of the strings in the array */
+    for (i = 0; i < MAX_STACK_SIZE; i++)
+        free ((*stack)[i]);
+
+    /* Free the stack pointer itself */
+    free (*stack);
+    *stack = NULL;
+}
+
+
+/******************************************************************************
 MODULE:  push
 
 PURPOSE:  Push an item on the stack.

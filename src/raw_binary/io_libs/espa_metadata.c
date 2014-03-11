@@ -379,15 +379,19 @@ void free_metadata
                                                 structure */
 )
 {
-    int i;                        /* looping variable */
+    int i, b;                      /* looping variables */
 
     /* Free the pointers in the band metadata */
     for (i = 0; i < internal_meta->nbands; i++)
     {
-        if (internal_meta->band[i].bitmap_description)
+        if (internal_meta->band[i].nbits > 0)
+        {
+            for (b = 0; b < internal_meta->band[i].nbits; b++)
+                free (internal_meta->band[i].bitmap_description[b]);
             free (internal_meta->band[i].bitmap_description);
-        if (internal_meta->band[i].class_values)
-            free (internal_meta->band[i].class_values);
+        }
+
+        free (internal_meta->band[i].class_values);
     }
 
     /* Free the band pointer itself */

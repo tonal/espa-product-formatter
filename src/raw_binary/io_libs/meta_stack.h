@@ -36,6 +36,12 @@ int init_stack
                               memory will be allocated for this pointer */
 );
 
+void free_stack
+(
+    char ***stack       /* I: pointer to the array of strings in the stack;
+                              memory will be freed for this pointer */
+);
+
 int push
 (
     int *top_of_stack,    /* I/O: pointer to top of the stack; zero-based */

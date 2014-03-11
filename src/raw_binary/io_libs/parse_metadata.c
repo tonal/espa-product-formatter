@@ -1724,7 +1724,7 @@ int parse_xml_into_struct
     char *curr_stack_element = NULL;  /* element popped from the stack */
     xmlNode *cur_node = NULL;    /* pointer to the current node */
     xmlNode *sib_node = NULL;    /* pointer to the sibling node */
-    int nbands = 0;              /* number of bands in the XML structure */
+    static int nbands = 0;       /* number of bands in the XML structure */
     static bool global_metadata = false;  /* are we parsing the global metadata
                                     section of the ESPA metadata? */
     static bool bands_metadata = false;   /* are we parsing the bands metadata
@@ -1787,6 +1787,7 @@ int parse_xml_into_struct
                     return (ERROR);
                 }
                 bands_metadata = true;
+                cur_band = 0;  /* reset to zero for start of band count */
 
                 /* Count the number of siblings which are band elements */
                 nbands = 0;
@@ -1842,6 +1843,15 @@ int parse_xml_into_struct
             if (bands_metadata && xmlStrEqual (cur_node->name,
                 (const xmlChar *) "band"))
             {
+                if (cur_band >= nbands)
+                {
+                    sprintf (errmsg, "Number of bands consumed already "
+                        "reached the total number of bands allocated for this "
+                        "XML file (%d).", nbands);
+                    error_handler (true, FUNC_NAME, errmsg);
+                    return (ERROR);
+                }
+
                 if (add_band_metadata (cur_node, &metadata->band[cur_band++]))
                 {
                     sprintf (errmsg, "Consuming band metadata element '%s'.",
@@ -2140,7 +2150,7 @@ int parse_metadata
 
         /* Clean up the XML document and the stack */
         xmlFreeDoc (doc);
-        free (stack);
+        free_stack (&stack);
     }
 
     /* Free the reader and associated memory */
