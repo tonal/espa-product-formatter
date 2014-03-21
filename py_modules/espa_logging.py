@@ -1,10 +1,4 @@
 
-import os
-import inspect
-import datetime
-
-from espa_constants import *
-
 '''
 License:
   "NASA Open Source Agreement 1.3"
@@ -22,6 +16,11 @@ History:
   Created Oct/2013 by Ron Dilley, USGS/EROS
 '''
 
+import os
+import inspect
+import datetime
+
+from espa_constants import *
 
 '''
 The global variable that is the file handle to the log file.  Only used when
