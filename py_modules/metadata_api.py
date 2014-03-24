@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Fri Mar 21 08:21:25 2014 by generateDS.py version 2.12b.
+# Generated Mon Mar 24 11:16:35 2014 by generateDS.py version 2.12b.
 #
 # Generated with the ESPA modified version of generateDS.py
 # See espa google code project.
@@ -222,6 +222,13 @@ except ImportError, exp:
                         tzoff, results.group(0))
                     input_data = input_data[:-6]
             if len(input_data.split('.')) > 1:
+                # ESPA- Remove digits from the micro seconds if there are more
+                # than 6 because python datetime.strptime '%f' only supports
+                # upto 6 digits
+                parts = input_data.split('.')
+                while len(parts[1]) > 6:
+                    parts[1] = parts[1][:-1]
+                input_data = '.'.join(parts)
                 dt = datetime_.datetime.strptime(
                     input_data, '%Y-%m-%dT%H:%M:%S.%f')
             else:
@@ -325,6 +332,13 @@ except ImportError, exp:
                         tzoff, results.group(0))
                     input_data = input_data[:-6]
             if len(input_data.split('.')) > 1:
+                # ESPA- Remove digits from the micro seconds if there are more
+                # than 6 because python datetime.strptime '%f' only supports
+                # upto 6 digits
+                parts = input_data.split('.')
+                while len(parts[1]) > 6:
+                    parts[1] = parts[1][:-1]
+                input_data = '.'.join(parts)
                 dt = datetime_.datetime.strptime(input_data, '%H:%M:%S.%f')
             else:
                 dt = datetime_.datetime.strptime(input_data, '%H:%M:%S')
