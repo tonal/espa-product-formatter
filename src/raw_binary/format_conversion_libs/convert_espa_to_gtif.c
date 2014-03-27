@@ -86,8 +86,8 @@ int convert_espa_to_gtif
     for (i = 0; i < xml_metadata.nbands; i++)
     {
         /* Determine the output GeoTIFF band name */
-        count = snprintf (gtif_band, sizeof (gtif_band), "%s_%s.tif", gtif_file,
-            xml_metadata.band[i].name);
+        count = snprintf (gtif_band, sizeof (gtif_band), "%s_%s.tif",
+            gtif_file, xml_metadata.band[i].name);
         if (count < 0 || count >= sizeof (gtif_band))
         {
             sprintf (errmsg, "Overflow of gtif_file string");

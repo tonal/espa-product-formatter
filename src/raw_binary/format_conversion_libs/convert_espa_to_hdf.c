@@ -23,6 +23,7 @@ NOTES:
 *****************************************************************************/
 
 #include <math.h>
+#include "HE2_config.h"
 #include "convert_espa_to_hdf.h"
 
 #define OUTPUT_PROVIDER ("DataProvider")
@@ -52,6 +53,8 @@ NOTES:
 #define OUTPUT_SOUTH_BOUND ("SouthBoundingCoordinate")
 #define UL_LAT_LONG ("UpperLeftCornerLatLong")
 #define LR_LAT_LONG ("LowerRightCornerLatLong")
+#define OUTPUT_HDFEOS_VERSION ("HDFEOSVersion");
+#define OUTPUT_HDF_VERSION ("HDFVersion");
 
 #define OUTPUT_LONG_NAME        ("long_name")
 #define OUTPUT_UNITS            ("units")
@@ -61,6 +64,7 @@ NOTES:
 #define OUTPUT_SCALE_FACTOR     ("scale_factor")
 #define OUTPUT_ADD_OFFSET       ("add_offset")
 #define OUTPUT_CALIBRATED_NT    ("calibrated_nt")
+#define OUTPUT_APP_VERSION      ("app_version")
 
 
 /******************************************************************************
@@ -91,6 +95,8 @@ int write_global_attributes
 {
     char FUNC_NAME[] = "write_global_attributes";  /* function name */
     char errmsg[STR_SIZE];        /* error message */
+    char hdf_version[] = H4_VERSION;  /* version for HDF4 */
+    char hdfeos_version[] = PACKAGE_VERSION;  /* version for HDFEOS */
     int i;                        /* looping variable for each SDS */
     int ngain_bias = 0;           /* number of gain/bias values for refl */
     int ngain_bias_thm = 0;       /* number of gain/bias values for thermal */
@@ -463,6 +469,26 @@ int write_global_attributes
         return (ERROR);
     }
 
+    attr.type = DFNT_CHAR8;
+    attr.nval = strlen (hdf_version);
+    attr.name = OUTPUT_HDF_VERSION;
+    if (put_attr_string (hdf_id, &attr, hdf_version) != SUCCESS)
+    {
+        sprintf (errmsg, "Writing global attribute (HDF Version)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    attr.type = DFNT_CHAR8;
+    attr.nval = strlen (hdfeos_version);
+    attr.name = OUTPUT_HDFEOS_VERSION;
+    if (put_attr_string (hdf_id, &attr, hdfeos_version) != SUCCESS)
+    {
+        sprintf (errmsg, "Writing global attribute (HDFEOS Version)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
     /* Use the production date from the first band */
     attr.type = DFNT_CHAR8;
     attr.nval = strlen (xml_metadata->band[0].production_date);
@@ -496,6 +522,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/6/2014     Gail Schmidt     Original development
+3/21/2014    Gail Schmidt     Added the application version for band attributes
 
 NOTES:
 ******************************************************************************/
@@ -718,6 +745,20 @@ int write_sds_attributes
         }
     }
 
+    if (strcmp (bmeta->app_version, ESPA_STRING_META_FILL))
+    {
+        attr.type = DFNT_CHAR8;
+        attr.nval = strlen (bmeta->app_version);
+        attr.name = OUTPUT_APP_VERSION;
+        if (put_attr_string (sds_id, &attr, bmeta->app_version) != SUCCESS)
+        {
+            sprintf (errmsg, "Writing attribute (app version) to SDS: %s",
+                bmeta->name);
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+    }
+
     /* Successful write */
     return (SUCCESS);
 }
@@ -743,6 +784,7 @@ Date         Programmer       Reason
 3/5/2014     Gail Schmidt     Updated to correctly support the external raw
                               binary files, which need to be in big endian
                               vs. little endian (as is the case with Linux)
+3/21/2014    Gail Schmidt     Added the HDF and HDF-EOS version
 
 NOTES:
   1. The ESPA products are 2D thus only 2D products are supported.
