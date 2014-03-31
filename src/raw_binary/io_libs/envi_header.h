@@ -12,6 +12,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/12/2013   Gail Schmidt     Original development
+3/31/2014    Ron Dilley       Added fill value to the ENVI header structure
 
 NOTES:
 *****************************************************************************/
@@ -61,6 +62,7 @@ typedef struct {
                             13 = 32-bit unsigned long integer 
                             14 = 64-bit signed long integer 
                             15 = 64-bit unsigned long integer */
+    long data_ignore_value;  /* value designated as fill for the data */
     char interleave[4];  /* "BSQ" for band sequential,
                             "BIL" for band interleave by line,
                             "BIP" for band interleave by pixel */

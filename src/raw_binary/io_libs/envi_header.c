@@ -12,6 +12,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/12/2013   Gail Schmidt     Original development
+3/31/2014    Ron Dilley       Modified to support a data fill value in the
+                              ENVI header
 
 NOTES:
 *****************************************************************************/
@@ -90,11 +92,12 @@ int write_envi_hdr
         "byte order = %d\n"
         "file type = %s\n"
         "data type = %d\n"
+        "data ignore value = %ld\n"
         "interleave = %s\n"
         "sensor_type = %s\n",
         hdr->description, hdr->nsamps, hdr->nlines, hdr->nbands,
         hdr->header_offset, hdr->byte_order, hdr->file_type, hdr->data_type,
-        hdr->interleave, hdr->sensor_type);
+        hdr->data_ignore_value, hdr->interleave, hdr->sensor_type);
    
     if (hdr->proj_type == GCTP_UTM_PROJ)
     {
@@ -218,6 +221,9 @@ int create_envi_struct
         case ESPA_FLOAT32: hdr->data_type=4; break;
         case ESPA_FLOAT64: hdr->data_type=5; break;
     }
+
+    /* Data ignore value */
+    hdr->data_ignore_value = bmeta->fill_value;
 
     /* Projection information */
     for (i = 0; i < 15; i++)
