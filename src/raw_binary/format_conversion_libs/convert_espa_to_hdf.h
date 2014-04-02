@@ -58,7 +58,9 @@ int create_hdf_metadata
 int convert_espa_to_hdf
 (
     char *espa_xml_file,   /* I: input ESPA XML metadata filename */
-    char *hdf_file         /* I: output HDF filename */
+    char *hdf_file,        /* I: output HDF filename */
+    bool del_src           /* I: should the source files be removed after
+                                 conversion? */
 );
 
 #endif

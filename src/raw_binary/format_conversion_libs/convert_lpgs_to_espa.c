@@ -13,6 +13,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/30/2013   Gail Schmidt     Original development
+4/2/2014     Gail Schmidt     Added support for a flag to delete the source
+                              .tif files
 
 NOTES:
   1. The XML metadata format written via this library follows the ESPA internal
@@ -1173,15 +1175,19 @@ NOTES:
 int convert_lpgs_to_espa
 (
     char *lpgs_mtl_file,   /* I: input LPGS MTL metadata filename */
-    char *espa_xml_file    /* I: output ESPA XML metadata filename */
+    char *espa_xml_file,   /* I: output ESPA XML metadata filename */
+    bool del_src           /* I: should the source .tif files be removed after
+                                 conversion? */
 )
 {
     char FUNC_NAME[] = "convert_lpgs_to_espa";  /* function name */
     char errmsg[STR_SIZE];   /* error message */
+    char rm_cmd[STR_SIZE];   /* command string for removing source file */
     Espa_internal_meta_t xml_metadata;  /* XML metadata structure to be
                                 populated by reading the MTL metadata file */
     int i;                   /* looping variable */
     int nlpgs_bands;         /* number of bands in the LPGS product */
+    int count;               /* number of chars copied in snprintf */
     char lpgs_bands[MAX_LPGS_BANDS][STR_SIZE];  /* array containing the file
                                 names of the LPGS bands */
 
@@ -1222,6 +1228,27 @@ int convert_lpgs_to_espa
             sprintf (errmsg, "Converting band %d: %s", i, lpgs_bands[i]);
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
+        }
+
+        /* Remove the source file if specified */
+        if (del_src)
+        {
+            printf ("  Removing %s\n", lpgs_bands[i]);
+            count = snprintf (rm_cmd, sizeof (rm_cmd), "rm -f %s",
+                lpgs_bands[i]);
+            if (count < 0 || count >= sizeof (rm_cmd))
+            {
+                sprintf (errmsg, "Overflow of rm_cmd string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            if (system (rm_cmd) == -1)
+            {
+                sprintf (errmsg, "Deleting source file: %s", lpgs_bands[i]);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
         }
     }
 

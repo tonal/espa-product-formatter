@@ -39,6 +39,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/9/2014     Gail Schmidt     Original development
+4/2/2014     Gail Schmidt     Added support for a flag to delete the source
+                              .img and .hdr files
 
 NOTES:
   1. The GDAL tools will be used for converting the raw binary (ENVI format)
@@ -49,13 +51,17 @@ NOTES:
 int convert_espa_to_gtif
 (
     char *espa_xml_file,   /* I: input ESPA XML metadata filename */
-    char *gtif_file        /* I: base output GeoTIFF filename */
+    char *gtif_file,       /* I: base output GeoTIFF filename */
+    bool del_src           /* I: should the source files be removed after
+                                 conversion? */
 )
 {
     char FUNC_NAME[] = "convert_espa_to_gtif";  /* function name */
     char errmsg[STR_SIZE];      /* error message */
     char gdal_cmd[STR_SIZE];    /* command string for GDAL call */
+    char rm_cmd[STR_SIZE];      /* command string for removing source file */
     char gtif_band[STR_SIZE];   /* name of the GeoTIFF file for this band */
+    char hdr_file[STR_SIZE];    /* name of the header file for this band */
     char *cptr = NULL;          /* pointer to empty space in the band name */
     int i;                      /* looping variable for each band */
     int count;                  /* number of chars copied in snprintf */
@@ -119,6 +125,57 @@ int convert_espa_to_gtif
             sprintf (errmsg, "Running gdal_translate: %s", gdal_cmd);
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
+        }
+
+        /* Remove the source file if specified */
+        if (del_src)
+        {
+            /* .img file */
+            printf ("  Removing %s\n", xml_metadata.band[i].file_name);
+            count = snprintf (rm_cmd, sizeof (rm_cmd),
+                "rm -f %s", xml_metadata.band[i].file_name);
+            if (count < 0 || count >= sizeof (rm_cmd))
+            {
+                sprintf (errmsg, "Overflow of rm_cmd string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            if (system (rm_cmd) == -1)
+            {
+                sprintf (errmsg, "Deleting source file: %s",
+                    xml_metadata.band[i].file_name);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            /* .hdr file */
+            count = snprintf (hdr_file, sizeof (hdr_file), "%s",
+                xml_metadata.band[i].file_name);
+            if (count < 0 || count >= sizeof (hdr_file))
+            {
+                sprintf (errmsg, "Overflow of hdr_file string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            cptr = strrchr (hdr_file, '.');
+            strcpy (cptr, ".hdr");
+            printf ("  Removing %s\n", hdr_file);
+            count = snprintf (rm_cmd, sizeof (rm_cmd), "rm -f %s", hdr_file);
+            if (count < 0 || count >= sizeof (rm_cmd))
+            {
+                sprintf (errmsg, "Overflow of rm_cmd string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            if (system (rm_cmd) == -1)
+            {
+                sprintf (errmsg, "Deleting source file: %s", hdr_file);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
         }
     }
 

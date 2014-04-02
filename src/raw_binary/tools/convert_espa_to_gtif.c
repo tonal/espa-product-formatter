@@ -13,6 +13,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/14/2014    Gail Schmidt     Original development
+4/2/2014     Gail Schmidt     Added a command-line flag to remove the source
+                              files if specified
 
 NOTES:
   1. The XML metadata format parsed or written via this library follows the
@@ -47,12 +49,15 @@ void usage ()
             "by the band name with a .tif file extension.\n\n");
     printf ("usage: convert_espa_to_gtif "
             "--xml=input_metadata_filename "
-            "--gtif=output_geotiff_base_filename\n");
+            "--gtif=output_geotiff_base_filename "
+            "[--del_src_files]\n");
 
     printf ("\nwhere the following parameters are required:\n");
     printf ("    -xml: name of the input XML metadata file which follows "
             "the ESPA internal raw binary schema\n");
     printf ("    -gtif: base filename of the output GeoTIFF files\n");
+    printf ("    -del_src_files: if specified the source image and header "
+            "files will be removed\n");
     printf ("\nExample: convert_espa_to_gtif "
             "--xml=LE70230282011250EDC00.xml "
             "--gtif=LE70230282011250EDC00\n");
@@ -88,15 +93,18 @@ short get_args
     int argc,             /* I: number of cmd-line args */
     char *argv[],         /* I: string of cmd-line args */
     char **xml_infile,    /* O: address of input XML filename */
-    char **gtif_outfile   /* O: address of output GeoTIFF base filename */
+    char **gtif_outfile,  /* O: address of output GeoTIFF base filename */
+    bool *del_src         /* O: should source files be removed? */
 )
 {
     int c;                           /* current argument index */
     int option_index;                /* index for the command-line option */
     char errmsg[STR_SIZE];           /* error message */
     char FUNC_NAME[] = "get_args";   /* function name */
+    static int del_flag = 0;         /* flag for removing the source files */
     static struct option long_options[] =
     {
+        {"del_src_files", no_argument, &del_flag, 1},
         {"xml", required_argument, 0, 'i'},
         {"gtif", required_argument, 0, 'o'},
         {"help", no_argument, 0, 'h'},
@@ -162,6 +170,10 @@ short get_args
         return (ERROR);
     }
 
+    /* Check the delete source files flag */
+    if (del_flag)
+        *del_src = true;
+
     return (SUCCESS);
 }
 
@@ -192,15 +204,16 @@ int main (int argc, char** argv)
 {
     char *xml_infile = NULL;     /* input XML filename */
     char *gtif_outfile = NULL;   /* output base GeoTIFF filename */
+    bool del_src = false;        /* should source files be removed? */
 
     /* Read the command-line arguments */
-    if (get_args (argc, argv, &xml_infile, &gtif_outfile) != SUCCESS)
+    if (get_args (argc, argv, &xml_infile, &gtif_outfile, &del_src) != SUCCESS)
     {   /* get_args already printed the error message */
         exit (EXIT_FAILURE);
     }
 
     /* Convert the internal ESPA raw binary product to GeoTIFF */
-    if (convert_espa_to_gtif (xml_infile, gtif_outfile) != SUCCESS)
+    if (convert_espa_to_gtif (xml_infile, gtif_outfile, del_src) != SUCCESS)
     {  /* Error messages already written */
         exit (EXIT_FAILURE);
     }

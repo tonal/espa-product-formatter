@@ -13,6 +13,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/14/2014    Gail Schmidt     Original development
+4/2/2014     Gail Schmidt     Added a command-line flag to remove the source
+                              files if specified
 
 NOTES:
   1. The XML metadata format parsed or written via this library follows the
@@ -45,12 +47,16 @@ void usage ()
             "metadata file and associated raw binary files).\n\n");
     printf ("usage: convert_lpgs_to_espa "
             "--mtl=input_mtl_filename "
-            "--xml=output_xml_filename\n");
+            "--xml=output_xml_filename "
+            "[--del_src_files]\n");
 
     printf ("\nwhere the following parameters are required:\n");
     printf ("    -mtl: name of the input LPGS MTL metadata file\n");
     printf ("    -xml: name of the output XML metadata file which follows "
             "the ESPA internal raw binary schema\n");
+    printf ("    -del_src_files: if specified the source GeoTIFF files will "
+            "be removed.  The _MTL.txt file will remain along with the "
+            "gap directory for ETM+ products.\n");
     printf ("\nExample: convert_lpgs_to_espa "
             "--mtl=LE70230282011250EDC00_MTL.txt "
             "--xml=LE70230282011250EDC00.xml\n");
@@ -86,15 +92,18 @@ short get_args
     int argc,             /* I: number of cmd-line args */
     char *argv[],         /* I: string of cmd-line args */
     char **mtl_infile,    /* O: address of input LPGS MTL filename */
-    char **xml_outfile    /* O: address of output XML filename */
+    char **xml_outfile,   /* O: address of output XML filename */
+    bool *del_src         /* O: should source files be removed? */
 )
 {
     int c;                           /* current argument index */
     int option_index;                /* index for the command-line option */
     char errmsg[STR_SIZE];           /* error message */
     char FUNC_NAME[] = "get_args";   /* function name */
+    static int del_flag = 0;         /* flag for removing the source files */
     static struct option long_options[] =
     {
+        {"del_src_files", no_argument, &del_flag, 1},
         {"mtl", required_argument, 0, 'i'},
         {"xml", required_argument, 0, 'o'},
         {"help", no_argument, 0, 'h'},
@@ -160,6 +169,10 @@ short get_args
         return (ERROR);
     }
 
+    /* Check the delete source files flag */
+    if (del_flag)
+        *del_src = true;
+
     return (SUCCESS);
 }
 
@@ -188,15 +201,16 @@ int main (int argc, char** argv)
 {
     char *mtl_infile = NULL;      /* input LPGS MTL filename */
     char *xml_outfile = NULL;     /* output XML filename */
+    bool del_src = false;         /* should source files be removed? */
 
     /* Read the command-line arguments */
-    if (get_args (argc, argv, &mtl_infile, &xml_outfile) != SUCCESS)
+    if (get_args (argc, argv, &mtl_infile, &xml_outfile, &del_src) != SUCCESS)
     {   /* get_args already printed the error message */
         exit (EXIT_FAILURE);
     }
 
     /* Convert the LPGS MTL and data to ESPA raw binary and XML */
-    if (convert_lpgs_to_espa (mtl_infile, xml_outfile) != SUCCESS)
+    if (convert_lpgs_to_espa (mtl_infile, xml_outfile, del_src) != SUCCESS)
     {  /* Error messages already written */
         exit (EXIT_FAILURE);
     }

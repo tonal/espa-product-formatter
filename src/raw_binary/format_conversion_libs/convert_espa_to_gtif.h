@@ -33,7 +33,9 @@ NOTES:
 int convert_espa_to_gtif
 (
     char *espa_xml_file,   /* I: input ESPA XML metadata filename */
-    char *gtif_file        /* I: base output GeoTIFF filename */
+    char *gtif_file,       /* I: base output GeoTIFF filename */
+    bool del_src           /* I: should the source files be removed after
+                                 conversion? */
 );
 
 #endif
