@@ -28,6 +28,7 @@ NOTES:
 #include "error_handler.h"
 #include "espa_metadata.h"
 #include "parse_metadata.h"
+#include "write_metadata.h"
 #include "espa_hdf.h"
 #include "espa_hdf_eos.h"
 #include "envi_header.h"

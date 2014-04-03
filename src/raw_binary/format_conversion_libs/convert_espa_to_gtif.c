@@ -21,6 +21,7 @@ NOTES:
      http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd.
 *****************************************************************************/
 
+#include <unistd.h>
 #include "convert_espa_to_gtif.h"
 
 /******************************************************************************
@@ -41,6 +42,8 @@ Date         Programmer       Reason
 1/9/2014     Gail Schmidt     Original development
 4/2/2014     Gail Schmidt     Added support for a flag to delete the source
                               .img and .hdr files
+4/3/2014     Gail Schmidt     Remove the .xml file as well if source files are
+                              specified to be deleted
 
 NOTES:
   1. The GDAL tools will be used for converting the raw binary (ENVI format)
@@ -59,9 +62,9 @@ int convert_espa_to_gtif
     char FUNC_NAME[] = "convert_espa_to_gtif";  /* function name */
     char errmsg[STR_SIZE];      /* error message */
     char gdal_cmd[STR_SIZE];    /* command string for GDAL call */
-    char rm_cmd[STR_SIZE];      /* command string for removing source file */
     char gtif_band[STR_SIZE];   /* name of the GeoTIFF file for this band */
     char hdr_file[STR_SIZE];    /* name of the header file for this band */
+    char xml_file[STR_SIZE];    /* new XML file for the GeoTIFF product */
     char *cptr = NULL;          /* pointer to empty space in the band name */
     int i;                      /* looping variable for each band */
     int count;                  /* number of chars copied in snprintf */
@@ -132,16 +135,7 @@ int convert_espa_to_gtif
         {
             /* .img file */
             printf ("  Removing %s\n", xml_metadata.band[i].file_name);
-            count = snprintf (rm_cmd, sizeof (rm_cmd),
-                "rm -f %s", xml_metadata.band[i].file_name);
-            if (count < 0 || count >= sizeof (rm_cmd))
-            {
-                sprintf (errmsg, "Overflow of rm_cmd string");
-                error_handler (true, FUNC_NAME, errmsg);
-                return (ERROR);
-            }
-
-            if (system (rm_cmd) == -1)
+            if (unlink (xml_metadata.band[i].file_name) != 0)
             {
                 sprintf (errmsg, "Deleting source file: %s",
                     xml_metadata.band[i].file_name);
@@ -162,21 +156,46 @@ int convert_espa_to_gtif
             cptr = strrchr (hdr_file, '.');
             strcpy (cptr, ".hdr");
             printf ("  Removing %s\n", hdr_file);
-            count = snprintf (rm_cmd, sizeof (rm_cmd), "rm -f %s", hdr_file);
-            if (count < 0 || count >= sizeof (rm_cmd))
-            {
-                sprintf (errmsg, "Overflow of rm_cmd string");
-                error_handler (true, FUNC_NAME, errmsg);
-                return (ERROR);
-            }
-
-            if (system (rm_cmd) == -1)
+            if (unlink (hdr_file) != 0)
             {
                 sprintf (errmsg, "Deleting source file: %s", hdr_file);
                 error_handler (true, FUNC_NAME, errmsg);
                 return (ERROR);
             }
         }
+
+        /* Update the XML file to use the new GeoTIFF band name */
+        strcpy (xml_metadata.band[i].file_name, gtif_band);
+    }
+
+    /* Remove the source XML if specified */
+    if (del_src)
+    {
+        printf ("  Removing %s\n", espa_xml_file);
+        if (unlink (espa_xml_file) != 0)
+        {
+            sprintf (errmsg, "Deleting source file: %s", espa_xml_file);
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+    }
+
+    /* Create the XML file for the GeoTIFF product */
+    count = snprintf (xml_file, sizeof (xml_file), "%s_gtif.xml", gtif_file);
+    if (count < 0 || count >= sizeof (xml_file))
+    {
+        sprintf (errmsg, "Overflow of xml_file string");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    /* Write the new XML file containing the GeoTIFF band names */
+    if (write_metadata (&xml_metadata, xml_file) != SUCCESS)
+    {
+        sprintf (errmsg, "Error writing updated XML for the GeoTIFF product: "
+            "%s", xml_file);
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
     }
 
     /* Free the metadata structure */

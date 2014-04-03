@@ -22,6 +22,7 @@ NOTES:
      http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd.
 *****************************************************************************/
 
+#include <unistd.h>
 #include <math.h>
 #include "HE2_config.h"
 #include "convert_espa_to_hdf.h"
@@ -1080,6 +1081,8 @@ Date         Programmer       Reason
 1/6/2014     Gail Schmidt     Original development
 4/2/2014     Gail Schmidt     Added support for a flag to delete the source
                               .img and .hdr files
+4/3/2014     Gail Schmidt     Remove the .xml file as well if source files are
+                              specified to be deleted
 
 NOTES:
   1. The ESPA raw binary band files will be used, as-is, and linked to as
@@ -1098,7 +1101,8 @@ int convert_espa_to_hdf
     char FUNC_NAME[] = "convert_espa_to_hdf";  /* function name */
     char errmsg[STR_SIZE];   /* error message */
     char hdr_file[STR_SIZE]; /* ENVI header file */
-    char rm_cmd[STR_SIZE];   /* command string for removing source file */
+    char xml_file[STR_SIZE]; /* new XML file for the HDF product */
+    char bendian_file[STR_SIZE];  /* name of output big endian img file */
     char *cptr = NULL;       /* pointer to empty space in the band name */
     int i;                   /* looping variable */
     int count;               /* number of chars copied in snprintf */
@@ -1220,16 +1224,7 @@ int convert_espa_to_hdf
         {
             /* .img file */
             printf ("  Removing %s\n", xml_metadata.band[i].file_name);
-            count = snprintf (rm_cmd, sizeof (rm_cmd),
-                "rm -f %s", xml_metadata.band[i].file_name);
-            if (count < 0 || count >= sizeof (rm_cmd))
-            {
-                sprintf (errmsg, "Overflow of rm_cmd string");
-                error_handler (true, FUNC_NAME, errmsg);
-                return (ERROR);
-            }
-
-            if (system (rm_cmd) == -1)
+            if (unlink (xml_metadata.band[i].file_name) != 0)
             {
                 sprintf (errmsg, "Deleting source file: %s",
                     xml_metadata.band[i].file_name);
@@ -1250,21 +1245,67 @@ int convert_espa_to_hdf
             cptr = strrchr (hdr_file, '.');
             strcpy (cptr, ".hdr");
             printf ("  Removing %s\n", hdr_file);
-            count = snprintf (rm_cmd, sizeof (rm_cmd), "rm -f %s", hdr_file);
-            if (count < 0 || count >= sizeof (rm_cmd))
-            {
-                sprintf (errmsg, "Overflow of rm_cmd string");
-                error_handler (true, FUNC_NAME, errmsg);
-                return (ERROR);
-            }
-
-            if (system (rm_cmd) == -1)
+            if (unlink (hdr_file) != 0)
             {
                 sprintf (errmsg, "Deleting source file: %s", hdr_file);
                 error_handler (true, FUNC_NAME, errmsg);
                 return (ERROR);
             }
         }
+
+        /* XML file */
+        printf ("  Removing %s\n", espa_xml_file);
+        if (unlink (espa_xml_file) != 0)
+        {
+            sprintf (errmsg, "Deleting source file: %s", espa_xml_file);
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+    }
+
+    /* Loop through the bands and modify the band names to match the new
+       (external) raw binary filenames in the HDF product */
+    for (i = 0; i < xml_metadata.nbands; i++)
+    {
+        count = snprintf (bendian_file, sizeof (bendian_file), "%s",
+            xml_metadata.band[i].file_name);
+        if (count < 0 || count >= sizeof (bendian_file))
+        {
+            sprintf (errmsg, "Overflow of bendian_file string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        cptr = strrchr (bendian_file, '.');
+        if (cptr != NULL)
+            *cptr = '\0';
+        strcpy (cptr, "_hdf.img");
+
+        /* Update the XML file to use the new band names */
+        strcpy (xml_metadata.band[i].file_name, bendian_file);
+    }
+
+    /* Create the XML file for the HDF product */
+    count = snprintf (xml_file, sizeof (xml_file), "%s", hdf_file);
+    if (count < 0 || count >= sizeof (xml_file))
+    {
+        sprintf (errmsg, "Overflow of xml_file string");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    cptr = strrchr (xml_file, '.');
+    if (cptr != NULL)
+        *cptr = '\0';
+    strcpy (cptr, "_hdf.xml");
+
+    /* Write the new XML file containing the new band names */
+    if (write_metadata (&xml_metadata, xml_file) != SUCCESS)
+    {
+        sprintf (errmsg, "Error writing updated XML for the HDF product: %s",
+            xml_file);
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
     }
 
     /* Free the metadata structure */

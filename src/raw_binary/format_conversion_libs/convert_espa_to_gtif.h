@@ -26,6 +26,7 @@ NOTES:
 #include "error_handler.h"
 #include "espa_metadata.h"
 #include "parse_metadata.h"
+#include "write_metadata.h"
 
 /* Defines */
 
