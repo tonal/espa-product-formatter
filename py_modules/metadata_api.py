@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Mon Mar 24 11:16:35 2014 by generateDS.py version 2.12b.
+# Generated Mon Apr 21 12:31:10 2014 by generateDS.py version 2.12b.
 #
 # Generated with the ESPA modified version of generateDS.py
 # See espa google code project.
-# See directory ../tools/generateDS
+# See directory ...../tools/generateDS
 #
 
 import os
@@ -1444,10 +1444,154 @@ class albers_proj_params(GeneratedsSuper):
 # end class albers_proj_params
 
 
+class sin_proj_params(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, sphere_radius=None, central_meridian=None, false_easting=None, false_northing=None):
+        self.sphere_radius = sphere_radius
+        self.central_meridian = central_meridian
+        self.false_easting = false_easting
+        self.false_northing = false_northing
+    def factory(*args_, **kwargs_):
+        if sin_proj_params.subclass:
+            return sin_proj_params.subclass(*args_, **kwargs_)
+        else:
+            return sin_proj_params(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_sphere_radius(self): return self.sphere_radius
+    def set_sphere_radius(self, sphere_radius): self.sphere_radius = sphere_radius
+    def get_central_meridian(self): return self.central_meridian
+    def set_central_meridian(self, central_meridian): self.central_meridian = central_meridian
+    def get_false_easting(self): return self.false_easting
+    def set_false_easting(self, false_easting): self.false_easting = false_easting
+    def get_false_northing(self): return self.false_northing
+    def set_false_northing(self, false_northing): self.false_northing = false_northing
+    def hasContent_(self):
+        if (
+            self.sphere_radius is not None or
+            self.central_meridian is not None or
+            self.false_easting is not None or
+            self.false_northing is not None
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='sin_proj_params', namespacedef_='', pretty_print=True):
+        # Check if we are at the root level and output the XML header
+        if level == 0:
+            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            outfile.write('\n')
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        # Check if we are at the root level and output attributes first before namespacedef
+        if level == 0:
+            outfile.write('<%s%s' % (namespace_, name_))
+            already_processed = set()
+            self.exportAttributes(outfile, level, already_processed, namespace_, name_='sin_proj_params')
+            outfile.write('%s' % (namespacedef_ and ' ' + namespacedef_ or ''))
+        else:
+            outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+            already_processed = set()
+            self.exportAttributes(outfile, level, already_processed, namespace_, name_='sin_proj_params')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='', name_='sin_proj_params', pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='sin_proj_params'):
+        pass
+    def exportChildren(self, outfile, level, namespace_='', name_='sin_proj_params', fromsubclass_=False, pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        if self.sphere_radius is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%ssphere_radius>%s</%ssphere_radius>%s' % (namespace_, self.gds_format_double(self.sphere_radius, input_name='sphere_radius'), namespace_, eol_))
+        if self.central_meridian is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%scentral_meridian>%s</%scentral_meridian>%s' % (namespace_, self.gds_format_float(self.central_meridian, input_name='central_meridian'), namespace_, eol_))
+        if self.false_easting is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sfalse_easting>%s</%sfalse_easting>%s' % (namespace_, self.gds_format_double(self.false_easting, input_name='false_easting'), namespace_, eol_))
+        if self.false_northing is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sfalse_northing>%s</%sfalse_northing>%s' % (namespace_, self.gds_format_double(self.false_northing, input_name='false_northing'), namespace_, eol_))
+    def exportLiteral(self, outfile, level, name_='sin_proj_params'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        pass
+    def exportLiteralChildren(self, outfile, level, name_):
+        if self.sphere_radius is not None:
+            showIndent(outfile, level)
+            outfile.write('sphere_radius=%e,\n' % self.sphere_radius)
+        if self.central_meridian is not None:
+            showIndent(outfile, level)
+            outfile.write('central_meridian=%f,\n' % self.central_meridian)
+        if self.false_easting is not None:
+            showIndent(outfile, level)
+            outfile.write('false_easting=%e,\n' % self.false_easting)
+        if self.false_northing is not None:
+            showIndent(outfile, level)
+            outfile.write('false_northing=%e,\n' % self.false_northing)
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        pass
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'sphere_radius':
+            sval_ = child_.text
+            try:
+                fval_ = float(sval_)
+            except (TypeError, ValueError), exp:
+                raise_parse_error(child_, 'requires float or double: %s' % exp)
+            fval_ = self.gds_validate_float(fval_, node, 'sphere_radius')
+            self.sphere_radius = fval_
+        elif nodeName_ == 'central_meridian':
+            sval_ = child_.text
+            try:
+                fval_ = float(sval_)
+            except (TypeError, ValueError), exp:
+                raise_parse_error(child_, 'requires float or double: %s' % exp)
+            fval_ = self.gds_validate_float(fval_, node, 'central_meridian')
+            self.central_meridian = fval_
+        elif nodeName_ == 'false_easting':
+            sval_ = child_.text
+            try:
+                fval_ = float(sval_)
+            except (TypeError, ValueError), exp:
+                raise_parse_error(child_, 'requires float or double: %s' % exp)
+            fval_ = self.gds_validate_float(fval_, node, 'false_easting')
+            self.false_easting = fval_
+        elif nodeName_ == 'false_northing':
+            sval_ = child_.text
+            try:
+                fval_ = float(sval_)
+            except (TypeError, ValueError), exp:
+                raise_parse_error(child_, 'requires float or double: %s' % exp)
+            fval_ = self.gds_validate_float(fval_, node, 'false_northing')
+            self.false_northing = fval_
+# end class sin_proj_params
+
+
 class projection_information(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, projection=None, sphere_code=None, units=None, corner_point=None, grid_origin=None, utm_proj_params=None, ps_proj_params=None, albers_proj_params=None):
+    def __init__(self, projection=None, sphere_code=None, units=None, corner_point=None, grid_origin=None, utm_proj_params=None, ps_proj_params=None, albers_proj_params=None, sin_proj_params=None):
         self.projection = _cast(None, projection)
         self.sphere_code = _cast(int, sphere_code)
         self.units = _cast(None, units)
@@ -1459,6 +1603,7 @@ class projection_information(GeneratedsSuper):
         self.utm_proj_params = utm_proj_params
         self.ps_proj_params = ps_proj_params
         self.albers_proj_params = albers_proj_params
+        self.sin_proj_params = sin_proj_params
     def factory(*args_, **kwargs_):
         if projection_information.subclass:
             return projection_information.subclass(*args_, **kwargs_)
@@ -1477,6 +1622,8 @@ class projection_information(GeneratedsSuper):
     def set_ps_proj_params(self, ps_proj_params): self.ps_proj_params = ps_proj_params
     def get_albers_proj_params(self): return self.albers_proj_params
     def set_albers_proj_params(self, albers_proj_params): self.albers_proj_params = albers_proj_params
+    def get_sin_proj_params(self): return self.sin_proj_params
+    def set_sin_proj_params(self, sin_proj_params): self.sin_proj_params = sin_proj_params
     def get_projection(self): return self.projection
     def set_projection(self, projection): self.projection = projection
     def get_sphere_code(self): return self.sphere_code
@@ -1495,7 +1642,8 @@ class projection_information(GeneratedsSuper):
             self.grid_origin is not None or
             self.utm_proj_params is not None or
             self.ps_proj_params is not None or
-            self.albers_proj_params is not None
+            self.albers_proj_params is not None or
+            self.sin_proj_params is not None
         ):
             return True
         else:
@@ -1553,6 +1701,8 @@ class projection_information(GeneratedsSuper):
             self.ps_proj_params.export(outfile, level, namespace_, name_='ps_proj_params', pretty_print=pretty_print)
         if self.albers_proj_params is not None:
             self.albers_proj_params.export(outfile, level, namespace_, name_='albers_proj_params', pretty_print=pretty_print)
+        if self.sin_proj_params is not None:
+            self.sin_proj_params.export(outfile, level, namespace_, name_='sin_proj_params', pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='projection_information'):
         level += 1
         already_processed = set()
@@ -1606,6 +1756,12 @@ class projection_information(GeneratedsSuper):
             self.albers_proj_params.exportLiteral(outfile, level)
             showIndent(outfile, level)
             outfile.write('),\n')
+        if self.sin_proj_params is not None:
+            showIndent(outfile, level)
+            outfile.write('sin_proj_params=model_.sin_proj_params(\n')
+            self.sin_proj_params.exportLiteral(outfile, level)
+            showIndent(outfile, level)
+            outfile.write('),\n')
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1652,6 +1808,10 @@ class projection_information(GeneratedsSuper):
             obj_ = albers_proj_params.factory()
             obj_.build(child_)
             self.albers_proj_params = obj_
+        elif nodeName_ == 'sin_proj_params':
+            obj_ = sin_proj_params.factory()
+            obj_.build(child_)
+            self.sin_proj_params = obj_
 # end class projection_information
 
 
@@ -3749,8 +3909,10 @@ def validate_xml(rootObj, xmlns=None, xmlns_xsi=None, schema_uri=None):
 
 # ESPA - Added a module method to allow exporting from the module level with
 #        validation
-def export(outFile, rootObj, xmlns=None, xmlns_xsi=None, schema_uri=None):
+def export(outFile, rootObj, xmlns='http://espa.cr.usgs.gov/v1.0', xmlns_xsi='http://www.w3.org/2001/XMLSchema-instance', schema_uri='http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd'):
     ns_def = build_ns_def(xmlns, xmlns_xsi, schema_uri)
+
+    rootObj.set_version('1.0.0')
 
     try:
         validate_xml(rootObj, xmlns, xmlns_xsi, schema_uri)
@@ -3792,6 +3954,7 @@ __all__ = [
     "pixel_size",
     "projection_information",
     "ps_proj_params",
+    "sin_proj_params",
     "solar_angles",
     "toa_reflectance",
     "utm_proj_params",
