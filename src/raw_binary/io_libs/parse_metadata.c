@@ -14,6 +14,7 @@ Date         Programmer       Reason
 12/26/2013   Gail Schmidt     Original development
 2/25/2014    Gail Schmidt     Added support for source and category attributes
                               for the band metadata
+4/17/2014    Gail Schmidt     Added support for additional projections
 
 NOTES:
   1. The XML metadata format parsed or written via this library follows the
@@ -75,7 +76,7 @@ int add_global_metadata_proj_info_albers
         child_node = cur_node->children;
 
         if (xmlStrEqual (cur_node->name,
-            (const xmlChar *) "standard_parallell1"))
+            (const xmlChar *) "standard_parallel1"))
         {
             /* Expect the child node to be a text node containing the value of
                this field */
@@ -94,7 +95,7 @@ int add_global_metadata_proj_info_albers
                 atof ((const char *) child_node->content);
         }
         else if (xmlStrEqual (cur_node->name,
-            (const xmlChar *) "standard_parallell2"))
+            (const xmlChar *) "standard_parallel2"))
         {
             /* Expect the child node to be a text node containing the value of
                this field */
@@ -336,6 +337,142 @@ int add_global_metadata_proj_info_ps
 
 
 /******************************************************************************
+MODULE:  add_global_metadata_proj_info_sin
+
+PURPOSE: Add the SIN projection elements node to the global metadata projection
+information structure.
+
+RETURN VALUE:
+Type = int
+Value           Description
+-----           -----------
+ERROR           Error parsing the projection_info elements
+SUCCESS         Successful parse of the projection_info values
+
+HISTORY:
+Date         Programmer       Reason
+----------   --------------   -------------------------------------
+4/17/2014    Gail Schmidt     Original development
+
+NOTES:
+******************************************************************************/
+int add_global_metadata_proj_info_sin
+(
+    xmlNode *a_node,            /* I: pointer to the element node to process */
+    Espa_global_meta_t *gmeta   /* I: global metadata structure */
+)
+{
+    char FUNC_NAME[] = "add_global_metadata_proj_info_sin"; /* func name */
+    char errmsg[STR_SIZE];        /* error message */
+    xmlNode *cur_node = NULL;     /* pointer to the current node */
+    xmlNode *child_node = NULL;   /* pointer to the child node */
+
+    /* Make sure the projection type specified matches the projection
+       parameters type */
+    if (gmeta->proj_info.proj_type != GCTP_SIN_PROJ)
+    {
+        sprintf (errmsg, "Projection type is not SIN so the fact that "
+            "sin_proj_params exists is a mismatch in the "
+            "projection_information.");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    /* Process the siblings in the projection information */
+    for (cur_node = a_node->children; cur_node;
+         cur_node = xmlNextElementSibling (cur_node))
+    {
+        /* Set up the child pointer */
+        child_node = cur_node->children;
+
+        if (xmlStrEqual (cur_node->name, (const xmlChar *) "sphere_radius"))
+        {
+            /* Expect the child node to be a text node containing the value of
+               this field */
+            if (child_node == NULL || child_node->type != XML_TEXT_NODE) 
+            {
+                sprintf (errmsg, "Error processing global_metadata:"
+                    "projection_information:sin_proj_params element: %s.",
+                    cur_node->name);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+    
+            /* Copy the content of the child node into the value for this
+               field */
+            gmeta->proj_info.sphere_radius =
+                atof ((const char *) child_node->content);
+        }
+        else if (xmlStrEqual (cur_node->name,
+            (const xmlChar *) "central_meridian"))
+        {
+            /* Expect the child node to be a text node containing the value of
+               this field */
+            if (child_node == NULL || child_node->type != XML_TEXT_NODE) 
+            {
+                sprintf (errmsg, "Error processing global_metadata:"
+                    "projection_information:sin_proj_params element: %s.",
+                    cur_node->name);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+    
+            /* Copy the content of the child node into the value for this
+               field */
+            gmeta->proj_info.central_meridian =
+                atof ((const char *) child_node->content);
+        }
+        else if (xmlStrEqual (cur_node->name,
+            (const xmlChar *) "false_easting"))
+        {
+            /* Expect the child node to be a text node containing the value of
+               this field */
+            if (child_node == NULL || child_node->type != XML_TEXT_NODE) 
+            {
+                sprintf (errmsg, "Processing global_metadata:"
+                    "projection_information:sin_proj_params element: %s.",
+                    cur_node->name);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+    
+            /* Copy the content of the child node into the value for this
+               field */
+            gmeta->proj_info.false_easting =
+                atof ((const char *) child_node->content);
+        }
+        else if (xmlStrEqual (cur_node->name,
+            (const xmlChar *) "false_northing"))
+        {
+            /* Expect the child node to be a text node containing the value of
+               this field */
+            if (child_node == NULL || child_node->type != XML_TEXT_NODE) 
+            {
+                sprintf (errmsg, "Error processing global_metadata:"
+                    "projection_information:sin_proj_params element: %s.",
+                    cur_node->name);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+    
+            /* Copy the content of the child node into the value for this
+               field */
+            gmeta->proj_info.false_northing =
+                atof ((const char *) child_node->content);
+        }
+        else
+        {
+            sprintf (errmsg, "Unknown sin_proj_params element: %s",
+                cur_node->name);
+            error_handler (false, FUNC_NAME, errmsg);
+        }
+    }
+
+    return (SUCCESS);
+}
+
+
+/******************************************************************************
 MODULE:  add_global_metadata_proj_info_utm
 
 PURPOSE: Add the UTM projection elements node to the global metadata projection
@@ -426,6 +563,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/26/2013   Gail Schmidt     Original development
+4/17/2014    Gail Schmidt     Added support for additional projections
 
 NOTES:
 ******************************************************************************/
@@ -468,12 +606,16 @@ int add_global_metadata_proj_info
         attr_val = xmlGetProp (cur_node, attr->name);
         if (xmlStrEqual (attr->name, (const xmlChar *) "projection"))
         {
-            if (xmlStrEqual (attr_val, (const xmlChar *) "UTM"))
+            if (xmlStrEqual (attr_val, (const xmlChar *) "GEO"))
+                gmeta->proj_info.proj_type = GCTP_GEO_PROJ;
+            else if (xmlStrEqual (attr_val, (const xmlChar *) "UTM"))
                 gmeta->proj_info.proj_type = GCTP_UTM_PROJ;
             else if (xmlStrEqual (attr_val, (const xmlChar *) "PS"))
                 gmeta->proj_info.proj_type = GCTP_PS_PROJ;
             else if (xmlStrEqual (attr_val, (const xmlChar *) "ALBERS"))
                 gmeta->proj_info.proj_type = GCTP_ALBERS_PROJ;
+            else if (xmlStrEqual (attr_val, (const xmlChar *) "SIN"))
+                gmeta->proj_info.proj_type = GCTP_SIN_PROJ;
         }
         else if (xmlStrEqual (attr->name, (const xmlChar *) "sphere_code"))
             gmeta->proj_info.sphere_code = atoi ((const char *) attr_val);
@@ -610,6 +752,18 @@ int add_global_metadata_proj_info
             {
                 sprintf (errmsg, "Processing projection_information:"
                     "albers_proj_params elements");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+        }
+        else if (xmlStrEqual (cur_node->name,
+            (const xmlChar *) "sin_proj_params"))
+        {
+            /* Handle the projection-specific parameters */
+            if (add_global_metadata_proj_info_sin (cur_node, gmeta))
+            {
+                sprintf (errmsg, "Processing projection_information:"
+                    "sin_proj_params elements");
                 error_handler (true, FUNC_NAME, errmsg);
                 return (ERROR);
             }

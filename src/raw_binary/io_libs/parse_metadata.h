@@ -12,6 +12,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/26/2013   Gail Schmidt     Original development
+4/17/2014    Gail Schmidt     Added support for additional projection params
 
 NOTES:
 *****************************************************************************/
@@ -42,6 +43,12 @@ int add_global_metadata_proj_info_ps
 );
 
 int add_global_metadata_proj_info_utm
+(
+    xmlNode *a_node,            /* I: pointer to the element node to process */
+    Espa_global_meta_t *gmeta   /* I: global metadata structure */
+);
+
+int add_global_metadata_proj_info_sin
 (
     xmlNode *a_node,            /* I: pointer to the element node to process */
     Espa_global_meta_t *gmeta   /* I: global metadata structure */

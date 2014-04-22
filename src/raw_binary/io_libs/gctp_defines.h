@@ -12,6 +12,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/13/2013   Gail Schmidt     Original development
+4/17/2014    Gail Schmidt     Updated to support additional projections
 
 NOTES:
 *****************************************************************************/
@@ -24,5 +25,9 @@ NOTES:
 #define GCTP_UTM_PROJ 1
 #define GCTP_ALBERS_PROJ 3
 #define GCTP_PS_PROJ 6 
+#define GCTP_SIN_PROJ 16 
+
+/* Local defines to use for the datum */
+#define GCTP_WGS84 12
 
 #endif

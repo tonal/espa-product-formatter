@@ -42,6 +42,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/26/2013   Gail Schmidt     Original development
+4/17/2014    Gail Schmidt     Modified to support additional projections
 
 NOTES:
   1. If the XML file specified already exists, it will be overwritten.
@@ -120,9 +121,11 @@ int write_metadata
     /* Write the global metadata - projection information */
     switch (gmeta->proj_info.proj_type)
     {
+        case GCTP_GEO_PROJ: strcpy (myproj, "GEO"); break;
         case GCTP_UTM_PROJ: strcpy (myproj, "UTM"); break;
         case GCTP_ALBERS_PROJ: strcpy (myproj, "ALBERS"); break;
         case GCTP_PS_PROJ: strcpy (myproj, "PS"); break;
+        case GCTP_SIN_PROJ: strcpy (myproj, "SIN"); break;
     }
     fprintf (fptr,
         "        <projection_information projection=\"%s\" sphere_code=\"%d\"\n"
@@ -175,6 +178,20 @@ int write_metadata
             "            </ps_proj_params>\n",
             gmeta->proj_info.longitude_pole,
             gmeta->proj_info.latitude_true_scale,
+            gmeta->proj_info.false_easting, gmeta->proj_info.false_northing);
+    }
+
+    /* SIN-specific parameters */
+    if (gmeta->proj_info.proj_type == GCTP_SIN_PROJ)
+    {
+        fprintf (fptr,
+            "            <sin_proj_params>\n"
+            "                <sphere_radius>%lf</sphere_radius>\n"
+            "                <central_meridian>%lf</central_meridian>\n"
+            "                <false_easting>%lf</false_easting>\n"
+            "                <false_northing>%lf</false_northing>\n"
+            "            </sin_proj_params>\n",
+            gmeta->proj_info.sphere_radius, gmeta->proj_info.central_meridian,
             gmeta->proj_info.false_easting, gmeta->proj_info.false_northing);
     }
 
@@ -548,6 +565,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/26/2013   Gail Schmidt     Original development
+4/17/2014    Gail Schmidt     Modified to support additional projections
 
 NOTES:
 ******************************************************************************/
@@ -593,12 +611,16 @@ void print_metadata_struct
 
     if (metadata->global.proj_info.sphere_code == GCTP_WGS84)
         strcpy (sphere_str, "WGS84");
-    if (metadata->global.proj_info.proj_type == GCTP_UTM_PROJ)
+    if (metadata->global.proj_info.proj_type == GCTP_GEO_PROJ)
+        printf ("  projection type: GEO\n");
+    else if (metadata->global.proj_info.proj_type == GCTP_UTM_PROJ)
         printf ("  projection type: UTM\n");
     else if (metadata->global.proj_info.proj_type == GCTP_ALBERS_PROJ)
         printf ("  projection type: ALBERS\n");
     else if (metadata->global.proj_info.proj_type == GCTP_PS_PROJ)
         printf ("  projection type: POLAR STEREOGRAPHIC\n");
+    else if (metadata->global.proj_info.proj_type == GCTP_SIN_PROJ)
+        printf ("  projection type: SINUSOIDAL\n");
     printf ("  sphere code: %s\n", sphere_str);
     printf ("  projection units: %s\n", metadata->global.proj_info.units);
     printf ("  UL projection x,y: %f, %f\n",
@@ -633,6 +655,17 @@ void print_metadata_struct
             metadata->global.proj_info.central_meridian);
         printf ("  origin_latitude: %f\n",
             metadata->global.proj_info.origin_latitude);
+        printf ("  false_easting: %f\n",
+            metadata->global.proj_info.false_easting);
+        printf ("  false_northing: %f\n",
+            metadata->global.proj_info.false_northing);
+    }
+    else if (metadata->global.proj_info.proj_type == GCTP_SIN_PROJ)
+    {
+        printf ("  sphere_radius: %f\n",
+            metadata->global.proj_info.sphere_radius);
+        printf ("  central_meridian: %f\n",
+            metadata->global.proj_info.central_meridian);
         printf ("  false_easting: %f\n",
             metadata->global.proj_info.false_easting);
         printf ("  false_northing: %f\n",

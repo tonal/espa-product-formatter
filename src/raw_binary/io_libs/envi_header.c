@@ -37,10 +37,13 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/12/2013   Gail Schmidt     Original development
+4/17/2014    Gail Schmidt     Modified to support additional projections
 
 NOTES:
-  1. Only supports UTM, ALBERS, and PS projections.
-  2. Only supports WGS84 datum.
+  1. Only supports GEO, UTM, ALBERS, PS, and SIN projections.
+  2. Only supports WGS84 datum (GEO, UTM, ALBERS, PS).
+  3. Sinusoidal needs to pass the radius of the sphere in the first
+     projection parameter for the ENVI header.
 ******************************************************************************/
 int write_envi_hdr
 (
@@ -62,14 +65,18 @@ int write_envi_hdr
         return (ERROR);
     }
 
-    /* Verify the projection is UTM, ALBERS, or PS and datum is WGS-84 */
-    if (hdr->proj_type != GCTP_UTM_PROJ &&
+    /* Verify the projection is GEO, UTM, ALBERS, PS, or SIN and datum is
+       WGS-84 */
+    if (hdr->proj_type != GCTP_GEO_PROJ &&
+        hdr->proj_type != GCTP_UTM_PROJ &&
         hdr->proj_type != GCTP_ALBERS_PROJ &&
-        hdr->proj_type != GCTP_PS_PROJ)
+        hdr->proj_type != GCTP_PS_PROJ &&
+        hdr->proj_type != GCTP_SIN_PROJ)
     {
-        sprintf (errmsg, "UTM projection code (%d) or ALBERS projection "
-            "code (%d) or PS projection code (%d) expected.", GCTP_UTM_PROJ,
-            GCTP_ALBERS_PROJ, GCTP_PS_PROJ);
+        sprintf (errmsg, "GEO projection code (%d) or UTM projection code (%d) "
+            "or ALBERS projection code (%d) or PS projection code (%d) or "
+            "SIN projection code (%d) expected.", GCTP_GEO_PROJ, GCTP_UTM_PROJ,
+            GCTP_ALBERS_PROJ, GCTP_PS_PROJ, GCTP_SIN_PROJ);
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
@@ -99,7 +106,21 @@ int write_envi_hdr
         hdr->header_offset, hdr->byte_order, hdr->file_type, hdr->data_type,
         hdr->data_ignore_value, hdr->interleave, hdr->sensor_type);
    
-    if (hdr->proj_type == GCTP_UTM_PROJ)
+    if (hdr->proj_type == GCTP_GEO_PROJ)
+    {
+        fprintf (hdr_fptr,
+            "map info = {Geographic Lat/Lon, %d, %d, %f, %f, %f, %f, "
+            "WGS-84, units=Degrees}\n", hdr->xy_start[0], hdr->xy_start[1],
+            hdr->ul_corner[0], hdr->ul_corner[1], hdr->pixel_size[0],
+            hdr->pixel_size[1]);
+        fprintf (hdr_fptr,
+            "coordinate system string = GEOGCS[\"GCS_WGS_1984\", "
+            "DATUM[\"D_WGS_1984\", "
+            "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]], "
+            "PRIMEM[\"Greenwich\",0.0], "
+            "UNIT[\"Degree\",0.0174532925199433]]\n");
+    }
+    else if (hdr->proj_type == GCTP_UTM_PROJ)
     {
         if (hdr->utm_zone > 0)
             fprintf (hdr_fptr,
@@ -127,6 +148,20 @@ int write_envi_hdr
             "units=Meters}\n", ENVI_ALBERS_PROJ, hdr->proj_parms[5],
             hdr->proj_parms[4], hdr->proj_parms[6], hdr->proj_parms[7],
             hdr->proj_parms[2], hdr->proj_parms[3]);
+        fprintf (hdr_fptr,
+            "coordinate system string = "
+            "{PROJCS[\"Albers\",GEOGCS[\"GCS_WGS_1984\", "
+            "DATUM[\"D_WGS_1984\", "
+            "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]], "
+            "PRIMEM[\"Greenwich\",0.0], UNIT[\"Degree\",0.0174532925199433]], "
+            "PROJECTION[\"Albers\"], PARAMETER[\"False_Easting\",%f], "
+            "PARAMETER[\"False_Northing\",%f], "
+            "PARAMETER[\"Central_Meridian\",%f], "
+            "PARAMETER[\"Standard_Parallel_1\",%f], "
+            "PARAMETER[\"Standard_Parallel_2\",%f], "
+            "PARAMETER[\"Latitude_Of_Origin\",%f], UNIT[\"Meter\",1.0]]}\n",
+            hdr->proj_parms[6], hdr->proj_parms[7], hdr->proj_parms[4],
+            hdr->proj_parms[2], hdr->proj_parms[3], hdr->proj_parms[5]);
     }
     else if (hdr->proj_type == GCTP_PS_PROJ)
     {
@@ -140,6 +175,41 @@ int write_envi_hdr
             "%lf, %lf, %lf, WGS-84, Polar Stereographic, units=Meters}\n",
             ENVI_PS_PROJ, hdr->proj_parms[5], hdr->proj_parms[4],
             hdr->proj_parms[6], hdr->proj_parms[7]);
+        fprintf (hdr_fptr,
+            "coordinate system string = "
+            "{PROJCS[\"Stereographic_South_Pole\", "
+            "GEOGCS[\"GCS_WGS_1984\", DATUM[\"D_WGS_1984\", "
+            "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]], "
+            "PRIMEM[\"Greenwich\",0.0], UNIT[\"Degree\",0.0174532925199433]], "
+            "PROJECTION[\"Stereographic_South_Pole\"], "
+            "PARAMETER[\"False_Easting\",%f], "
+            "PARAMETER[\"False_Northing\",%f], "
+            "PARAMETER[\"Central_Meridian\",%f], "
+            "PARAMETER[\"Standard_Parallel_1\",%f], "
+            "UNIT[\"Meter\",1.0]]}\n",
+            hdr->proj_parms[6], hdr->proj_parms[7],
+            hdr->proj_parms[4], hdr->proj_parms[5]);
+    }
+    else if (hdr->proj_type == GCTP_SIN_PROJ)
+    {
+        /* Note: ENVI might need to be updated in the individual's version
+           to support the Sinusoidal projection. */
+        fprintf (hdr_fptr,
+            "map info = {Sinusoidal, %d, %d, %f, %f, %f, %f, "
+            "units=Meters}\n", hdr->xy_start[0], hdr->xy_start[1],
+            hdr->ul_corner[0], hdr->ul_corner[1], hdr->pixel_size[0],
+            hdr->pixel_size[1]);
+        fprintf (hdr_fptr,
+            "coordinate system string = {PROJCS[\"Sinusoidal\", "
+            "GEOGCS[\"GCS_Unknown datum based upon the custom spheroid\", "
+            "DATUM[\"D_Not specified (based on custom spheroid)\", "
+            "SPHEROID[\"Custom_spheroid\",%f,0]], "
+            "PRIMEM[\"Greenwich\",0], UNIT[\"Degree\",0.017453292519943295]], "
+            "PROJECTION[\"Sinusoidal\"], PARAMETER[\"central_meridian\",%f], "
+            "PARAMETER[\"false_easting\",%f], "
+            "PARAMETER[\"false_northing\",%f], UNIT[\"Meter\",1]]}\n",
+            hdr->proj_parms[0], hdr->proj_parms[4], hdr->proj_parms[6],
+            hdr->proj_parms[7]);
     }
 
     /* Write the array of band names */
@@ -173,11 +243,14 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/3/2014     Gail Schmidt     Original development
+4/17/2014    Gail Schmidt     Modified to support additional projections
 
 NOTES:
-  1. Only supports UTM, ALBERS, and PS projections.
+  1. Only supports GEO, UTM, ALBERS, PS, SIN projections.
   2. Only supports WGS84 datum.
-  3. Refer to ENVI Header Format in
+  3. Sinusoidal needs to pass the radius of the sphere in the first
+     projection parameter for the ENVI header.
+  4. Refer to Working with ENVI Header Files in
      http://www.exelisvis.com/portals/0/pdfs/envi/Getting_Started_with_ENVI.pdf
 ******************************************************************************/
 int create_envi_struct
@@ -231,6 +304,10 @@ int create_envi_struct
     hdr->proj_type = gmeta->proj_info.proj_type;
     switch (gmeta->proj_info.proj_type)
     {
+        case GCTP_GEO_PROJ:
+            /* just use the already initialized zeros for the proj parms */
+            break;
+
         case GCTP_UTM_PROJ:
             hdr->utm_zone = gmeta->proj_info.utm_zone;
             break;
@@ -251,9 +328,20 @@ int create_envi_struct
             hdr->proj_parms[7] = gmeta->proj_info.false_northing;
             break;
 
+        case GCTP_SIN_PROJ:
+            hdr->proj_parms[0] = gmeta->proj_info.sphere_radius;
+            hdr->proj_parms[4] = gmeta->proj_info.central_meridian;
+            hdr->proj_parms[6] = gmeta->proj_info.false_easting;
+            hdr->proj_parms[7] = gmeta->proj_info.false_northing;
+            break;
+
         default:
-            sprintf (errmsg, "Unsupported projection type (%d).  Currently "
-                "only support UTM, ALBERS, or PS.", gmeta->proj_info.proj_type);
+            sprintf (errmsg, "Unsupported projection type (%d).  GEO "
+                "projection code (%d) or UTM projection code (%d) or ALBERS "
+                "projection code (%d) or PS projection code (%d) or SIN "
+                "projection code (%d) expected.", gmeta->proj_info.proj_type,
+                GCTP_GEO_PROJ, GCTP_UTM_PROJ, GCTP_ALBERS_PROJ, GCTP_PS_PROJ,
+                GCTP_SIN_PROJ);
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
     }

@@ -13,6 +13,7 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/12/2013   Gail Schmidt     Original development
 3/31/2014    Ron Dilley       Added fill value to the ENVI header structure
+4/17/2014    Gail Schmidt     Added support for additional projections
 
 NOTES:
 *****************************************************************************/
@@ -32,6 +33,7 @@ NOTES:
 #define ENVI_GEO_PROJ 1
 #define ENVI_UTM_PROJ 2
 #define ENVI_ALBERS_PROJ 9
+#define ENVI_SIN_PROJ 16
 #define ENVI_PS_PROJ 31
 
 /* local defines to use for the datum */

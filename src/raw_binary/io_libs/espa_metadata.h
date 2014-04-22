@@ -50,9 +50,6 @@ enum Espa_geographic_type
     ESPA_WEST, ESPA_EAST, ESPA_NORTH, ESPA_SOUTH
 };
 
-/* Local defines to use for the datum */
-#define GCTP_WGS84 12
-
 /* Local define to specify the maximum total bands and product types.  This
    should be sufficient for ESPA products. */
 #define MAX_TOTAL_BANDS 100
@@ -74,7 +71,7 @@ typedef struct
 
 typedef struct
 {
-    int proj_type;        /* projection number (see #defines above) */
+    int proj_type;        /* projection number (see GCTP_* in gctp_defines.h) */
     int sphere_code;      /* spheroid number (see #defines above) */
     char units[STR_SIZE]; /* projection units (degrees, meters) */
     double ul_corner[2];  /* projection UL x, y (store center of the pixel
@@ -97,8 +94,15 @@ typedef struct
     double standard_parallel2;
     double central_meridian;
     double origin_latitude;
-    /* double false_easting;   -- used from the PS proj parms */
-    /* double false_northing;  -- used from the PS proj parms */
+    /* double false_easting;   -- already defined */
+    /* double false_northing;  -- already defined */
+
+    /* SIN projection parameters */
+    double sphere_radius;
+    /* double central_meridian; -- already defined */
+    /* double false_easting; -- already defined */
+    /* double false_northing; -- already defined */
+
 } Espa_proj_meta_t;
 
 typedef struct
