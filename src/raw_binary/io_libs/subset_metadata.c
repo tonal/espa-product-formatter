@@ -44,6 +44,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/10/2014    Gail Schmidt     Original development
+4/22/2014    Gail Schmidt     Updated for additional projection parameters
 
 NOTES:
   1. If no bands match the product type, then the global and projection
@@ -238,6 +239,8 @@ int subset_metadata_by_product
         inmeta->global.proj_info.central_meridian;
     outmeta->global.proj_info.origin_latitude =
         inmeta->global.proj_info.origin_latitude;
+    outmeta->global.proj_info.sphere_radius =
+        inmeta->global.proj_info.sphere_radius;
     outmeta->global.orientation_angle = inmeta->global.orientation_angle;
 
     /* Copy the bands metadata, for those bands specified to be subset into
@@ -481,6 +484,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/10/2014    Gail Schmidt     Original development
+4/22/2014    Gail Schmidt     Updated for additional projection parameters
 
 NOTES:
   1. If nbands is 0, then the global and projection information will still
@@ -672,6 +676,8 @@ int subset_metadata_by_band
         inmeta->global.proj_info.central_meridian;
     outmeta->global.proj_info.origin_latitude =
         inmeta->global.proj_info.origin_latitude;
+    outmeta->global.proj_info.sphere_radius =
+        inmeta->global.proj_info.sphere_radius;
     outmeta->global.orientation_angle = inmeta->global.orientation_angle;
 
     /* Copy the bands metadata, for those bands specified to be subset into
