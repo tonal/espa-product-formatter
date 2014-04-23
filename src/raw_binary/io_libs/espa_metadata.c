@@ -166,6 +166,7 @@ void init_metadata_struct
     gmeta->bounding_coords[2] = ESPA_FLOAT_META_FILL;
     gmeta->bounding_coords[3] = ESPA_FLOAT_META_FILL;
     gmeta->proj_info.proj_type = ESPA_INT_META_FILL;
+    gmeta->proj_info.datum_type = ESPA_NODATUM;
     gmeta->orientation_angle = ESPA_FLOAT_META_FILL;
 }
 

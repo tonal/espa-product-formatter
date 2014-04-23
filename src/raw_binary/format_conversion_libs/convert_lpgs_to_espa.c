@@ -305,7 +305,7 @@ int read_lpgs_mtl
                 else
                 {
                     sprintf (errmsg, "Unsupported projection type: %s. "
-                        "Only UTM and PS are supported.", tokenptr);
+                        "Only UTM and PS are supported for LPGS.", tokenptr);
                     error_handler (true, FUNC_NAME, errmsg);
                     return (ERROR);
                 }
@@ -314,11 +314,10 @@ int read_lpgs_mtl
                      !strcmp (label, "REFERENCE_DATUM"))
             {
                 if (!strcmp (tokenptr, "WGS84"))
-                    gmeta->proj_info.sphere_code = GCTP_WGS84;
+                    gmeta->proj_info.datum_type = ESPA_WGS84;
                 else
                 {
-                    sprintf (errmsg, "Unsupported datum type: %s",
-                        tokenptr);
+                    sprintf (errmsg, "Unexpected datum type: %s", tokenptr);
                     error_handler (true, FUNC_NAME, errmsg);
                     return (ERROR);
                 }
@@ -326,19 +325,19 @@ int read_lpgs_mtl
             else if (!strcmp (label, "GRID_CELL_SIZE_REFLECTIVE") ||
                      !strcmp (label, "GRID_CELL_SIZE_REF"))
             {
-                sscanf (tokenptr, "%f", &tmp_bmeta.pixel_size[0]);
+                sscanf (tokenptr, "%lf", &tmp_bmeta.pixel_size[0]);
                 tmp_bmeta.pixel_size[1] = tmp_bmeta.pixel_size[0];
             }
             else if (!strcmp (label, "GRID_CELL_SIZE_THERMAL") ||
                      !strcmp (label, "GRID_CELL_SIZE_THM"))
             {
-                sscanf (tokenptr, "%f", &tmp_bmeta_th.pixel_size[0]);
+                sscanf (tokenptr, "%lf", &tmp_bmeta_th.pixel_size[0]);
                 tmp_bmeta_th.pixel_size[1] = tmp_bmeta_th.pixel_size[0];
             }
             else if (!strcmp (label, "GRID_CELL_SIZE_PANCHROMATIC") ||
                      !strcmp (label, "GRID_CELL_SIZE_PAN"))
             {
-                sscanf (tokenptr, "%f", &tmp_bmeta_pan.pixel_size[0]);
+                sscanf (tokenptr, "%lf", &tmp_bmeta_pan.pixel_size[0]);
                 tmp_bmeta_pan.pixel_size[1] = tmp_bmeta_pan.pixel_size[0];
             }
             else if (!strcmp (label, "UTM_ZONE") ||

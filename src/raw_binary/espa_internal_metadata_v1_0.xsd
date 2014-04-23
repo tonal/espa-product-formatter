@@ -80,6 +80,15 @@ elementFormDefault="qualified">
   </xs:restriction>
 </xs:simpleType>
 
+<xs:simpleType name="datumType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="WGS84"/>
+    <xs:enumeration value="NAD83"/>
+    <xs:enumeration value="NAD27"/>
+    <!-- Additional datums can/will be added as needed -->
+  </xs:restriction>
+</xs:simpleType>
+
 <xs:simpleType name="gridOriginType">
   <xs:restriction base="xs:string">
     <xs:enumeration value="UL"/>
@@ -255,7 +264,7 @@ elementFormDefault="qualified">
       <xs:element ref="sin_proj_params" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="projection" type="projectionType" use="required"/>
-    <xs:attribute name="sphere_code" type="xs:int" use="required"/>
+    <xs:attribute name="datum" type="datumType" use="optional"/>
     <xs:attribute name="units" type="projectionUnitsType" use="required"/>
   </xs:complexType>
 </xs:element>

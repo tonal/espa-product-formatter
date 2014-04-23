@@ -35,7 +35,8 @@ NOTES:
 #define ESPA_SCHEMA_VERSION "1.0.0"
 #define ESPA_NS "http://espa.cr.usgs.gov/v1.0"
 #define ESPA_SCHEMA_LOCATION "http://espa.cr.usgs.gov/v1.0"
-#define ESPA_SCHEMA "http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd"
+//#define ESPA_SCHEMA "http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd"
+#define ESPA_SCHEMA "/media/sf_Software_SandBox/espa-common/trunk/src/raw_binary/espa_internal_metadata_v1_0.xsd"
 
 /* Data types */
 enum Espa_data_type
@@ -72,7 +73,7 @@ typedef struct
 typedef struct
 {
     int proj_type;        /* projection number (see GCTP_* in gctp_defines.h) */
-    int sphere_code;      /* spheroid number (see #defines above) */
+    int datum_type;       /* datum type (see ESPA_* in gctp_defines.h) */
     char units[STR_SIZE]; /* projection units (degrees, meters) */
     double ul_corner[2];  /* projection UL x, y (store center of the pixel
                              for multi-res products) */
@@ -147,13 +148,13 @@ typedef struct
     char long_name[STR_SIZE];    /* long band name */
     char file_name[STR_SIZE];    /* raw binary file name for this band w/o the
                                     pathname */
-    float pixel_size[2];         /* pixel size x, y */
+    double pixel_size[2];        /* pixel size x, y */
     char pixel_units[STR_SIZE];  /* units for pixel size (meters, degrees) */
     char data_units[STR_SIZE];   /* units of data stored in this band */
     long valid_range[2];         /* use long to support the long data types
                                     min, max */
-    float toa_gain;              /* gain values for top-of-atmosphere refl */
-    float toa_bias;              /* bias values for top-of-atmosphere refl */
+    double toa_gain;             /* gain values for top-of-atmosphere refl */
+    double toa_bias;             /* bias values for top-of-atmosphere refl */
     int nbits;                   /* number of bits in bitmap_description */
     char **bitmap_description;   /* support bit mapping description;
                                     0-based going from right to left in the

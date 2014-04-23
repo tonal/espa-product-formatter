@@ -29,15 +29,12 @@ NOTES:
 #include "gctp_defines.h"
 
 /* Defines */
-/* ENVI projection numbers for UTM and PS */
+/* ENVI projection numbers */
 #define ENVI_GEO_PROJ 1
 #define ENVI_UTM_PROJ 2
 #define ENVI_ALBERS_PROJ 9
 #define ENVI_SIN_PROJ 16
 #define ENVI_PS_PROJ 31
-
-/* local defines to use for the datum */
-#define ENVI_WGS84 12
 
 /* most of the time there will be only one band per ENVI file, but define
    the maximum to be 50 for the HDF ENVI headers */

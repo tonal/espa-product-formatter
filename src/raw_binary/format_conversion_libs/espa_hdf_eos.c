@@ -96,6 +96,8 @@ Date         Programmer       Reason
 ---------    ---------------  -------------------------------------
 1/7/2014     Gail Schmidt     Original Development (based on input routines
                               from the LEDAPS lndsr application)
+4/22/2014    Gail Schmidt     Updated to support additional projections and
+                              datums
 
 NOTES:
 ******************************************************************************/
@@ -112,6 +114,7 @@ int write_hdf_eos_attr
     char cbuf[ESPA_MAX_METADATA_SIZE];        /* temp buffer for metadata */
     char *dim_names[2] = {"YDim", "XDim"};    /* base names for dimensions */
     char proj_str[STR_SIZE];                  /* projection string */
+    char datum_str[STR_SIZE];                 /* datum string */
     char dtype[STR_SIZE];                     /* data type */
     char temp_name[STR_SIZE];                 /* temporary grid name */
     double ul_corner[2];     /* UL corner x,y */
@@ -168,9 +171,11 @@ int write_hdf_eos_attr
     /* Get the projection name string */
     switch (gmeta->proj_info.proj_type)
     {
+        case (GCTP_GEO_PROJ): strcpy (proj_str, "GEO"); break;
         case (GCTP_UTM_PROJ): strcpy (proj_str, "UTM"); break;
         case (GCTP_PS_PROJ): strcpy (proj_str, "PS"); break;
         case (GCTP_ALBERS_PROJ): strcpy (proj_str, "ALBERS"); break;
+        case (GCTP_SIN_PROJ): strcpy (proj_str, "SIN"); break;
     }
   
     /* If the grid origin is center, then adjust for the resolution.  The
@@ -265,21 +270,48 @@ int write_hdf_eos_attr
         for (i = 0; i < NPROJ_PARAM; i++)
             proj_parms[i] = 0.0;
 
-        if (gmeta->proj_info.proj_type == GCTP_ALBERS_PROJ)
+        switch (gmeta->proj_info.proj_type)
         {
-            proj_parms[2] = gmeta->proj_info.standard_parallel1;
-            proj_parms[3] = gmeta->proj_info.standard_parallel2;
-            proj_parms[4] = gmeta->proj_info.central_meridian;
-            proj_parms[5] = gmeta->proj_info.origin_latitude;
-            proj_parms[6] = gmeta->proj_info.false_easting;
-            proj_parms[7] = gmeta->proj_info.false_northing;
-        }
-        else if (gmeta->proj_info.proj_type == GCTP_PS_PROJ)
-        {
-            proj_parms[4] = gmeta->proj_info.longitude_pole;
-            proj_parms[5] = gmeta->proj_info.latitude_true_scale;
-            proj_parms[6] = gmeta->proj_info.false_easting;
-            proj_parms[7] = gmeta->proj_info.false_northing;
+            case GCTP_GEO_PROJ:
+                /* just use the already initialized zeros for the proj parms */
+                break;
+    
+            case GCTP_UTM_PROJ:
+                /* UTM handled in the if statement above */
+                break;
+
+            case GCTP_ALBERS_PROJ:
+                proj_parms[2] = gmeta->proj_info.standard_parallel1;
+                proj_parms[3] = gmeta->proj_info.standard_parallel2;
+                proj_parms[4] = gmeta->proj_info.central_meridian;
+                proj_parms[5] = gmeta->proj_info.origin_latitude;
+                proj_parms[6] = gmeta->proj_info.false_easting;
+                proj_parms[7] = gmeta->proj_info.false_northing;
+                break;
+    
+            case GCTP_PS_PROJ:
+                proj_parms[4] = gmeta->proj_info.longitude_pole;
+                proj_parms[5] = gmeta->proj_info.latitude_true_scale;
+                proj_parms[6] = gmeta->proj_info.false_easting;
+                proj_parms[7] = gmeta->proj_info.false_northing;
+                break;
+    
+            case GCTP_SIN_PROJ:
+                proj_parms[0] = gmeta->proj_info.sphere_radius;
+                proj_parms[4] = gmeta->proj_info.central_meridian;
+                proj_parms[6] = gmeta->proj_info.false_easting;
+                proj_parms[7] = gmeta->proj_info.false_northing;
+                break;
+    
+            default:
+                sprintf (errmsg, "Unsupported projection type (%d).  GEO "
+                    "projection code (%d) or UTM projection code (%d) or "
+                    "ALBERS projection code (%d) or PS projection code (%d) or "
+                    "SIN projection code (%d) expected.",
+                    gmeta->proj_info.proj_type, GCTP_GEO_PROJ, GCTP_UTM_PROJ,
+                    GCTP_ALBERS_PROJ, GCTP_PS_PROJ, GCTP_SIN_PROJ);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
         }
 
         for (i = 0; i < NPROJ_PARAM; i++)
@@ -321,10 +353,28 @@ int write_hdf_eos_attr
         }
     }
   
+    /* Only print the datum if it's valid */
+    if (gmeta->proj_info.datum_type != ESPA_NODATUM)
+    {
+        switch (gmeta->proj_info.datum_type)
+        {
+            case (ESPA_WGS84): strcpy (datum_str, "WGS84"); break;
+            case (ESPA_NAD83): strcpy (datum_str, "NAD83"); break;
+            case (ESPA_NAD27): strcpy (datum_str, "NAD27"); break;
+        }
+  
+        count = snprintf (cbuf, sizeof (cbuf),
+            "\t\tDatumCode=%s\n", datum_str);
+        if (count < 0 || count >= sizeof (cbuf))
+        {
+            sprintf (errmsg, "Overflow of cbuf string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+    }
+
     count = snprintf (cbuf, sizeof (cbuf),
-        "\t\tSphereCode=%d\n" 
-        "\t\tGridOrigin=HDFE_GD_UL\n",
-        gmeta->proj_info.sphere_code);
+        "\t\tGridOrigin=HDFE_GD_UL\n");
     if (count < 0 || count >= sizeof (cbuf))
     {
         sprintf (errmsg, "Overflow of cbuf string");
@@ -476,9 +526,11 @@ int write_hdf_eos_attr
             /* Get the projection name string */
             switch (gmeta->proj_info.proj_type)
             {
+                case (GCTP_GEO_PROJ): strcpy (proj_str, "GEO"); break;
                 case (GCTP_UTM_PROJ): strcpy (proj_str, "UTM"); break;
                 case (GCTP_PS_PROJ): strcpy (proj_str, "PS"); break;
                 case (GCTP_ALBERS_PROJ): strcpy (proj_str, "ALBERS"); break;
+                case (GCTP_SIN_PROJ): strcpy (proj_str, "SIN"); break;
             }
   
             /* If the grid origin is center, then adjust for the resolution.
@@ -576,22 +628,51 @@ int write_hdf_eos_attr
   
                 for (i = 0; i < NPROJ_PARAM; i++)
                     proj_parms[i] = 0.0;
-
-                if (gmeta->proj_info.proj_type == GCTP_ALBERS_PROJ)
+        
+                switch (gmeta->proj_info.proj_type)
                 {
-                    proj_parms[2] = gmeta->proj_info.standard_parallel1;
-                    proj_parms[3] = gmeta->proj_info.standard_parallel2;
-                    proj_parms[4] = gmeta->proj_info.central_meridian;
-                    proj_parms[5] = gmeta->proj_info.origin_latitude;
-                    proj_parms[6] = gmeta->proj_info.false_easting;
-                    proj_parms[7] = gmeta->proj_info.false_northing;
-                }
-                else if (gmeta->proj_info.proj_type == GCTP_ALBERS_PROJ)
-                {
-                    proj_parms[4] = gmeta->proj_info.longitude_pole;
-                    proj_parms[5] = gmeta->proj_info.latitude_true_scale;
-                    proj_parms[6] = gmeta->proj_info.false_easting;
-                    proj_parms[7] = gmeta->proj_info.false_northing;
+                    case GCTP_GEO_PROJ:
+                        /* just use the already initialized zeros for the proj
+                           parms */
+                        break;
+            
+                    case GCTP_UTM_PROJ:
+                        /* UTM handled in the if statement above */
+                        break;
+        
+                    case GCTP_ALBERS_PROJ:
+                        proj_parms[2] = gmeta->proj_info.standard_parallel1;
+                        proj_parms[3] = gmeta->proj_info.standard_parallel2;
+                        proj_parms[4] = gmeta->proj_info.central_meridian;
+                        proj_parms[5] = gmeta->proj_info.origin_latitude;
+                        proj_parms[6] = gmeta->proj_info.false_easting;
+                        proj_parms[7] = gmeta->proj_info.false_northing;
+                        break;
+            
+                    case GCTP_PS_PROJ:
+                        proj_parms[4] = gmeta->proj_info.longitude_pole;
+                        proj_parms[5] = gmeta->proj_info.latitude_true_scale;
+                        proj_parms[6] = gmeta->proj_info.false_easting;
+                        proj_parms[7] = gmeta->proj_info.false_northing;
+                        break;
+            
+                    case GCTP_SIN_PROJ:
+                        proj_parms[0] = gmeta->proj_info.sphere_radius;
+                        proj_parms[4] = gmeta->proj_info.central_meridian;
+                        proj_parms[6] = gmeta->proj_info.false_easting;
+                        proj_parms[7] = gmeta->proj_info.false_northing;
+                        break;
+            
+                    default:
+                        sprintf (errmsg, "Unsupported projection type (%d).  "
+                            "GEO projection code (%d) or UTM projection code "
+                            "(%d) or ALBERS projection code (%d) or PS "
+                            "projection code (%d) or SIN projection code (%d) "
+                            "expected.", gmeta->proj_info.proj_type,
+                            GCTP_GEO_PROJ, GCTP_UTM_PROJ, GCTP_ALBERS_PROJ,
+                            GCTP_PS_PROJ, GCTP_SIN_PROJ);
+                        error_handler (true, FUNC_NAME, errmsg);
+                        return (ERROR);
                 }
 
                 for (i = 0; i < NPROJ_PARAM; i++)
@@ -631,17 +712,34 @@ int write_hdf_eos_attr
                 }
             }
   
+            /* Only print the datum if it's valid */
+            if (gmeta->proj_info.datum_type != ESPA_NODATUM)
+            {
+                switch (gmeta->proj_info.datum_type)
+                {
+                    case (ESPA_WGS84): strcpy (datum_str, "WGS84"); break;
+                    case (ESPA_NAD83): strcpy (datum_str, "NAD83"); break;
+                    case (ESPA_NAD27): strcpy (datum_str, "NAD27"); break;
+                }
+          
+                count = snprintf (cbuf, sizeof (cbuf),
+                    "\t\tDatumCode=%s\n", datum_str);
+                if (count < 0 || count >= sizeof (cbuf))
+                {
+                    sprintf (errmsg, "Overflow of cbuf string");
+                    error_handler (true, FUNC_NAME, errmsg);
+                    return (ERROR);
+                }
+            }
+        
             count = snprintf (cbuf, sizeof (cbuf),
-                "\t\tSphereCode=%d\n" 
-                "\t\tGridOrigin=HDFE_GD_UL\n",
-                gmeta->proj_info.sphere_code);
+                "\t\tGridOrigin=HDFE_GD_UL\n");
             if (count < 0 || count >= sizeof (cbuf))
             {
                 sprintf (errmsg, "Overflow of cbuf string");
                 error_handler (true, FUNC_NAME, errmsg);
                 return (ERROR);
             }
-
             if (!append_meta (struct_meta, &meta_indx, cbuf))
             {
                 sprintf (errmsg, "Error appending to metadata string (grid "

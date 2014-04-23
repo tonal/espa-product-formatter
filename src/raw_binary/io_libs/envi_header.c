@@ -38,12 +38,18 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/12/2013   Gail Schmidt     Original development
 4/17/2014    Gail Schmidt     Modified to support additional projections
+4/23/2014    Gail Schmidt     Modified to support additional datums
 
 NOTES:
   1. Only supports GEO, UTM, ALBERS, PS, and SIN projections.
-  2. Only supports WGS84 datum (GEO, UTM, ALBERS, PS).
+  2. Only supports WGS84, NAD27, NAD83 datums (GEO, UTM, ALBERS, PS).
   3. Sinusoidal needs to pass the radius of the sphere in the first
      projection parameter for the ENVI header.
+  4. The following are the strings to use for the various datums, obtained from
+     ExcelisVis via http://www.exelisvis.com/services/Files/envi_pe/envi_pe_v10/EnviPEReferenceDocs/EnviPeGeogcs_v10.txt
+     WGS84: GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]
+     NAD27: GEOGCS["GCS_North_American_1927",DATUM["D_North_American_1927",SPHEROID["Clarke_1866",6378206.4,294.9786982]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]
+     NAD83: GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]
 ******************************************************************************/
 int write_envi_hdr
 (
@@ -52,9 +58,17 @@ int write_envi_hdr
 )
 {
     char FUNC_NAME[] = "write_envi_hdr";   /* function name */
-    char errmsg[STR_SIZE];   /* error message */
-    int i;                   /* looping variable */
-    FILE *hdr_fptr = NULL;   /* file pointer to the ENVI header file */
+    char errmsg[STR_SIZE];       /* error message */
+    char geogcs_str[STR_SIZE];   /* string for the GCS code */
+    char datum_str[STR_SIZE];    /* string for the datum code */
+    char proj_datum_str[STR_SIZE];  /* string for the datum code in projection
+                                       info section */
+    char spheroid_str[STR_SIZE]; /* string for the spheroid code */
+    int i;                       /* looping variable */
+    double semi_major_axis;      /* semi-major axis for the spheroid */
+    double semi_minor_axis;      /* semi-minor axis for the spheroid */
+    double inv_flattening;       /* inverse flattening for the spheroid */
+    FILE *hdr_fptr = NULL;       /* file pointer to the ENVI header file */
 
     /* Open the header file */
     hdr_fptr = fopen (hdr_file, "w");
@@ -73,19 +87,61 @@ int write_envi_hdr
         hdr->proj_type != GCTP_PS_PROJ &&
         hdr->proj_type != GCTP_SIN_PROJ)
     {
-        sprintf (errmsg, "GEO projection code (%d) or UTM projection code (%d) "
-            "or ALBERS projection code (%d) or PS projection code (%d) or "
-            "SIN projection code (%d) expected.", GCTP_GEO_PROJ, GCTP_UTM_PROJ,
+        sprintf (errmsg, "Unsupported projection code (%d).  GEO projection "
+            "code (%d) or UTM projection code (%d) or ALBERS projection code "
+            "(%d) or PS projection code (%d) or SIN projection code (%d) "
+            "expected.", hdr->proj_type, GCTP_GEO_PROJ, GCTP_UTM_PROJ,
             GCTP_ALBERS_PROJ, GCTP_PS_PROJ, GCTP_SIN_PROJ);
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
 
-    if (hdr->datum_type != ENVI_WGS84)
+    if (hdr->datum_type != ESPA_WGS84 &&
+        hdr->datum_type != ESPA_NAD27 &&
+        hdr->datum_type != ESPA_NAD83 &&
+        hdr->datum_type != ESPA_NODATUM)
     {
-        sprintf (errmsg, "Error WGS-84 datum code (%d) expected.", ENVI_WGS84);
+        sprintf (errmsg, "Unsupported datum code (%d). WGS84 datum code (%d) "
+            "or NAD27 datum code (%d) or NAD83 datum code (%d) or NODATUM "
+            "datum code (%d) expected.", hdr->datum_type, ESPA_WGS84,
+            ESPA_NAD27, ESPA_NAD83, ESPA_NODATUM);
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
+    }
+
+    /* Determine the GCS, DATUM, and SPHEROID strings that will get written
+       along with the semi-major and inverse flattening numbers */
+    switch (hdr->datum_type)
+    {
+        case ESPA_WGS84:  /* WGS84 sphere */
+            strcpy (geogcs_str, "GCS_WGS_1984");
+            strcpy (datum_str, "D_WGS_1984");
+            strcpy (spheroid_str, "WGS_1984");
+            strcpy (proj_datum_str, "WGS-84");
+            semi_major_axis = GCTP_WGS84_SEMI_MAJOR;
+            semi_minor_axis = GCTP_WGS84_SEMI_MINOR;
+            inv_flattening = GCTP_WGS84_INV_FLATTENING;
+            break;
+
+        case ESPA_NAD27:  /* Clarke 1866 sphere */
+            strcpy (geogcs_str, "GCS_North_American_1927");
+            strcpy (datum_str, "D_North_American_1927");
+            strcpy (spheroid_str, "Clarke_1866");
+            strcpy (proj_datum_str, "NAD-27");
+            semi_major_axis = GCTP_CLARKE_1866_SEMI_MAJOR;
+            semi_minor_axis = GCTP_CLARKE_1866_SEMI_MINOR;
+            inv_flattening = GCTP_CLARKE_1866_INV_FLATTENING;
+            break;
+
+        case ESPA_NAD83:  /* GRS 1980 sphere */
+            strcpy (geogcs_str, "GCS_North_American_1983");
+            strcpy (datum_str, "D_North_American_1983");
+            strcpy (spheroid_str, "GRS_1980");
+            strcpy (proj_datum_str, "NAD-83");
+            semi_major_axis = GCTP_GRS80_SEMI_MAJOR;
+            semi_minor_axis = GCTP_GRS80_SEMI_MINOR;
+            inv_flattening = GCTP_GRS80_INV_FLATTENING;
+            break;
     }
 
     /* Write the header to the file */
@@ -109,77 +165,78 @@ int write_envi_hdr
     if (hdr->proj_type == GCTP_GEO_PROJ)
     {
         fprintf (hdr_fptr,
-            "map info = {Geographic Lat/Lon, %d, %d, %f, %f, %f, %f, "
-            "WGS-84, units=Degrees}\n", hdr->xy_start[0], hdr->xy_start[1],
+            "map info = {Geographic Lat/Lon, %d, %d, %f, %f, %g, %g, %s, "
+            "units=Degrees}\n", hdr->xy_start[0], hdr->xy_start[1],
             hdr->ul_corner[0], hdr->ul_corner[1], hdr->pixel_size[0],
-            hdr->pixel_size[1]);
+            hdr->pixel_size[1], proj_datum_str);
         fprintf (hdr_fptr,
-            "coordinate system string = GEOGCS[\"GCS_WGS_1984\", "
-            "DATUM[\"D_WGS_1984\", "
-            "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]], "
-            "PRIMEM[\"Greenwich\",0.0], "
-            "UNIT[\"Degree\",0.0174532925199433]]\n");
+            "coordinate system string = GEOGCS[\"%s\", DATUM[\"%s\", "
+            "SPHEROID[\"%s\",%g,%g]], PRIMEM[\"Greenwich\",0.0], "
+            "UNIT[\"Degree\",0.0174532925199433]]\n", geogcs_str, datum_str,
+            spheroid_str, semi_major_axis, inv_flattening);
     }
     else if (hdr->proj_type == GCTP_UTM_PROJ)
     {
         if (hdr->utm_zone > 0)
             fprintf (hdr_fptr,
-                "map info = {UTM, %d, %d, %f, %f, %f, %f, %d, North, "
-                "WGS-84, units=Meters}\n", hdr->xy_start[0], hdr->xy_start[1],
+                "map info = {UTM, %d, %d, %f, %f, %g, %g, %d, North, %s, "
+                "units=Meters}\n", hdr->xy_start[0], hdr->xy_start[1],
                 hdr->ul_corner[0], hdr->ul_corner[1], hdr->pixel_size[0],
-                hdr->pixel_size[1], hdr->utm_zone);
+                hdr->pixel_size[1], hdr->utm_zone, proj_datum_str);
         else
             fprintf (hdr_fptr,
-                "map info = {UTM, %d, %d, %f, %f, %f, %f, %d, North, "
-                "WGS-84, units=Meters}\n", hdr->xy_start[0], hdr->xy_start[1],
+                "map info = {UTM, %d, %d, %f, %f, %f, %f, %d, South, %s, "
+                "units=Meters}\n", hdr->xy_start[0], hdr->xy_start[1],
                 hdr->ul_corner[0], hdr->ul_corner[1], hdr->pixel_size[0],
-                hdr->pixel_size[1], -(hdr->utm_zone));
+                hdr->pixel_size[1], -(hdr->utm_zone), proj_datum_str);
     }
     else if (hdr->proj_type == GCTP_ALBERS_PROJ)
     {
         fprintf (hdr_fptr,
-            "map info = {Albers Conical Equal Area, %d, %d, %f, %f, %f, %f, "
-            "WGS-84, units=Meters}\n", hdr->xy_start[0], hdr->xy_start[1],
+            "map info = {Albers Conical Equal Area, %d, %d, %f, %f, %g, %g, "
+            "%s, units=Meters}\n", hdr->xy_start[0], hdr->xy_start[1],
             hdr->ul_corner[0], hdr->ul_corner[1], hdr->pixel_size[0],
-            hdr->pixel_size[1]);
+            hdr->pixel_size[1], proj_datum_str);
         fprintf (hdr_fptr,
-            "projection info = {%d, 6378137.0, 6356752.314245179, %lf, %lf, "
-            "%lf, %lf, %lf, %lf, WGS-84, Albers Conical Equal Area, "
-            "units=Meters}\n", ENVI_ALBERS_PROJ, hdr->proj_parms[5],
-            hdr->proj_parms[4], hdr->proj_parms[6], hdr->proj_parms[7],
-            hdr->proj_parms[2], hdr->proj_parms[3]);
+            "projection info = {%d, %g, %g, %g, %g, %g, %g, %g, %g, "
+            "%s, Albers Conical Equal Area, units=Meters}\n",
+            ENVI_ALBERS_PROJ, semi_major_axis, semi_minor_axis,
+            hdr->proj_parms[5], hdr->proj_parms[4], hdr->proj_parms[6],
+            hdr->proj_parms[7], hdr->proj_parms[2], hdr->proj_parms[3],
+            proj_datum_str);
         fprintf (hdr_fptr,
             "coordinate system string = "
-            "{PROJCS[\"Albers\",GEOGCS[\"GCS_WGS_1984\", "
-            "DATUM[\"D_WGS_1984\", "
-            "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]], "
-            "PRIMEM[\"Greenwich\",0.0], UNIT[\"Degree\",0.0174532925199433]], "
+            "{PROJCS[\"Albers\",GEOGCS[\"%s\", DATUM[\"%s\", "
+            "SPHEROID[\"%s\",%g,%g]], PRIMEM[\"Greenwich\",0.0], "
+            "UNIT[\"Degree\",0.0174532925199433]], "
             "PROJECTION[\"Albers\"], PARAMETER[\"False_Easting\",%f], "
             "PARAMETER[\"False_Northing\",%f], "
             "PARAMETER[\"Central_Meridian\",%f], "
             "PARAMETER[\"Standard_Parallel_1\",%f], "
             "PARAMETER[\"Standard_Parallel_2\",%f], "
             "PARAMETER[\"Latitude_Of_Origin\",%f], UNIT[\"Meter\",1.0]]}\n",
-            hdr->proj_parms[6], hdr->proj_parms[7], hdr->proj_parms[4],
-            hdr->proj_parms[2], hdr->proj_parms[3], hdr->proj_parms[5]);
+            geogcs_str, datum_str, spheroid_str, semi_major_axis,
+            inv_flattening, hdr->proj_parms[6], hdr->proj_parms[7],
+            hdr->proj_parms[4], hdr->proj_parms[2], hdr->proj_parms[3],
+            hdr->proj_parms[5]);
     }
     else if (hdr->proj_type == GCTP_PS_PROJ)
     {
         fprintf (hdr_fptr,
-            "map info = {Polar Stereographic, %d, %d, %f, %f, %f, %f, "
-            "WGS-84, units=Meters}\n", hdr->xy_start[0], hdr->xy_start[1],
+            "map info = {Polar Stereographic, %d, %d, %f, %f, %g, %g, %s, "
+            "units=Meters}\n", hdr->xy_start[0], hdr->xy_start[1],
             hdr->ul_corner[0], hdr->ul_corner[1], hdr->pixel_size[0],
-            hdr->pixel_size[1]);
+            hdr->pixel_size[1], proj_datum_str);
         fprintf (hdr_fptr,
-            "projection info = {%d, 6378137.0, 6356752.314245179, %lf, "
-            "%lf, %lf, %lf, WGS-84, Polar Stereographic, units=Meters}\n",
-            ENVI_PS_PROJ, hdr->proj_parms[5], hdr->proj_parms[4],
-            hdr->proj_parms[6], hdr->proj_parms[7]);
+            "projection info = {%d, %g, %g, %g, %g, %g, %g, %s, "
+            "Polar Stereographic, units=Meters}\n", ENVI_PS_PROJ,
+            semi_major_axis, semi_minor_axis, hdr->proj_parms[5],
+            hdr->proj_parms[4], hdr->proj_parms[6], hdr->proj_parms[7],
+            proj_datum_str);
         fprintf (hdr_fptr,
             "coordinate system string = "
             "{PROJCS[\"Stereographic_South_Pole\", "
-            "GEOGCS[\"GCS_WGS_1984\", DATUM[\"D_WGS_1984\", "
-            "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]], "
+            "GEOGCS[\"%s\", DATUM[\"%s\", SPHEROID[\"%s\",%g,%g]], "
             "PRIMEM[\"Greenwich\",0.0], UNIT[\"Degree\",0.0174532925199433]], "
             "PROJECTION[\"Stereographic_South_Pole\"], "
             "PARAMETER[\"False_Easting\",%f], "
@@ -187,29 +244,47 @@ int write_envi_hdr
             "PARAMETER[\"Central_Meridian\",%f], "
             "PARAMETER[\"Standard_Parallel_1\",%f], "
             "UNIT[\"Meter\",1.0]]}\n",
-            hdr->proj_parms[6], hdr->proj_parms[7],
+            geogcs_str, datum_str, spheroid_str, semi_major_axis,
+            inv_flattening, hdr->proj_parms[6], hdr->proj_parms[7],
             hdr->proj_parms[4], hdr->proj_parms[5]);
     }
     else if (hdr->proj_type == GCTP_SIN_PROJ)
     {
-        /* Note: ENVI might need to be updated in the individual's version
-           to support the Sinusoidal projection. */
+        /* Note: No datum is used for this projection, just the radius of the
+           sphere */
         fprintf (hdr_fptr,
-            "map info = {Sinusoidal, %d, %d, %f, %f, %f, %f, "
+            "map info = {Sinusoidal, %d, %d, %f, %f, %g, %g, "
             "units=Meters}\n", hdr->xy_start[0], hdr->xy_start[1],
             hdr->ul_corner[0], hdr->ul_corner[1], hdr->pixel_size[0],
             hdr->pixel_size[1]);
         fprintf (hdr_fptr,
-            "coordinate system string = {PROJCS[\"Sinusoidal\", "
-            "GEOGCS[\"GCS_Unknown datum based upon the custom spheroid\", "
-            "DATUM[\"D_Not specified (based on custom spheroid)\", "
-            "SPHEROID[\"Custom_spheroid\",%f,0]], "
-            "PRIMEM[\"Greenwich\",0], UNIT[\"Degree\",0.017453292519943295]], "
-            "PROJECTION[\"Sinusoidal\"], PARAMETER[\"central_meridian\",%f], "
-            "PARAMETER[\"false_easting\",%f], "
-            "PARAMETER[\"false_northing\",%f], UNIT[\"Meter\",1]]}\n",
+            "projection info = {%d, %f, %f, %f, %f, Sinusoidal, "
+            "units=Meters}\n", ENVI_SIN_PROJ, hdr->proj_parms[0],
+            hdr->proj_parms[4], hdr->proj_parms[6], hdr->proj_parms[7]);
+        fprintf (hdr_fptr,
+            "coordinate system string = {PROJCS[\"Sphere_Sinusoidal\", "
+            "GEOGCS[\"GCS_Sphere\", DATUM[\"D_Sphere\", "
+            "SPHEROID[\"Sphere\",%f,0.0]], "
+            "PRIMEM[\"Greenwich\",0.0], "
+            "UNIT[\"Degree\",0.0174532925199433]], "
+            "PROJECTION[\"Sinusoidal\"], PARAMETER[\"Central_Meridian\",%f], "
+            "PARAMETER[\"False_Easting\",%f], "
+            "PARAMETER[\"False_Northing\",%f], UNIT[\"Meter\",1.0]]}\n",
             hdr->proj_parms[0], hdr->proj_parms[4], hdr->proj_parms[6],
             hdr->proj_parms[7]);
+
+/*        fprintf (hdr_fptr,
+            "coordinate system string = {PROJCS[\"Sinusoidal\", "
+            "GEOGCS[\"GCS_ELLIPSE_BASED_1\", DATUM[\"D_ELLIPSE_BASED_1\", "
+            "SPHEROID[\"S_ELLIPSE_BASED_1\",%f,0.0]], "
+            "PRIMEM[\"Greenwich\",0.0], "
+            "UNIT[\"Degree\",0.0174532925199433]], "
+            "PROJECTION[\"Sinusoidal\"], PARAMETER[\"Central_Meridian\",%f], "
+            "PARAMETER[\"False_Easting\",%f], "
+            "PARAMETER[\"False_Northing\",%f], UNIT[\"Meter\",1.0]]}\n",
+            hdr->proj_parms[0], hdr->proj_parms[4], hdr->proj_parms[6],
+            hdr->proj_parms[7]);
+*/
     }
 
     /* Write the array of band names */
@@ -244,6 +319,7 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/3/2014     Gail Schmidt     Original development
 4/17/2014    Gail Schmidt     Modified to support additional projections
+4/23/2014    Gail Schmidt     Modified to support additional datums
 
 NOTES:
   1. Only supports GEO, UTM, ALBERS, PS, SIN projections.
@@ -346,14 +422,20 @@ int create_envi_struct
             return (ERROR);
     }
 
-    if (gmeta->proj_info.sphere_code != GCTP_WGS84)
+    hdr->datum_type = gmeta->proj_info.datum_type;
+    if (gmeta->proj_info.datum_type != ESPA_WGS84 &&
+        gmeta->proj_info.datum_type != ESPA_NAD27 &&
+        gmeta->proj_info.datum_type != ESPA_NAD83 &&
+        gmeta->proj_info.datum_type != ESPA_NODATUM)
     {
-        sprintf (errmsg, "Unsupported datum type.  Currently only support "
-            "WGS84.");
+        sprintf (errmsg, "Unsupported datum code (%d). WGS84 datum code (%d) "
+            "or NAD27 datum code (%d) or NAD83 datum code (%d) or NODATUM "
+            "datum code (%d) expected.", gmeta->proj_info.datum_type,
+            ESPA_WGS84, ESPA_NAD27, ESPA_NAD83, ESPA_NODATUM);
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
-    hdr->datum_type = ENVI_WGS84;
+
     hdr->pixel_size[0] = bmeta->pixel_size[0];
     hdr->pixel_size[1] = bmeta->pixel_size[1];
     count = snprintf (hdr->band_names[0], sizeof (hdr->band_names[0]), "%s",

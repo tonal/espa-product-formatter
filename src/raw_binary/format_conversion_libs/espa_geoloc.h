@@ -93,7 +93,7 @@ typedef struct
 {
     int proj_num;           /* GCTP map projection number */
     double proj_param[NPROJ_PARAM]; /* GCTP map projection parameters */
-    float pixel_size[2];    /* Pixel size (meters) (x, y) */
+    double pixel_size[2];   /* Pixel size (meters) (x, y) */
     Map_coord_t ul_corner;  /* Map projection coordinates of the upper left 
                                corner of the pixel in the upper left corner 
                                of the image */
@@ -103,7 +103,7 @@ typedef struct
     int zone;               /* GCTP zone number */
     bool zone_set;          /* Flag to indicate whether the zone has been set;
                                'true' = set; 'false' = not set */
-    int sphere;             /* GCTP sphere number */
+    int spheroid;           /* GCTP spheroid number */
     double orientation_angle;  /* Orientation of the image with respect to 
                                map north (radians).  A positive angle causes 
                                the image to be rotated counter-clockwise. */

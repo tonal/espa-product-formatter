@@ -109,8 +109,8 @@ Geoloc_t *setup_mapping
 
     if (space_def->pixel_size[0] <= 0.0 || space_def->pixel_size[1] <= 0.0)
     {
-        sprintf (errmsg, "Invalid pixel size: %f %f", space_def->pixel_size[0],
-            space_def->pixel_size[1]);
+        sprintf (errmsg, "Invalid pixel size: %lf %lf",
+            space_def->pixel_size[0], space_def->pixel_size[1]);
         error_handler (true, FUNC_NAME, errmsg);
         return (NULL);
     }
@@ -140,7 +140,7 @@ Geoloc_t *setup_mapping
     this->def.img_size.s = space_def->img_size.s;
     this->def.proj_num = space_def->proj_num;
     this->def.zone = space_def->zone;
-    this->def.sphere = space_def->sphere;
+    this->def.spheroid = space_def->spheroid;
     this->def.orientation_angle = space_def->orientation_angle;
     for (i = 0; i < NPROJ_PARAM; i++) 
         this->def.proj_param[i] = space_def->proj_param[i];
@@ -167,7 +167,7 @@ Geoloc_t *setup_mapping
      
     /* Setup the forward transform */
     for_init (this->def.proj_num, this->def.zone, this->def.proj_param, 
-        this->def.sphere, file27, file83, &iflag, for_trans);
+        this->def.spheroid, file27, file83, &iflag, for_trans);
     if (iflag)
     {
         free (this);
@@ -179,7 +179,7 @@ Geoloc_t *setup_mapping
   
     /* Setup the inverse transform */
     inv_init (this->def.proj_num, this->def.zone, this->def.proj_param, 
-        this->def.sphere, file27, file83, &iflag, inv_trans);
+        this->def.spheroid, file27, file83, &iflag, inv_trans);
     if (iflag)
     {
         free (this);
@@ -413,34 +413,87 @@ bool get_geoloc_info
     
     /* Projection related info */
     geoloc_info->zone_set = false;
-    if (gmeta->proj_info.proj_type == GCTP_UTM_PROJ)
-    {
-        geoloc_info->zone = gmeta->proj_info.utm_zone;
-        geoloc_info->zone_set = true;
-    }
-    else
-    {
-        for (i = 0; i < NPROJ_PARAM; i++)
-            geoloc_info->proj_param[i] = 0.0;
+    for (i = 0; i < NPROJ_PARAM; i++)
+        geoloc_info->proj_param[i] = 0.0;
 
-        if (gmeta->proj_info.proj_type == GCTP_ALBERS_PROJ)
-        {
+    switch (gmeta->proj_info.proj_type)
+    {
+        case GCTP_GEO_PROJ:
+            /* just use the already initialized zeros for the proj param */
+            break;
+
+        case GCTP_UTM_PROJ:
+            geoloc_info->zone = gmeta->proj_info.utm_zone;
+            geoloc_info->zone_set = true;
+            break;
+
+        case GCTP_ALBERS_PROJ:
             geoloc_info->proj_param[2] = gmeta->proj_info.standard_parallel1;
             geoloc_info->proj_param[3] = gmeta->proj_info.standard_parallel2;
             geoloc_info->proj_param[4] = gmeta->proj_info.central_meridian;
             geoloc_info->proj_param[5] = gmeta->proj_info.origin_latitude;
             geoloc_info->proj_param[6] = gmeta->proj_info.false_easting;
             geoloc_info->proj_param[7] = gmeta->proj_info.false_northing;
-        }
-        else if (gmeta->proj_info.proj_type == GCTP_PS_PROJ)
-        {
+            break;
+
+        case GCTP_PS_PROJ:
             geoloc_info->proj_param[4] = gmeta->proj_info.longitude_pole;
             geoloc_info->proj_param[5] = gmeta->proj_info.latitude_true_scale;
             geoloc_info->proj_param[6] = gmeta->proj_info.false_easting;
             geoloc_info->proj_param[7] = gmeta->proj_info.false_northing;
-        }
+            break;
+
+        case GCTP_SIN_PROJ:
+            geoloc_info->proj_param[0] = gmeta->proj_info.sphere_radius;
+            geoloc_info->proj_param[4] = gmeta->proj_info.central_meridian;
+            geoloc_info->proj_param[6] = gmeta->proj_info.false_easting;
+            geoloc_info->proj_param[7] = gmeta->proj_info.false_northing;
+            break;
+
+        default:
+            sprintf (errmsg, "Unsupported projection type (%d).  GEO "
+                "projection code (%d) or UTM projection code (%d) or "
+                "ALBERS projection code (%d) or PS projection code (%d) or "
+                "SIN projection code (%d) expected.",
+                gmeta->proj_info.proj_type, GCTP_GEO_PROJ, GCTP_UTM_PROJ,
+                GCTP_ALBERS_PROJ, GCTP_PS_PROJ, GCTP_SIN_PROJ);
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
     }
-    geoloc_info->sphere = gmeta->proj_info.sphere_code;
+
+    /* Get the proper spheroid for the current datum
+       WGS84 datum <-- WGS84 spheroid, NAD27 datum <-- Clarke 86 spheroid,
+       NAD83 datum <-- GRS80 spheroid */
+    switch (gmeta->proj_info.datum_type)
+    {
+        case (ESPA_WGS84):
+            geoloc_info->spheroid = GCTP_WGS84;
+            break;
+        case (ESPA_NAD27):
+            geoloc_info->spheroid = GCTP_CLARKE_1866;
+            break;
+        case (ESPA_NAD83):
+            geoloc_info->spheroid = GCTP_GRS80;
+            break;
+        case (ESPA_NODATUM):
+            if (gmeta->proj_info.proj_type == GCTP_SIN_PROJ)
+                geoloc_info->spheroid = GCTP_MODIS_SPHERE;
+            else
+            {
+                sprintf (errmsg, "Unsupported datum/projection combination. "
+                    "NoDatum is currently only supported with Sinusoidal.");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (false);
+            }
+            break;
+        default:
+            sprintf (errmsg, "Unsupported datum. Currently only WGS84, NAD27, "
+                "NAD83, and NODATUM (Sinusoidal) are supported.");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (false);
+    }
+
+    /* Convert the orientation angle to radians */
     geoloc_info->orientation_angle = gmeta->orientation_angle * RAD;
  
     /* Successful completion */

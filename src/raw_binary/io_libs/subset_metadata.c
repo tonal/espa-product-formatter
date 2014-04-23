@@ -44,7 +44,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/10/2014    Gail Schmidt     Original development
-4/22/2014    Gail Schmidt     Updated for additional projection parameters
+4/22/2014    Gail Schmidt     Updated for additional projection parameters and
+                              datums
 
 NOTES:
   1. If no bands match the product type, then the global and projection
@@ -190,8 +191,7 @@ int subset_metadata_by_product
 
     /* Copy the projection information */
     outmeta->global.proj_info.proj_type = inmeta->global.proj_info.proj_type;
-    outmeta->global.proj_info.sphere_code =
-        inmeta->global.proj_info.sphere_code;
+    outmeta->global.proj_info.datum_type = inmeta->global.proj_info.datum_type;
 
     count = snprintf (outmeta->global.proj_info.units,
         sizeof (outmeta->global.proj_info.units), "%s",
@@ -484,7 +484,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/10/2014    Gail Schmidt     Original development
-4/22/2014    Gail Schmidt     Updated for additional projection parameters
+4/22/2014    Gail Schmidt     Updated for additional projection parameters and
+                              datums
 
 NOTES:
   1. If nbands is 0, then the global and projection information will still
@@ -629,8 +630,7 @@ int subset_metadata_by_band
 
     /* Copy the projection information */
     outmeta->global.proj_info.proj_type = inmeta->global.proj_info.proj_type;
-    outmeta->global.proj_info.sphere_code =
-        inmeta->global.proj_info.sphere_code;
+    outmeta->global.proj_info.datum_type = inmeta->global.proj_info.datum_type;
     count = snprintf (outmeta->global.proj_info.units,
         sizeof (outmeta->global.proj_info.units), "%s",
         inmeta->global.proj_info.units);

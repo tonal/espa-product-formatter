@@ -564,6 +564,7 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/26/2013   Gail Schmidt     Original development
 4/17/2014    Gail Schmidt     Added support for additional projections
+4/22/2014    Gail Schmidt     Added support for additional datums
 
 NOTES:
 ******************************************************************************/
@@ -600,6 +601,9 @@ int add_global_metadata_proj_info
         return (SUCCESS);
     }
 
+    /* Initialize the datum to no datum */
+    gmeta->proj_info.datum_type = ESPA_NODATUM;
+
     /* Handle the element attributes */
     for (attr = cur_node->properties; attr != NULL; attr = attr->next)
     {
@@ -617,8 +621,15 @@ int add_global_metadata_proj_info
             else if (xmlStrEqual (attr_val, (const xmlChar *) "SIN"))
                 gmeta->proj_info.proj_type = GCTP_SIN_PROJ;
         }
-        else if (xmlStrEqual (attr->name, (const xmlChar *) "sphere_code"))
-            gmeta->proj_info.sphere_code = atoi ((const char *) attr_val);
+        else if (xmlStrEqual (attr->name, (const xmlChar *) "datum"))
+        {
+            if (xmlStrEqual (attr_val, (const xmlChar *) "WGS84"))
+                gmeta->proj_info.datum_type = ESPA_WGS84;
+            else if (xmlStrEqual (attr_val, (const xmlChar *) "NAD27"))
+                gmeta->proj_info.datum_type = ESPA_NAD27;
+            else if (xmlStrEqual (attr_val, (const xmlChar *) "NAD83"))
+                gmeta->proj_info.datum_type = ESPA_NAD83;
+        }
         else if (xmlStrEqual (attr->name, (const xmlChar *) "units"))
         {
             count = snprintf (gmeta->proj_info.units,
@@ -1661,9 +1672,11 @@ int add_band_metadata
             {
                 attr_val = xmlGetProp (cur_node, attr->name);
                 if (xmlStrEqual (attr->name, (const xmlChar *) "x"))
-                    bmeta->pixel_size[0] = atof ((const char *) attr_val);
+                    bmeta->pixel_size[0] =
+                        (double) atof ((const char *) attr_val);
                 else if (xmlStrEqual (attr->name, (const xmlChar *) "y"))
-                    bmeta->pixel_size[1] = atof ((const char *) attr_val);
+                    bmeta->pixel_size[1] =
+                        (double) atof ((const char *) attr_val);
                 else if (xmlStrEqual (attr->name, (const xmlChar *) "units"))
                 {
                     count = snprintf (bmeta->pixel_units,

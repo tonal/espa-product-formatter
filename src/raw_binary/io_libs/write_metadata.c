@@ -43,6 +43,7 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/26/2013   Gail Schmidt     Original development
 4/17/2014    Gail Schmidt     Modified to support additional projections
+4/22/2014    Gail Schmidt     Modified to support additional datums
 
 NOTES:
   1. If the XML file specified already exists, it will be overwritten.
@@ -62,6 +63,7 @@ int write_metadata
     char FUNC_NAME[] = "write_metadata";       /* function name */
     char errmsg[STR_SIZE];   /* error message */
     char myproj[STR_SIZE];   /* projection type string */
+    char mydatum[STR_SIZE];  /* datum string */
     char my_dtype[STR_SIZE]; /* data type string */
     int i, j;                /* looping variables */
     FILE *fptr = NULL;       /* file pointer to the XML metadata file */
@@ -126,14 +128,31 @@ int write_metadata
         case GCTP_ALBERS_PROJ: strcpy (myproj, "ALBERS"); break;
         case GCTP_PS_PROJ: strcpy (myproj, "PS"); break;
         case GCTP_SIN_PROJ: strcpy (myproj, "SIN"); break;
+        default: strcpy (myproj, "undefined"); break;
+    }
+    if (gmeta->proj_info.datum_type != ESPA_NODATUM)
+    {
+        switch (gmeta->proj_info.datum_type)
+        {
+            case ESPA_WGS84: strcpy (mydatum, "WGS84"); break;
+            case ESPA_NAD27: strcpy (mydatum, "NAD27"); break;
+            case ESPA_NAD83: strcpy (mydatum, "NAD83"); break;
+        }
+        fprintf (fptr,
+            "        <projection_information projection=\"%s\" datum=\"%s\" "
+            "units=\"%s\">\n", myproj, mydatum,
+            gmeta->proj_info.units);
+    }
+    else
+    {
+        fprintf (fptr,
+            "        <projection_information projection=\"%s\" units=\"%s\">\n",
+            myproj, gmeta->proj_info.units);
     }
     fprintf (fptr,
-        "        <projection_information projection=\"%s\" sphere_code=\"%d\"\n"
-        "            units=\"%s\">\n"
         "            <corner_point location=\"UL\" x=\"%lf\" y=\"%lf\"/>\n"
         "            <corner_point location=\"LR\" x=\"%lf\" y=\"%lf\"/>\n"
-        "            <grid_origin>%s</grid_origin>\n", myproj,
-        gmeta->proj_info.sphere_code, gmeta->proj_info.units,
+        "            <grid_origin>%s</grid_origin>\n",
         gmeta->proj_info.ul_corner[0], gmeta->proj_info.ul_corner[1],
         gmeta->proj_info.lr_corner[0], gmeta->proj_info.lr_corner[1],
         gmeta->proj_info.grid_origin);
@@ -255,7 +274,7 @@ int write_metadata
             "            <short_name>%s</short_name>\n"
             "            <long_name>%s</long_name>\n"
             "            <file_name>%s</file_name>\n"
-            "            <pixel_size x=\"%f\" y=\"%f\" units=\"%s\"/>\n"
+            "            <pixel_size x=\"%g\" y=\"%g\" units=\"%s\"/>\n"
             "            <data_units>%s</data_units>\n",
             bmeta[i].short_name, bmeta[i].long_name, bmeta[i].file_name,
             bmeta[i].pixel_size[0], bmeta[i].pixel_size[1],
@@ -273,7 +292,7 @@ int write_metadata
             fabs (bmeta[i].toa_bias - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
         {
             fprintf (fptr,
-                "            <toa_reflectance gain=\"%f\" bias=\"%f\"/>\n",
+                "            <toa_reflectance gain=\"%g\" bias=\"%g\"/>\n",
                 bmeta[i].toa_gain, bmeta[i].toa_bias);
         }
 
@@ -475,7 +494,7 @@ int append_metadata
             "            <short_name>%s</short_name>\n"
             "            <long_name>%s</long_name>\n"
             "            <file_name>%s</file_name>\n"
-            "            <pixel_size x=\"%f\" y=\"%f\" units=\"%s\"/>\n"
+            "            <pixel_size x=\"%g\" y=\"%g\" units=\"%s\"/>\n"
             "            <data_units>%s</data_units>\n",
             bmeta[i].short_name, bmeta[i].long_name, bmeta[i].file_name,
             bmeta[i].pixel_size[0], bmeta[i].pixel_size[1],
@@ -493,7 +512,7 @@ int append_metadata
             fabs (bmeta[i].toa_bias - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
         {
             fprintf (fptr,
-                "            <toa_reflectance gain=\"%f\" bias=\"%f\"/>\n",
+                "            <toa_reflectance gain=\"%g\" bias=\"%g\"/>\n",
                 bmeta[i].toa_gain, bmeta[i].toa_bias);
         }
 
@@ -575,8 +594,7 @@ void print_metadata_struct
                                           printed */
 )
 {
-    char sphere_str[STR_SIZE] = "undefined";     /* sphere string */
-    int i, j;                                    /* looping variables */
+    int i, j;                                   /* looping variables */
 
     /* Print the metadata structure to stdout */
     printf ("DEBUG Metadata structure:\n");
@@ -609,8 +627,15 @@ void print_metadata_struct
         metadata->global.bounding_coords[ESPA_NORTH],
         metadata->global.bounding_coords[ESPA_SOUTH]);
 
-    if (metadata->global.proj_info.sphere_code == GCTP_WGS84)
-        strcpy (sphere_str, "WGS84");
+    if (metadata->global.proj_info.datum_type == ESPA_WGS84)
+        printf ("  datum: WGS84\n");
+    else if (metadata->global.proj_info.datum_type == ESPA_NAD27)
+        printf ("  datum: NAD27\n");
+    else if (metadata->global.proj_info.datum_type == ESPA_NAD83)
+        printf ("  datum: NAD83\n");
+    else if (metadata->global.proj_info.datum_type == ESPA_NODATUM)
+        printf ("  datum: No Datum\n");
+
     if (metadata->global.proj_info.proj_type == GCTP_GEO_PROJ)
         printf ("  projection type: GEO\n");
     else if (metadata->global.proj_info.proj_type == GCTP_UTM_PROJ)
@@ -621,7 +646,6 @@ void print_metadata_struct
         printf ("  projection type: POLAR STEREOGRAPHIC\n");
     else if (metadata->global.proj_info.proj_type == GCTP_SIN_PROJ)
         printf ("  projection type: SINUSOIDAL\n");
-    printf ("  sphere code: %s\n", sphere_str);
     printf ("  projection units: %s\n", metadata->global.proj_info.units);
     printf ("  UL projection x,y: %f, %f\n",
         metadata->global.proj_info.ul_corner[0],
@@ -630,6 +654,7 @@ void print_metadata_struct
         metadata->global.proj_info.lr_corner[0],
         metadata->global.proj_info.lr_corner[1]);
     printf ("  grid origin: %s\n", metadata->global.proj_info.grid_origin);
+
     if (metadata->global.proj_info.proj_type == GCTP_UTM_PROJ)
     {
         printf ("  UTM zone: %d\n", metadata->global.proj_info.utm_zone);
@@ -706,7 +731,7 @@ void print_metadata_struct
         printf ("    short_name: %s\n", metadata->band[i].short_name);
         printf ("    long_name: %s\n", metadata->band[i].long_name);
         printf ("    file_name: %s\n", metadata->band[i].file_name);
-        printf ("    pixel_size (x, y) : %f %f\n",
+        printf ("    pixel_size (x, y) : %g %g\n",
             metadata->band[i].pixel_size[0], metadata->band[i].pixel_size[1]);
         printf ("    data_units: %s\n", metadata->band[i].data_units);
         if (metadata->band[i].valid_range[0] != 0 ||
@@ -719,7 +744,7 @@ void print_metadata_struct
         if (metadata->band[i].toa_gain != 0 ||
             metadata->band[i].toa_bias != 0)
         {
-            printf ("    toa_reflectance gain, bias : %f %f\n",
+            printf ("    toa_reflectance gain, bias : %g %g\n",
                 metadata->band[i].toa_gain, metadata->band[i].toa_bias);
         }
         if (metadata->band[i].nbits != 0)
