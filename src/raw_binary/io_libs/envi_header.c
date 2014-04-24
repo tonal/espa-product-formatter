@@ -127,7 +127,7 @@ int write_envi_hdr
             strcpy (geogcs_str, "GCS_North_American_1927");
             strcpy (datum_str, "D_North_American_1927");
             strcpy (spheroid_str, "Clarke_1866");
-            strcpy (proj_datum_str, "NAD-27");
+            strcpy (proj_datum_str, "North America 1927");
             semi_major_axis = GCTP_CLARKE_1866_SEMI_MAJOR;
             semi_minor_axis = GCTP_CLARKE_1866_SEMI_MINOR;
             inv_flattening = GCTP_CLARKE_1866_INV_FLATTENING;
@@ -137,7 +137,7 @@ int write_envi_hdr
             strcpy (geogcs_str, "GCS_North_American_1983");
             strcpy (datum_str, "D_North_American_1983");
             strcpy (spheroid_str, "GRS_1980");
-            strcpy (proj_datum_str, "NAD-83");
+            strcpy (proj_datum_str, "North America 1983");
             semi_major_axis = GCTP_GRS80_SEMI_MAJOR;
             semi_minor_axis = GCTP_GRS80_SEMI_MINOR;
             inv_flattening = GCTP_GRS80_INV_FLATTENING;

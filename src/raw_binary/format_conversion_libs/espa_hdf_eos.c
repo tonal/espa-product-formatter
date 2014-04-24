@@ -98,6 +98,9 @@ Date         Programmer       Reason
                               from the LEDAPS lndsr application)
 4/22/2014    Gail Schmidt     Updated to support additional projections and
                               datums
+4/24/2014    Gail Schmidt     Modified grid and dimension naming (in the case
+                              of multiple resolutions) for Geographic
+                              projections to not use the pixel size
 
 NOTES:
 ******************************************************************************/
@@ -124,6 +127,8 @@ int write_hdf_eos_attr
     int meta_indx;           /* index of current location in metadata buffer */
     int i;                   /* looping variable */
     int count;               /* number of chars copied in snprintf */
+    int mycount;             /* integer value to use in the name of the 2nd,
+                                3rd, etc. grid dimensions */
     int isds;                /* looping variable for SDSs */
     int ngrids;              /* number of grids written to HDF file */
     int nfields;             /* number of fields written for this grid */
@@ -353,28 +358,17 @@ int write_hdf_eos_attr
         }
     }
   
-    /* Only print the datum if it's valid */
-    if (gmeta->proj_info.datum_type != ESPA_NODATUM)
+    switch (gmeta->proj_info.datum_type)
     {
-        switch (gmeta->proj_info.datum_type)
-        {
-            case (ESPA_WGS84): strcpy (datum_str, "WGS84"); break;
-            case (ESPA_NAD83): strcpy (datum_str, "NAD83"); break;
-            case (ESPA_NAD27): strcpy (datum_str, "NAD27"); break;
-        }
-  
-        count = snprintf (cbuf, sizeof (cbuf),
-            "\t\tDatumCode=%s\n", datum_str);
-        if (count < 0 || count >= sizeof (cbuf))
-        {
-            sprintf (errmsg, "Overflow of cbuf string");
-            error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
-        }
+        case (ESPA_WGS84): strcpy (datum_str, "WGS84"); break;
+        case (ESPA_NAD83): strcpy (datum_str, "NAD83"); break;
+        case (ESPA_NAD27): strcpy (datum_str, "NAD27"); break;
+        case (ESPA_NODATUM): strcpy (datum_str, "NoDatum"); break;
     }
-
+  
     count = snprintf (cbuf, sizeof (cbuf),
-        "\t\tGridOrigin=HDFE_GD_UL\n");
+        "\t\tDatumCode=%s\n"
+        "\t\tGridOrigin=HDFE_GD_UL\n", datum_str);
     if (count < 0 || count >= sizeof (cbuf))
     {
         sprintf (errmsg, "Overflow of cbuf string");
@@ -555,16 +549,22 @@ int write_hdf_eos_attr
             }
 
             /* Write the Grid information for the resolution of this band.
-               Append the resolution to the grid name. */
+               Append the resolution to the grid name or the count of the grids
+               if dealing with Geographic. */
+            if (xml_metadata->global.proj_info.proj_type == GCTP_GEO)
+                mycount = ngrids+1;
+            else
+                mycount = (int) xml_metadata->band[isds].pixel_size[0];
+
             count = snprintf (cbuf, sizeof (cbuf),
                 "\t\tGridName=\"%s_%d\"\n" 
                 "\t\tXDim=%d\n" 
                 "\t\tYDim=%d\n" 
-                "\t\tPixelSize=%f,%f\n"
+                "\t\tPixelSize=%g,%g\n"
                 "\t\tUpperLeftPointMtrs=(%.6f,%.6f)\n" 
                 "\t\tLowerRightMtrs=(%.6f,%.6f)\n" 
                 "\t\tProjection=GCTP_%s\n", 
-                grid_name, (int) xml_metadata->band[isds].pixel_size[0],
+                grid_name, mycount,
                 xml_metadata->band[isds].nsamps,
                 xml_metadata->band[isds].nlines,
                 xml_metadata->band[isds].pixel_size[0],
@@ -944,13 +944,23 @@ int write_hdf_eos_attr
             return (ERROR);
         }
 
-        /* If this is the first grid, then don't use the pixel size.  Otherwise
-           use the pixel size in the grid name. */
-        if (igrid == 0)
+        /* If this is the first grid, then don't use the pixel size in the grid
+           name.  Otherwise use the pixel size in the grid name.  If processing
+           geographic then use the count of the grids instead of the pixel
+           size. */
+        if (igrid == 0 &&
+            xml_metadata->global.proj_info.proj_type != GCTP_GEO)
             count = snprintf (temp_name, sizeof (temp_name), "%s", grid_name);
         else
+        {
+            if (xml_metadata->global.proj_info.proj_type == GCTP_GEO)
+                mycount = igrid+1;
+            else
+                mycount = (int) xml_metadata->band[grid[igrid]].pixel_size[0];
             count = snprintf (temp_name, sizeof (temp_name), "%s_%d", grid_name,
-                (int) xml_metadata->band[grid[igrid]].pixel_size[0]);
+                mycount);
+        }
+
         if (count < 0 || count >= sizeof (temp_name))
         {
             sprintf (errmsg, "Overflow of temp_name string");

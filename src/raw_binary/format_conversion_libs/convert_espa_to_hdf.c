@@ -786,12 +786,17 @@ Date         Programmer       Reason
                               binary files, which need to be in big endian
                               vs. little endian (as is the case with Linux)
 3/21/2014    Gail Schmidt     Added the HDF and HDF-EOS version
+4/24/2014    Gail Schmidt     Modified grid and dimension naming (in the case
+                              of multiple resolutions) for Geographic
+                              projections to not use the pixel size
+
 
 NOTES:
   1. The ESPA products are 2D thus only 2D products are supported.
   2. XDim, YDim will refer to the x,y dimension size in the first SDS.  From
      there, different x,y dimensions will contain the pixel size at the end of
-     XDim, YDim.  Example: XDim_15, YDim_15.
+     XDim, YDim.  Example: XDim_15, YDim_15.  For Geographic projections, the
+     name will be based on the count of grids instead of the pixel size.
 ******************************************************************************/
 int create_hdf_metadata
 (
@@ -810,6 +815,11 @@ int create_hdf_metadata
     int nsamps;                   /* number of samples in the band */
     int dim;                      /* looping variable for dimensions */
     int count;                    /* number of chars copied in snprintf */
+    int ngrids;                   /* current number of grids in the product;
+                                     different grids are written for different
+                                     resolutions (1-based) */
+    int mycount;                  /* integer value to use in the name of the
+                                     2nd, 3rd, etc. grid dimensions */
     int32 hdf_id;                 /* HDF file ID */
     int32 sds_id;                 /* ID for each SDS */
     int32 dim_id;                 /* ID for current dimension in SDS */
@@ -832,6 +842,7 @@ int create_hdf_metadata
 
     /* Loop through the bands in the XML file and set each band as an
        external SDS in this HDF file */
+    ngrids = 1;
     for (i = 0; i < xml_metadata->nbands; i++)
     {
         /* Provide the status of processing */
@@ -958,8 +969,16 @@ int create_hdf_metadata
         }
         else
         {  /* create new dimension name for this resolution */
+            /* Use the pixel size for non-geographic projections otherwise
+               use the grid count */
+            ngrids++;
+            if (xml_metadata->global.proj_info.proj_type == GCTP_GEO)
+                mycount = ngrids;
+            else
+                mycount = (int) xml_metadata->band[i].pixel_size[1]; /* Y dim */
+
             count = snprintf (dim_name[0], sizeof (dim_name[0]), "YDim_%d",
-                (int) xml_metadata->band[i].pixel_size[1]);  /* Y dim */
+                mycount);  /* Y dim */
             if (count < 0 || count >= sizeof (dim_name[0]))
             {
                 sprintf (errmsg, "Overflow of dim_name[0] string");
@@ -967,8 +986,13 @@ int create_hdf_metadata
                 return (ERROR);
             }
 
+            if (xml_metadata->global.proj_info.proj_type == GCTP_GEO)
+                mycount = ngrids;
+            else
+                mycount = (int) xml_metadata->band[i].pixel_size[0]; /* X dim */
+
             count = snprintf (dim_name[1], sizeof (dim_name[1]), "XDim_%d",
-                (int) xml_metadata->band[i].pixel_size[0]);  /* X dim */
+                mycount);  /* X dim */
             if (count < 0 || count >= sizeof (dim_name[1]))
             {
                 sprintf (errmsg, "Overflow of dim_name[1] string");
