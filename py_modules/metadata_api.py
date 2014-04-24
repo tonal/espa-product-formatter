@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Mon Apr 21 12:31:10 2014 by generateDS.py version 2.12b.
+# Generated Thu Apr 24 09:36:38 2014 by generateDS.py version 2.12b.
 #
 # Generated with the ESPA modified version of generateDS.py
 # See espa google code project.
@@ -1591,9 +1591,9 @@ class sin_proj_params(GeneratedsSuper):
 class projection_information(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, projection=None, sphere_code=None, units=None, corner_point=None, grid_origin=None, utm_proj_params=None, ps_proj_params=None, albers_proj_params=None, sin_proj_params=None):
+    def __init__(self, projection=None, datum=None, units=None, corner_point=None, grid_origin=None, utm_proj_params=None, ps_proj_params=None, albers_proj_params=None, sin_proj_params=None):
         self.projection = _cast(None, projection)
-        self.sphere_code = _cast(int, sphere_code)
+        self.datum = _cast(None, datum)
         self.units = _cast(None, units)
         if corner_point is None:
             self.corner_point = []
@@ -1626,12 +1626,15 @@ class projection_information(GeneratedsSuper):
     def set_sin_proj_params(self, sin_proj_params): self.sin_proj_params = sin_proj_params
     def get_projection(self): return self.projection
     def set_projection(self, projection): self.projection = projection
-    def get_sphere_code(self): return self.sphere_code
-    def set_sphere_code(self, sphere_code): self.sphere_code = sphere_code
+    def get_datum(self): return self.datum
+    def set_datum(self, datum): self.datum = datum
     def get_units(self): return self.units
     def set_units(self, units): self.units = units
     def validate_projectionType(self, value):
         # Validate type projectionType, a restriction on xs:string.
+        pass
+    def validate_datumType(self, value):
+        # Validate type datumType, a restriction on xs:string.
         pass
     def validate_projectionUnitsType(self, value):
         # Validate type projectionUnitsType, a restriction on xs:string.
@@ -1679,9 +1682,9 @@ class projection_information(GeneratedsSuper):
         if self.projection is not None and 'projection' not in already_processed:
             already_processed.add('projection')
             outfile.write(' projection=%s' % (quote_attrib(self.projection), ))
-        if self.sphere_code is not None and 'sphere_code' not in already_processed:
-            already_processed.add('sphere_code')
-            outfile.write(' sphere_code="%s"' % self.gds_format_integer(self.sphere_code, input_name='sphere_code'))
+        if self.datum is not None and 'datum' not in already_processed:
+            already_processed.add('datum')
+            outfile.write(' datum=%s' % (quote_attrib(self.datum), ))
         if self.units is not None and 'units' not in already_processed:
             already_processed.add('units')
             outfile.write(' units=%s' % (quote_attrib(self.units), ))
@@ -1714,10 +1717,10 @@ class projection_information(GeneratedsSuper):
             already_processed.add('projection')
             showIndent(outfile, level)
             outfile.write('projection="%s",\n' % (self.projection,))
-        if self.sphere_code is not None and 'sphere_code' not in already_processed:
-            already_processed.add('sphere_code')
+        if self.datum is not None and 'datum' not in already_processed:
+            already_processed.add('datum')
             showIndent(outfile, level)
-            outfile.write('sphere_code=%d,\n' % (self.sphere_code,))
+            outfile.write('datum="%s",\n' % (self.datum,))
         if self.units is not None and 'units' not in already_processed:
             already_processed.add('units')
             showIndent(outfile, level)
@@ -1775,13 +1778,11 @@ class projection_information(GeneratedsSuper):
             already_processed.add('projection')
             self.projection = value
             self.validate_projectionType(self.projection)    # validate type projectionType
-        value = find_attr_value_('sphere_code', node)
-        if value is not None and 'sphere_code' not in already_processed:
-            already_processed.add('sphere_code')
-            try:
-                self.sphere_code = int(value)
-            except ValueError, exp:
-                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
+        value = find_attr_value_('datum', node)
+        if value is not None and 'datum' not in already_processed:
+            already_processed.add('datum')
+            self.datum = value
+            self.validate_datumType(self.datum)    # validate type datumType
         value = find_attr_value_('units', node)
         if value is not None and 'units' not in already_processed:
             already_processed.add('units')
