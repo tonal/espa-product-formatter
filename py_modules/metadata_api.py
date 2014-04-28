@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Thu Apr 24 09:36:38 2014 by generateDS.py version 2.12b.
+# Generated Mon Apr 28 13:54:11 2014 by generateDS.py version 2.12b.
 #
 # Generated with the ESPA modified version of generateDS.py
 # See espa google code project.
@@ -675,7 +675,8 @@ class corner(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='corner', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -800,7 +801,8 @@ class bounding_coordinates(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='bounding_coordinates', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -942,7 +944,8 @@ class corner_point(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='corner_point', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -1053,7 +1056,8 @@ class utm_proj_params(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='utm_proj_params', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -1155,7 +1159,8 @@ class ps_proj_params(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='ps_proj_params', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -1307,7 +1312,8 @@ class albers_proj_params(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='albers_proj_params', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -1479,7 +1485,8 @@ class sin_proj_params(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='sin_proj_params', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -1654,7 +1661,8 @@ class projection_information(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='projection_information', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -1849,7 +1857,8 @@ class pixel_size(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='pixel_size', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -1964,7 +1973,8 @@ class toa_reflectance(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='toa_reflectance', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -2076,7 +2086,8 @@ class solar_angles(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='solar_angles', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -2205,7 +2216,8 @@ class wrs(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='wrs', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -2325,7 +2337,8 @@ class valid_range(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='valid_range', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -2427,7 +2440,8 @@ class bit(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='bit', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -2521,7 +2535,8 @@ class bitmap_description(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='bitmap_description', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -2618,7 +2633,8 @@ class class_(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='class', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -2712,7 +2728,8 @@ class class_values(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='class_values', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -2896,7 +2913,8 @@ class band(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='band', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -3252,7 +3270,8 @@ class espa_metadata(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='espa_metadata', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -3425,7 +3444,8 @@ class global_metadataType(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='global_metadataType', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -3656,7 +3676,8 @@ class bandsType(GeneratedsSuper):
     def export(self, outfile, level, namespace_='', name_='bandsType', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
-            outfile.write('<?xml version="1.0" encoding="%s"?>\n' % ExternalEncoding)
+            xml_v_str = '<?xml version="1.0" ?>\n'
+            outfile.write(xml_v_str)
             outfile.write('\n')
         if pretty_print:
             eol_ = '\n'
@@ -3855,6 +3876,7 @@ def build_ns_def(xmlns=None, xmlns_xsi=None, schema_uri=None):
 # ESPA - Added a module method to allow validation of the proposed output
 def validate_xml(rootObj, xmlns=None, xmlns_xsi=None, schema_uri=None):
 
+    xml_text = ''
     try:
         ns_def = build_ns_def(xmlns, xmlns_xsi, schema_uri)
 
@@ -3905,7 +3927,9 @@ def validate_xml(rootObj, xmlns=None, xmlns_xsi=None, schema_uri=None):
         schema.assertValid(xml)
 
     except Exception, e:
-        print "metadata_api Validation Error: " + str(e)
+        raise Exception("metadata_api Validation Error: " + str(e))
+
+    return xml_text
 
 
 # ESPA - Added a module method to allow exporting from the module level with
@@ -3915,15 +3939,17 @@ def export(outFile, rootObj, xmlns='http://espa.cr.usgs.gov/v1.0', xmlns_xsi='ht
 
     rootObj.set_version('1.0.0')
 
+    xml_text = ''
     try:
-        validate_xml(rootObj, xmlns, xmlns_xsi, schema_uri)
+        xml_text = validate_xml(rootObj, xmlns, xmlns_xsi, schema_uri)
     except Exception, e:
         raise
 
     try:
-        rootObj.export(outFile, 0, namespacedef_=ns_def, pretty_print=True)
+        outFile.write(xml_text)
+        outFile.flush()
     except Exception, e:
-        raise Exception("metadata_api Export Error: " + str(e))
+        raise Exception("metadata_api Write Error: " + str(e))
 
 
 def main():
