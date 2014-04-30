@@ -44,6 +44,8 @@ Date         Programmer       Reason
                               .img and .hdr files
 4/3/2014     Gail Schmidt     Remove the .xml file as well if source files are
                               specified to be deleted
+4/30/2014    Gail Schmidt     Remove the .tif.aux.xml files that were created
+                              by GDAL in the conversion to GeoTIFF
 
 NOTES:
   1. The GDAL tools will be used for converting the raw binary (ENVI format)
@@ -65,6 +67,7 @@ int convert_espa_to_gtif
     char gtif_band[STR_SIZE];   /* name of the GeoTIFF file for this band */
     char hdr_file[STR_SIZE];    /* name of the header file for this band */
     char xml_file[STR_SIZE];    /* new XML file for the GeoTIFF product */
+    char tmpfile[STR_SIZE];     /* filename of file.tif.aux.xml */
     char *cptr = NULL;          /* pointer to empty space in the band name */
     int i;                      /* looping variable for each band */
     int count;                  /* number of chars copied in snprintf */
@@ -129,6 +132,18 @@ int convert_espa_to_gtif
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
         }
+
+        /* Remove the {gtif_name}.tif.aux.xml file since it's not needed and
+           clutters the results.  Don't worry about testing the unlink
+           results.  If it doesn't unlink it's not fatal. */
+        count = snprintf (tmpfile, sizeof (tmpfile), "%s.aux.xml", gtif_band);
+        if (count < 0 || count >= sizeof (tmpfile))
+        {
+            sprintf (errmsg, "Overflow of tmpfile string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+        unlink (tmpfile);
 
         /* Remove the source file if specified */
         if (del_src)

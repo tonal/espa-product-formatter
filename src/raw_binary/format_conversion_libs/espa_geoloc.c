@@ -71,10 +71,13 @@ Date          Programmer       Reason
 ----------    ---------------  -------------------------------------
 1/23/2014     Gail Schmidt     Original Development (based on input routines
                                from the LEDAPS lndsr application)
+4/25/2014     Gail Schmidt     Updated to support additional projections
 
 NOTES:
 1. Memory is allocated for the Geoloc_t pointer.  It is up to the calling
    routine to free the memory for this pointer.
+2. Make sure the corners Space_def_t are reported as the upper left of the
+   the since that's what the other routines are expecting.
 ******************************************************************************/
 Geoloc_t *setup_mapping
 (
@@ -83,8 +86,10 @@ Geoloc_t *setup_mapping
 {
     char FUNC_NAME[] = "setup_mapping"; /* function name */
     char errmsg[STR_SIZE];              /* error message */
-    char file27[28] = "FILE27";         /* file for NAD27 */
-    char file83[28] = "FILE83";         /* file for NAD83 */
+    char file27[] = "FILE27";           /* file for NAD27 (only for State Plane)
+                                           so just use something fake for now */
+    char file83[] = "FILE83";           /* file for NAD83 (only for State Plane)
+                                           so just use something fake for now */
     Geoloc_t *this = NULL;              /* pointer to the space structure */
     double temp1, temp2;                /* temp variables for PS projection */
     int i;                              /* looping variable */
@@ -149,20 +154,33 @@ Geoloc_t *setup_mapping
     this->sin_orien = sin (space_def->orientation_angle);
     this->cos_orien = cos (space_def->orientation_angle);
   
-    /* Convert angular projection parameters for Polar Stereographic to DMS */
-    if (this->def.proj_num == GCTP_PS_PROJ)
+    /* Convert angular projection parameters to DMS the necessary projections */
+    if (this->def.proj_num == GCTP_PS_PROJ ||
+        this->def.proj_num == GCTP_ALBERS_PROJ)
     {
         if (!degdms (&this->def.proj_param[4], &temp1, "DEG", "LON" ) ||
             !degdms (&this->def.proj_param[5], &temp2, "DEG", "LAT" ))
         {
             free (this);
-            sprintf (errmsg, "Converting PS angular parameters from degrees "
-                "to DMS");
+            sprintf (errmsg, "Converting PS or ALBERS angular parameters from "
+                "degrees to DMS");
             error_handler (true, FUNC_NAME, errmsg);
             return (NULL);
         }
         this->def.proj_param[4] = temp1;
         this->def.proj_param[5] = temp2;
+    }
+    else if (this->def.proj_num == GCTP_SIN_PROJ)
+    {
+        if (!degdms (&this->def.proj_param[4], &temp1, "DEG", "LON" ))
+        {
+            free (this);
+            sprintf (errmsg, "Converting SIN angular parameters from degrees "
+                "to DMS");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (NULL);
+        }
+        this->def.proj_param[4] = temp1;
     }
      
     /* Setup the forward transform */
@@ -216,13 +234,14 @@ Date          Programmer       Reason
                                from the LEDAPS lndsr application)
 
 NOTES:
+1. Report image coordinates for the UL corner of the pixel.
 ******************************************************************************/
 bool to_space
 (
     Geoloc_t *this,          /* I: geolocation structure; for_trans function
                                    is used for the forward mapping */
     Geo_coord_t *geo,        /* I: geodetic coordinates (radians) */
-    Img_coord_float_t *img   /* O: image coordinates */
+    Img_coord_float_t *img   /* O: image coordinates (for UL corner of pixel) */
 )
 {
     char FUNC_NAME[] = "to_space";  /* function name */
@@ -256,8 +275,8 @@ bool to_space
     dl = (dx * this->sin_orien) - (dy * this->cos_orien);
     ds = (dx * this->cos_orien) + (dy * this->sin_orien);
 
-    img->l = (dl / this->def.pixel_size[1]) - 0.5;
-    img->s = (ds / this->def.pixel_size[0]) - 0.5;
+    img->l = dl / this->def.pixel_size[1];
+    img->s = ds / this->def.pixel_size[0];
     img->is_fill = false;
 
     /* Successful completion */
@@ -287,12 +306,13 @@ Date          Programmer       Reason
                                from the LEDAPS lndsr application)
 
 NOTES:
+1. Report image coordinates for the UL corner of the pixel.
 ******************************************************************************/
 bool from_space
 (
     Geoloc_t *this,          /* I: geolocation structure; inv_trans function
                                    is used for the inverse mapping */
-    Img_coord_float_t *img,  /* I: image coordinates */
+    Img_coord_float_t *img,  /* I: image coordinates (for UL corner of pixel) */
     Geo_coord_t *geo         /* O: geodetic coordinates (radians) */
 )
 {
@@ -313,8 +333,8 @@ bool from_space
     }
 
     /* Determine the line,sample location in projection space */
-    dl = (img->l + 0.5) * this->def.pixel_size[1];
-    ds = (img->s + 0.5) * this->def.pixel_size[0];
+    dl = img->l * this->def.pixel_size[1];
+    ds = img->s * this->def.pixel_size[0];
 
     dy = (ds * this->sin_orien) - (dl * this->cos_orien);
     dx = (ds * this->cos_orien) + (dl * this->sin_orien);
@@ -345,8 +365,8 @@ RETURN VALUE: N/A
 Type = bool
 Value      Description
 -----      -----------
-false      Error occurred in the computation or mapping
-true       Successfully computed the image bounds
+false      Error occurred getting geolocation information
+true       Successfully obtained geolocation information
 
 PROJECT:  Land Satellites Data System Science Research and Development (LSRD)
 at the USGS EROS
@@ -357,6 +377,8 @@ Date          Programmer       Reason
 1/23/2014     Gail Schmidt     Original Development
 
 NOTES:
+1. Make sure UL corner pixel is UL corner of the pixel, since that's what
+   setup_mapping expects.
 ******************************************************************************/
 bool get_geoloc_info
 (
@@ -526,10 +548,12 @@ Date          Programmer       Reason
 ----------    ---------------  -------------------------------------
 1/23/2014     Gail Schmidt     Original Development (based on input routines
                                from the LEDAPS lndsr application)
-
 NOTES:
 1. Memory is allocated for the Geoloc_t pointer.  It is up to the calling
    routine to free the memory for this pointer.
+2. This assumes the setup mapping was setup using the UL of the UL pixel.
+   It then loops around the outer edges of each pixel as it loops around the
+   outer edges of the entire image.
 ******************************************************************************/
 bool compute_bounds
 (
@@ -541,65 +565,116 @@ bool compute_bounds
     Geo_bounds_t *bounds      /* O: output boundary for the scene */
 )
 {
-    const float pixcorn_x[4] = {-0.5,-0.5, 0.5, 0.5}; /* 4 corners of a pixel */
-    const float pixcorn_y[4] = {-0.5, 0.5,-0.5, 0.5}; /* 4 corners of a pixel */
     char FUNC_NAME[] = "compute_bounds";  /* function name */
     char errmsg[STR_SIZE];            /* error message */
     Img_coord_float_t img;            /* image coordinates for current pixel */
     Geo_coord_t geo;                  /* geodetic coordinates (note radians) */
-    int i, ic;                        /* looping variables */
     int ix, iy;                       /* current x,y coordinates */
 
-    /* Initialize the bounding coordinates */
-    bounds->min_lat =  99999.9999;
-    bounds->min_lon =  99999.9999;
-    bounds->max_lat = -99999.9999;
-    bounds->max_lon = -99999.9999;
-
-    /* Determine the bounding coords by looping around the image in
-       line, sample space */
-    for (i = 0; i < (nsamps * 2 + nlines * 2); i++)
+    /* Initialize the bounding coordinates with the upper left of the UL
+       corner */
+    img.l = 0.0;
+    img.s = 0.0;
+    img.is_fill = false;
+    if (!from_space (space, &img, &geo))
     {
-        if (i < nsamps)                      /* top edge */
+        sprintf (errmsg, "Mapping line, sample pixel to lat/long");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (false);
+    }
+
+    bounds->max_lat = geo.lat * DEG;
+    bounds->min_lat = geo.lat * DEG;
+    bounds->max_lon = geo.lon * DEG;
+    bounds->min_lon = geo.lon * DEG;
+
+    /* Determine the bounding coords by looping around the edges of the image
+       in line, sample space and converting to lat/long space. Remember that
+       the to/from space mappings are initialized using the UL of the UL corner
+       of the image. Thus we need to go an extra pixel to the right and bottom
+       of the image to get the true outer extents. */
+    /** top -- go to (nsamps-1) + 1 to get to the far right edge of the
+        image **/
+    for (ix = 0; ix <= nsamps; ix++)
+    {
+        iy = 0;
+        img.l = (double) iy;
+        img.s = (double) ix;
+        img.is_fill = false;
+        if (!from_space (space, &img, &geo))
         {
-            ix = i;
-            iy = 0;
-        }
-        else if (i < nsamps * 2)             /* right edge */
-        {
-            ix = i - nsamps;
-            iy = nlines - 1;
-        }
-        else if (i < (nsamps * 2 + nlines))  /* left edge */
-        {
-            ix = 0;
-            iy = i - 2 * nsamps;
-        }
-        else                                 /* bottom edge */
-        {
-            ix = nsamps - 1;
-            iy = i - (2 * nsamps + nlines);
+            sprintf (errmsg, "Mapping top line of the image to lat/long");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (false);
         }
 
-        /* Loop through each of the corners and convert to geodetic (lat/long)
-           space */
-        for (ic = 0; ic < 4; ic++)
-        {
-            img.l = (double) iy + pixcorn_y[ic];
-            img.s = (double) ix + pixcorn_x[ic];
-            img.is_fill = false;
-            if (!from_space (space, &img, &geo))
-            {
-                sprintf (errmsg, "Mapping line, sample pixel to lat/long");
-                error_handler (true, FUNC_NAME, errmsg);
-                return (false);
-            }
+        bounds->max_lat = max (bounds->max_lat, geo.lat*DEG);
+        bounds->min_lat = min (bounds->min_lat, geo.lat*DEG);
+        bounds->max_lon = max (bounds->max_lon, geo.lon*DEG);
+        bounds->min_lon = min (bounds->min_lon, geo.lon*DEG);
+    }
 
-            bounds->max_lat = max (bounds->max_lat, geo.lat*DEG);
-            bounds->min_lat = min (bounds->min_lat, geo.lat*DEG);
-            bounds->max_lon = max (bounds->max_lon, geo.lon*DEG);
-            bounds->min_lon = min (bounds->min_lon, geo.lon*DEG);
+    /** bottom -- go to (nsamps-1) + 1 to get to the far right edge of the
+        image **/
+    for (ix = 0; ix <= nsamps; ix++)
+    {
+        iy = nlines;  /* this is actually (nlines-1) + 1 to get to the very
+                         bottom edge of the image */
+        img.l = (double) iy;
+        img.s = (double) ix;
+        img.is_fill = false;
+        if (!from_space (space, &img, &geo))
+        {
+            sprintf (errmsg, "Mapping top line of the image to lat/long");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (false);
         }
+
+        bounds->max_lat = max (bounds->max_lat, geo.lat*DEG);
+        bounds->min_lat = min (bounds->min_lat, geo.lat*DEG);
+        bounds->max_lon = max (bounds->max_lon, geo.lon*DEG);
+        bounds->min_lon = min (bounds->min_lon, geo.lon*DEG);
+    }
+
+    /** left -- go to (nlines-1) + 1 to get to the bottom edge of the image **/
+    for (iy = 0; iy <= nlines; iy++)
+    {
+        ix = 0;
+        img.l = (double) iy;
+        img.s = (double) ix;
+        img.is_fill = false;
+        if (!from_space (space, &img, &geo))
+        {
+            sprintf (errmsg, "Mapping top line of the image to lat/long");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (false);
+        }
+
+        bounds->max_lat = max (bounds->max_lat, geo.lat*DEG);
+        bounds->min_lat = min (bounds->min_lat, geo.lat*DEG);
+        bounds->max_lon = max (bounds->max_lon, geo.lon*DEG);
+        bounds->min_lon = min (bounds->min_lon, geo.lon*DEG);
+    }
+
+    /** right -- go to (nlines-1) + 1 to get to the bottom edge of the image **/
+    for (iy = 0; iy <= nlines; iy++)
+    {
+        ix = nsamps;  /* this is actually (nsamps-1) + 1 to get to the far
+                         right edge of the image */
+        img.l = (double) iy;
+        img.s = (double) ix;
+        img.is_fill = false;
+        if (!from_space (space, &img, &geo))
+        {
+            sprintf (errmsg, "Mapping top line of the image to lat/long");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (false);
+        }
+
+        bounds->max_lat = max (bounds->max_lat, geo.lat*DEG);
+        bounds->min_lat = min (bounds->min_lat, geo.lat*DEG);
+        bounds->max_lon = max (bounds->max_lon, geo.lon*DEG);
+        bounds->min_lon = min (bounds->min_lon, geo.lon*DEG);
     }
 
     /* Successful completion */
@@ -640,7 +715,7 @@ bool degdms
 (
     double *deg,     /* I: input angular value in degrees, minutes, or seconds
                            to be converted to DMS; or input angle in DMS to be
-                           validated (no converstion occurs) */
+                           validated (no conversion occurs) */
     double *dms,     /* O: output angular value in DMS converted from degrees,
                            minutes, or seconds; or copy of 'deg' value
                            (code=DMS) */

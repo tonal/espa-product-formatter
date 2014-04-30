@@ -93,7 +93,7 @@ typedef struct
 {
     int proj_num;           /* GCTP map projection number */
     double proj_param[NPROJ_PARAM]; /* GCTP map projection parameters */
-    double pixel_size[2];   /* Pixel size (meters) (x, y) */
+    double pixel_size[2];   /* Pixel size (x, y) */
     Map_coord_t ul_corner;  /* Map projection coordinates of the upper left 
                                corner of the pixel in the upper left corner 
                                of the image */
