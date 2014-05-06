@@ -264,7 +264,7 @@ int write_metadata
         if (bmeta[i].saturate_value != ESPA_INT_META_FILL)
             fprintf (fptr, " saturate_value=\"%d\"",
             bmeta[i].saturate_value);
-        if (fabs (bmeta[i].saturate_value-ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        if (fabs (bmeta[i].scale_factor-ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
             fprintf (fptr, " scale_factor=\"%f\"", bmeta[i].scale_factor);
         if (fabs (bmeta[i].add_offset-ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
             fprintf (fptr, " add_offset=\"%f\"", bmeta[i].add_offset);
