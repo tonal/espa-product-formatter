@@ -387,8 +387,7 @@ int subset_metadata_by_product
             for (k = 0; k < inmeta->band[i].nbits; k++)
             {
                 count = snprintf (outmeta->band[iband].bitmap_description[k],
-                    sizeof (outmeta->band[iband].bitmap_description[k]),
-                    "%s", inmeta->band[i].bitmap_description[k]);
+                    STR_SIZE, "%s", inmeta->band[i].bitmap_description[k]);
                 if (count < 0 || count >= STR_SIZE)
                 {
                     sprintf (errmsg, "Overflow of "
@@ -850,10 +849,8 @@ int subset_metadata_by_band
             for (k = 0; k < inmeta->band[j].nbits; k++)
             {
                 count = snprintf (outmeta->band[iband].bitmap_description[k],
-                    sizeof (outmeta->band[iband].bitmap_description[k]), "%s",
-                    inmeta->band[j].bitmap_description[k]);
-                if (count < 0 || count >=
-                    sizeof (outmeta->band[iband].bitmap_description[k]))
+                    STR_SIZE, "%s", inmeta->band[j].bitmap_description[k]);
+                if (count < 0 || count >= STR_SIZE)
                 {
                     sprintf (errmsg, "Overflow of "
                         "outmeta->band[iband].bitmap_description[k] string");
