@@ -32,7 +32,7 @@ NOTES:
 #define GCTP_CLARKE_1866  0
 #define GCTP_GRS80        8
 #define GCTP_WGS84        12
-#define GCTP_MODIS_SPHERE 31
+#define GCTP_MODIS_SPHERE 21
 
 /* Local defines to use for the datum */
 #define ESPA_NAD27   225

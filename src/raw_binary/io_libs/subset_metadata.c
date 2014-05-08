@@ -46,6 +46,7 @@ Date         Programmer       Reason
 1/10/2014    Gail Schmidt     Original development
 4/22/2014    Gail Schmidt     Updated for additional projection parameters and
                               datums
+5/7/2014     Gail Schmidt     Updated for modis tiles
 
 NOTES:
   1. If no bands match the product type, then the global and projection
@@ -165,6 +166,9 @@ int subset_metadata_by_product
     outmeta->global.wrs_system = inmeta->global.wrs_system;
     outmeta->global.wrs_path = inmeta->global.wrs_path;
     outmeta->global.wrs_row = inmeta->global.wrs_row;
+
+    outmeta->global.htile = inmeta->global.htile;
+    outmeta->global.vtile = inmeta->global.vtile;
 
     count = snprintf (outmeta->global.lpgs_metadata_file,
         sizeof (outmeta->global.lpgs_metadata_file), "%s",
@@ -426,6 +430,16 @@ int subset_metadata_by_product
             }
         }
 
+        count = snprintf (outmeta->band[iband].qa_desc,
+            sizeof (outmeta->band[iband].qa_desc), "%s",
+            inmeta->band[i].qa_desc);
+        if (count < 0 || count >= sizeof (outmeta->band[iband].qa_desc))
+        {
+            sprintf (errmsg, "Overflow of outmeta->band[iband].qa_desc");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         outmeta->band[iband].calibrated_nt = inmeta->band[i].calibrated_nt;
         count = snprintf (outmeta->band[iband].app_version,
             sizeof (outmeta->band[iband].app_version), "%s",
@@ -486,6 +500,7 @@ Date         Programmer       Reason
 1/10/2014    Gail Schmidt     Original development
 4/22/2014    Gail Schmidt     Updated for additional projection parameters and
                               datums
+5/7/2014     Gail Schmidt     Updated for modis tiles
 
 NOTES:
   1. If nbands is 0, then the global and projection information will still
@@ -605,6 +620,10 @@ int subset_metadata_by_band
     outmeta->global.wrs_system = inmeta->global.wrs_system;
     outmeta->global.wrs_path = inmeta->global.wrs_path;
     outmeta->global.wrs_row = inmeta->global.wrs_row;
+
+    outmeta->global.htile = inmeta->global.htile;
+    outmeta->global.vtile = inmeta->global.vtile;
+
     count = snprintf (outmeta->global.lpgs_metadata_file,
         sizeof (outmeta->global.lpgs_metadata_file), "%s",
         inmeta->global.lpgs_metadata_file);
@@ -872,6 +891,16 @@ int subset_metadata_by_band
                     return (ERROR);
                 }
             }
+        }
+
+        count = snprintf (outmeta->band[iband].qa_desc,
+            sizeof (outmeta->band[iband].qa_desc), "%s",
+            inmeta->band[i].qa_desc);
+        if (count < 0 || count >= sizeof (outmeta->band[iband].qa_desc))
+        {
+            sprintf (errmsg, "Overflow of outmeta->band[iband].qa_desc");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
         }
 
         outmeta->band[iband].calibrated_nt = inmeta->band[j].calibrated_nt;

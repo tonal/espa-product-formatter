@@ -1112,6 +1112,25 @@ int add_global_metadata
             xmlFree (attr_val);
         }
     }
+    else if (xmlStrEqual (cur_node->name, (const xmlChar *) "modis"))
+    {
+        /* Handle the element attributes */
+        for (attr = cur_node->properties; attr != NULL; attr = attr->next)
+        {
+            attr_val = xmlGetProp (cur_node, attr->name);
+            if (xmlStrEqual (attr->name, (const xmlChar *) "htile"))
+                gmeta->htile = atoi ((const char *) attr_val);
+            else if (xmlStrEqual (attr->name, (const xmlChar *) "vtile"))
+                gmeta->vtile = atoi ((const char *) attr_val);
+            else
+            {
+                sprintf (errmsg, "WARNING: unknown attribute for element "
+                    "(%s): %s\n", cur_node->name, attr->name);
+                error_handler (false, FUNC_NAME, errmsg);
+            }
+            xmlFree (attr_val);
+        }
+    }
     else if (xmlStrEqual (cur_node->name,
         (const xmlChar *) "lpgs_metadata_file"))
     {
@@ -1757,6 +1776,29 @@ int add_band_metadata
                     error_handler (false, FUNC_NAME, errmsg);
                 }
                 xmlFree (attr_val);
+            }
+        }
+        else if (xmlStrEqual (cur_node->name,
+            (const xmlChar *) "qa_description"))
+        {
+            /* Expect the child node to be a text node containing the value of
+               this field */
+            if (child_node == NULL || child_node->type != XML_TEXT_NODE) 
+            {
+                sprintf (errmsg, "Processing band metadata element: %s.",
+                    cur_node->name);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            /* Copy the content of the child node into value for this field */
+            count = snprintf (bmeta->qa_desc, sizeof (bmeta->qa_desc), "%s",
+                (const char *) child_node->content);
+            if (count < 0 || count >= sizeof (bmeta->qa_desc))
+            {
+                sprintf (errmsg, "Overflow of bmeta->qa_desc string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
             }
         }
         else if (xmlStrEqual (cur_node->name,

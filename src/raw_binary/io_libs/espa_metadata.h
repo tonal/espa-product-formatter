@@ -109,25 +109,30 @@ typedef struct
 {
     char data_provider[STR_SIZE]; /* name of the original data provider */
     char satellite[STR_SIZE];     /* name of the satellite (LANDSAT_4,
-                                     LANDSAT_5, LANDSAT_7) */
+                                     LANDSAT_5, LANDSAT_7, LANDSAT_8, MODIS) */
     char instrument[STR_SIZE];    /* name of instrument (MSS, TM, ETM+, OLI,
-                                     ...) */
-    char acquisition_date[STR_SIZE];  /* date of scene acquisition */
-    char scene_center_time[STR_SIZE]; /* GMT time at scene center */
-    char level1_production_date[STR_SIZE];  /* date the scene was processed
-                                               to a level 1 product */
-    float solar_zenith;           /* solar zenith angle in degrees */
-    float solar_azimuth;          /* solar azimuth angle in degrees */
-    char solar_units[STR_SIZE];   /* degrees */
+                                     AQUA, TERRA, ...) */
+    char acquisition_date[STR_SIZE]; /* date of scene acquisition (yyyy-mm-dd)*/
+    double ul_corner[2];          /* geographic UL lat, long */
+    double lr_corner[2];          /* geographic LR lat, long */
+    double bounding_coords[4];    /* geographic west, east, north, south */
+    Espa_proj_meta_t proj_info;   /* projection information structure */
+
+    /* Landsat products */
     int wrs_system;               /* 1 or 2 */
     int wrs_path;                 /* WRS path of this scene */
     int wrs_row;                  /* WRS row of this scene */
-    char lpgs_metadata_file[STR_SIZE];  /* name of LPGS metadata file */
-    double ul_corner[2];  /* geographic UL lat, long */
-    double lr_corner[2];  /* geographic LR lat, long */
-    double bounding_coords[4];   /* geographic west, east, north, south */
-    Espa_proj_meta_t proj_info;  /* projection information structure */
-    float orientation_angle;     /* orientation angle of this scene (degrees) */
+    char scene_center_time[STR_SIZE];  /* GMT time at scene center */
+    char lpgs_metadata_file[STR_SIZE]; /* name of LPGS metadata file */
+    float orientation_angle;      /* orientation angle of the scene (degrees) */
+    float solar_zenith;           /* solar zenith angle (degrees) */
+    float solar_azimuth;          /* solar azimuth angle (degrees) */
+    char solar_units[STR_SIZE];   /* degrees */
+    char level1_production_date[STR_SIZE];  /* date the scene was processed
+                                               to a level 1 product */
+    /* MODIS products */
+    int htile;                    /* MODIS horizontal tile number */
+    int vtile;                    /* MODIS vertical tile number */
 } Espa_global_meta_t;
 
 typedef struct
@@ -140,7 +145,7 @@ typedef struct
     int nlines;                  /* number of lines in the dataset */
     int nsamps;                  /* number of samples in the dataset */
     long fill_value;             /* use long to support long data types */
-    int saturate_value;          /* saturation value */
+    int saturate_value;          /* saturation value (for Landsat) */
     float scale_factor;          /* scaling factor */
     float add_offset;            /* offset to be added */
     char short_name[STR_SIZE];   /* short band name */
@@ -162,6 +167,9 @@ typedef struct
                                     inclusive from 0 to nbits-1 */
     int nclass;                  /* number of classes in class_values */
     Espa_class_t *class_values;  /* support class value descriptions */
+    char qa_desc[HUGE_STR_SIZE]; /* description of the QA bits where
+                                    they are not bit-specific and don't fit
+                                    as classes */
     float calibrated_nt;
     char app_version[STR_SIZE];  /* version of the application which produced
                                     the current band */

@@ -53,6 +53,20 @@ elementFormDefault="qualified">
   </xs:restriction>
 </xs:simpleType>
 
+<xs:simpleType name="modisHTileType">
+  <xs:restriction base="xs:unsignedByte">
+    <xs:minInclusive value="0"/>
+    <xs:maxInclusive value="35"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="modisVTileType">
+  <xs:restriction base="xs:unsignedByte">
+    <xs:minInclusive value="0"/>
+    <xs:maxInclusive value="17"/>
+  </xs:restriction>
+</xs:simpleType>
+
 <xs:simpleType name="zoneCodeType">
   <xs:restriction base="xs:int">
     <xs:minInclusive value="-60"/>
@@ -167,6 +181,7 @@ elementFormDefault="qualified">
 <xs:element name="long_name" type="xs:string"/>
 <xs:element name="file_name" type="xs:string"/>
 <xs:element name="data_units" type="xs:string"/>
+<xs:element name="qa_description" type="xs:string"/>
 <xs:element name="calibrated_nt" type="xs:float"/>
 <xs:element name="app_version" type="xs:string"/>
 <xs:element name="production_date" type="xs:dateTime"/>
@@ -300,10 +315,17 @@ elementFormDefault="qualified">
   </xs:complexType>
 </xs:element>
 
+<xs:element name="modis">
+  <xs:complexType>
+    <xs:attribute name="htile" type="modisHTileType" use="required"/>
+    <xs:attribute name="vtile" type="modisVTileType" use="required"/>
+  </xs:complexType>
+</xs:element>
+
 <xs:element name="valid_range">
   <xs:complexType>
-    <xs:attribute name="min" type="xs:int" use="required"/>
-    <xs:attribute name="max" type="xs:int" use="required"/>
+    <xs:attribute name="min" type="xs:long" use="required"/>
+    <xs:attribute name="max" type="xs:long" use="required"/>
   </xs:complexType>
 </xs:element>
 
@@ -355,6 +377,7 @@ elementFormDefault="qualified">
       <xs:element ref="toa_reflectance" minOccurs="0"/>
       <xs:element ref="bitmap_description" minOccurs="0"/>
       <xs:element ref="class_values" minOccurs="0"/>
+      <xs:element ref="qa_description" minOccurs="0"/>
       <xs:element ref="calibrated_nt" minOccurs="0"/>
       <xs:element ref="app_version"/>
       <xs:element ref="production_date"/>
@@ -366,7 +389,7 @@ elementFormDefault="qualified">
     <xs:attribute name="data_type" type="dataType" use="required"/>
     <xs:attribute name="nlines" type="xs:int" use="required"/>
     <xs:attribute name="nsamps" type="xs:int" use="required"/>
-    <xs:attribute name="fill_value" type="xs:int" use="required"/>
+    <xs:attribute name="fill_value" type="xs:long" use="required"/>
     <xs:attribute name="saturate_value" type="xs:int" use="optional"/>
     <xs:attribute name="scale_factor" type="xs:float" use="optional"/>
     <xs:attribute name="add_offset" type="xs:float" use="optional"/>
@@ -387,15 +410,16 @@ elementFormDefault="qualified">
             <xs:element ref="satellite"/>
             <xs:element ref="instrument"/>
             <xs:element ref="acquisition_date"/>
-            <xs:element ref="scene_center_time"/>
-            <xs:element ref="level1_production_date"/>
-            <xs:element ref="solar_angles"/>
-            <xs:element ref="wrs"/>
-            <xs:element ref="lpgs_metadata_file"/>
+            <xs:element ref="scene_center_time" minOccurs="0"/>
+            <xs:element ref="level1_production_date" minOccurs="0"/>
+            <xs:element ref="solar_angles" minOccurs="0"/>
+            <xs:element ref="wrs" minOccurs="0"/>
+            <xs:element ref="modis" minOccurs="0"/>
+            <xs:element ref="lpgs_metadata_file" minOccurs="0"/>
             <xs:element ref="corner" minOccurs="1" maxOccurs="4"/>
             <xs:element ref="bounding_coordinates"/>
             <xs:element ref="projection_information"/>
-            <xs:element ref="orientation_angle"/>
+            <xs:element ref="orientation_angle" minOccurs="0"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

@@ -29,6 +29,9 @@ OBJ4 = $(SRC4:.c=.o)
 SRC5 = espa_product_subset.c
 OBJ5 = $(SRC5:.c=.o)
 
+SRC6 = convert_modis_to_espa.c
+OBJ6 = $(SRC6:.c=.o)
+
 # Define the object libraries
 LIB1   = \
     -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
@@ -53,9 +56,15 @@ LIB5   = \
     -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
 
+LIB6   = \
+    -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
+    -L$(XML2LIB) -lxml2 \
+    -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lGctp \
+    -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
+
 # Define the executable
 EXE = convert_lpgs_to_espa convert_espa_to_hdf convert_espa_to_gtif \
-      espa_band_subset espa_product_subset
+      espa_band_subset espa_product_subset convert_modis_to_espa
 
 # Target for the executable
 all: $(EXE)
@@ -75,6 +84,9 @@ espa_band_subset: $(OBJ4) $(INC)
 espa_product_subset: $(OBJ5) $(INC)
 	$(CC) $(NCFLAGS) -o espa_product_subset $(OBJ5) $(LIB5)
 
+convert_modis_to_espa: $(OBJ6) $(INC)
+	$(CC) $(NCFLAGS) -o convert_modis_to_espa $(OBJ6) $(LIB6)
+
 clean:
 	$(RM) *.o $(EXE)
 
@@ -87,6 +99,7 @@ $(OBJ2): $(INC)
 $(OBJ3): $(INC)
 $(OBJ4): $(INC)
 $(OBJ5): $(INC)
+$(OBJ6): $(INC)
 .c.o:
 	$(CC) $(NCFLAGS) -c $<
 

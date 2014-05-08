@@ -128,6 +128,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/18/2013   Gail Schmidt     Original development
+5/7/2014     Gail Schmidt     Updated for modis tiles
 
 NOTES:
 ******************************************************************************/
@@ -158,6 +159,8 @@ void init_metadata_struct
     gmeta->wrs_system = ESPA_INT_META_FILL;
     gmeta->wrs_path = ESPA_INT_META_FILL;
     gmeta->wrs_row = ESPA_INT_META_FILL;
+    gmeta->htile = ESPA_INT_META_FILL;
+    gmeta->vtile = ESPA_INT_META_FILL;
     strcpy (gmeta->lpgs_metadata_file, ESPA_STRING_META_FILL);
     gmeta->ul_corner[0] = gmeta->ul_corner[1] = ESPA_FLOAT_META_FILL;
     gmeta->lr_corner[0] = gmeta->lr_corner[1] = ESPA_FLOAT_META_FILL;
@@ -251,6 +254,7 @@ int allocate_band_metadata
         bmeta[i].toa_gain = ESPA_INT_META_FILL;
         bmeta[i].toa_bias = ESPA_INT_META_FILL;
         bmeta[i].calibrated_nt = ESPA_FLOAT_META_FILL;
+        strcpy (bmeta[i].qa_desc, ESPA_STRING_META_FILL);
         strcpy (bmeta[i].app_version, ESPA_STRING_META_FILL);
         strcpy (bmeta[i].production_date, ESPA_STRING_META_FILL);
     }

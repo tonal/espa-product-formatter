@@ -25,6 +25,7 @@ NOTES:
 
 /* Common string size definition */
 #define STR_SIZE 2048
+#define HUGE_STR_SIZE 7500
 
 /* Prototypes */
 

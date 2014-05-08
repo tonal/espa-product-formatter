@@ -375,6 +375,8 @@ HISTORY:
 Date          Programmer       Reason
 ----------    ---------------  -------------------------------------
 1/23/2014     Gail Schmidt     Original Development
+5/7/2014      Gail Schmidt     Modify to use the first band if band1 is not
+                               available
 
 NOTES:
 1. Make sure UL corner pixel is UL corner of the pixel, since that's what
@@ -389,26 +391,23 @@ bool get_geoloc_info
     char FUNC_NAME[] = "get_geoloc_info"; /* function name */
     char errmsg[STR_SIZE];                /* error message */
     int i;                                /* looping variable */
-    int refl_indx = -99;                  /* index of band1 */
+    int refl_indx = -99;                  /* index of band1 or first band */
     Espa_global_meta_t *gmeta=&xml_metadata->global;  /* global metadata */
 
-    /* Use band1 band-related metadata for the reflectance information */
+    /* Use 'band1' band-related metadata for the reflectance information for
+       Landsat.  If band1 isn't available then just use the first band in the
+       XML file (for MODIS and others). */
     for (i = 0; i < xml_metadata->nbands; i++)
     {
         if (!strcmp (xml_metadata->band[i].name, "band1") &&
             !strncmp (xml_metadata->band[i].product, "L1", 2))  /* L1G or L1T */
         {
-            /* this is the index we'll use for reflectance band info */
+            /* this is the index we'll use for Landsat band info */
             refl_indx = i;
         }
     }
-
     if (refl_indx == -99)
-    {
-        sprintf (errmsg, "band1 not found in the input XML file");
-        error_handler (true, FUNC_NAME, errmsg);
-        return (false);
-    }
+        refl_indx = 0;
 
     /* Copy the information from the XML file */
     geoloc_info->proj_num = gmeta->proj_info.proj_type;
@@ -516,7 +515,7 @@ bool get_geoloc_info
     }
 
     /* Convert the orientation angle to radians */
-    geoloc_info->orientation_angle = gmeta->orientation_angle * RAD;
+    geoloc_info->orientation_angle *= RAD;
  
     /* Successful completion */
     return (true);
@@ -832,6 +831,64 @@ bool degdms
     }
 
     return (true);
+}
+
+
+/******************************************************************************
+MODULE:  dmsdeg
+
+PURPOSE:  Converts a single DMS value to decimal degrees
+
+RETURN VALUE:
+Type = none
+
+PROJECT:  Land Satellites Data System Science Research and Development (LSRD)
+at the USGS EROS
+
+HISTORY:
+Date          Programmer       Reason
+----------    ---------------  -------------------------------------
+5/5/2014      Gail Schmidt     Original Development (based on input routines
+                               from MRT)
+
+NOTES:
+******************************************************************************/
+void dmsdeg
+( 
+    double dms, 	       /* I: DMS value */
+    double *dec_degrees	   /* O: degree value */
+)
+{
+    int deg;		   /* degrees */
+    int min;		   /* minutes */
+    double sec;		   /* decimal seconds */
+    double tempstore;  /* temporary storage of the dms */
+    
+    /* Store the dms value */
+    tempstore = dms;
+    
+    if (dms < 0.0)
+    	dms = -dms;
+    
+    /* Nothing to do? */
+    if (dms == 0.0)
+    	return;
+    
+    /* Calculate the degrees */
+    deg = (int) (dms / 1000000.0);
+    
+    /* Calculate minutes */
+    min = (int) (dms / 1000.0 - deg * 1000.0);
+    
+    /* Calculate the seconds */
+    sec = dms - (deg * 1000000.0 + min * 1000.0);
+    
+    /* Calculate the decimal degrees */
+    *dec_degrees = sec / 3600.0 + min / 60.0 + deg;
+    
+    /* Negate if needed */
+    if (tempstore < 0.0)
+    	*dec_degrees = -*dec_degrees;
 }
 
 

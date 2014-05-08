@@ -175,6 +175,12 @@ bool degdms
     char *check      /* I: angle type to check/validate (LAT, LON, OTHER) */
 );
 
+void dmsdeg
+( 
+    double dms, 	       /* I: DMS value */
+    double *dec_degrees	   /* O: degree value */
+);
+
 int find_deg
 (
     double angle    /* I: angle in total degrees */

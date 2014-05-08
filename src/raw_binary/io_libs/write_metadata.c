@@ -44,6 +44,7 @@ Date         Programmer       Reason
 12/26/2013   Gail Schmidt     Original development
 4/17/2014    Gail Schmidt     Modified to support additional projections
 4/22/2014    Gail Schmidt     Modified to support additional datums
+5/7/2014     Gail Schmidt     Updated to support modis tiles
 
 NOTES:
   1. If the XML file specified already exists, it will be overwritten.
@@ -96,12 +97,44 @@ int write_metadata
         "        <data_provider>%s</data_provider>\n"
         "        <satellite>%s</satellite>\n"
         "        <instrument>%s</instrument>\n"
-        "        <acquisition_date>%s</acquisition_date>\n"
-        "        <scene_center_time>%s</scene_center_time>\n"
-        "        <level1_production_date>%s</level1_production_date>\n"
-        "        <solar_angles zenith=\"%f\" azimuth=\"%f\" units=\"%s\"/>\n"
-        "        <wrs system=\"%d\" path=\"%d\" row=\"%d\"/>\n"
-        "        <lpgs_metadata_file>%s</lpgs_metadata_file>\n"
+        "        <acquisition_date>%s</acquisition_date>\n",
+        gmeta->data_provider, gmeta->satellite, gmeta->instrument,
+        gmeta->acquisition_date);
+
+    if (strcmp (gmeta->scene_center_time, ESPA_STRING_META_FILL))
+        fprintf (fptr,
+        "        <scene_center_time>%s</scene_center_time>\n",
+        gmeta->scene_center_time);
+
+    if (strcmp (gmeta->level1_production_date, ESPA_STRING_META_FILL))
+        fprintf (fptr,
+        "        <level1_production_date>%s</level1_production_date>\n",
+        gmeta->level1_production_date);
+
+    if (fabs (gmeta->solar_azimuth - ESPA_FLOAT_META_FILL) > ESPA_EPSILON &&
+        fabs (gmeta->solar_zenith - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        fprintf (fptr,
+        "        <solar_angles zenith=\"%f\" azimuth=\"%f\" units=\"%s\"/>\n",
+        gmeta->solar_zenith, gmeta->solar_azimuth, gmeta->solar_units);
+
+    if (fabs (gmeta->wrs_system != ESPA_INT_META_FILL))
+        fprintf (fptr,
+        "        <wrs system=\"%d\" path=\"%d\" row=\"%d\"/>\n",
+        gmeta->wrs_system, gmeta->wrs_path, gmeta->wrs_row);
+
+    if (fabs (gmeta->htile != ESPA_INT_META_FILL) &&
+        fabs (gmeta->vtile != ESPA_INT_META_FILL))
+        fprintf (fptr,
+        "        <modis htile=\"%d\" vtile=\"%d\"/>\n",
+        gmeta->htile, gmeta->vtile);
+
+    if (strcmp (gmeta->lpgs_metadata_file, ESPA_STRING_META_FILL))
+        fprintf (fptr,
+        "        <lpgs_metadata_file>%s</lpgs_metadata_file>\n",
+        gmeta->lpgs_metadata_file);
+
+    /* Write the global metadata - corners and bounding coords */
+    fprintf (fptr,
         "        <corner location=\"UL\" latitude=\"%lf\" longitude=\"%lf\"/>\n"
         "        <corner location=\"LR\" latitude=\"%lf\" longitude=\"%lf\"/>\n"
         "        <bounding_coordinates>\n"
@@ -110,11 +143,6 @@ int write_metadata
         "            <north>%lf</north>\n"
         "            <south>%lf</south>\n"
         "        </bounding_coordinates>\n",
-        gmeta->data_provider, gmeta->satellite, gmeta->instrument,
-        gmeta->acquisition_date, gmeta->scene_center_time,
-        gmeta->level1_production_date, gmeta->solar_zenith,
-        gmeta->solar_azimuth, gmeta->solar_units, gmeta->wrs_system,
-        gmeta->wrs_path, gmeta->wrs_row, gmeta->lpgs_metadata_file,
         gmeta->ul_corner[0], gmeta->ul_corner[1],
         gmeta->lr_corner[0], gmeta->lr_corner[1],
         gmeta->bounding_coords[ESPA_WEST], gmeta->bounding_coords[ESPA_EAST],
@@ -324,6 +352,11 @@ int write_metadata
             fprintf (fptr,
                 "            </class_values>\n");
         }
+
+        if (strcmp (bmeta[i].qa_desc, ESPA_STRING_META_FILL))
+            fprintf (fptr,
+                "            <qa_description>%s"
+                "            </qa_description>\n", bmeta[i].qa_desc);
 
         if (fabs (bmeta[i].calibrated_nt-ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
         {
@@ -545,6 +578,11 @@ int append_metadata
                 "            </class_values>\n");
         }
 
+        if (strcmp (bmeta[i].qa_desc, ESPA_STRING_META_FILL))
+            fprintf (fptr,
+                "            <qa_description>%s"
+                "            </qa_description>\n", bmeta[i].qa_desc);
+
         if (fabs (bmeta[i].calibrated_nt-ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
         {
             fprintf (fptr,
@@ -585,6 +623,7 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/26/2013   Gail Schmidt     Original development
 4/17/2014    Gail Schmidt     Modified to support additional projections
+5/7/2014     Gail Schmidt     Updated to support modis tiles
 
 NOTES:
 ******************************************************************************/
@@ -615,6 +654,8 @@ void print_metadata_struct
     printf ("  wrs_system: %d\n", metadata->global.wrs_system);
     printf ("  wrs_path: %d\n", metadata->global.wrs_path);
     printf ("  wrs_row: %d\n", metadata->global.wrs_row);
+    printf ("  htile: %d\n", metadata->global.htile);
+    printf ("  vtile: %d\n", metadata->global.vtile);
     printf ("  lpgs_metadata_file: %s\n",
         metadata->global.lpgs_metadata_file);
     printf ("  ul_corner (lat, long): %f %f\n",
@@ -766,6 +807,7 @@ void print_metadata_struct
                      metadata->band[i].class_values[j].description);
             }
         }
+        printf ("    qa_description: %s\n", metadata->band[i].qa_desc);
         printf ("    calibrated_nt: %f\n", metadata->band[i].calibrated_nt);
         printf ("    app_version: %s\n", metadata->band[i].app_version);
         printf ("    production_date: %s\n", metadata->band[i].production_date);

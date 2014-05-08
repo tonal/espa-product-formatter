@@ -23,14 +23,14 @@ AR = ar rcsv
 INCS = -I$(XML2INC) -I../common -I../io_libs -I$(JPEGINC) -I$(TIFFINC) \
        -I$(GEOTIFF_INC) -I$(HDFINC) -I$(HDFEOS_INC) -I$(HDFEOS_GCTPINC)
 INC = convert_lpgs_to_espa.h convert_espa_to_hdf.h espa_hdf.h espa_hdf_eos.h \
-      convert_espa_to_gtif.h espa_geoloc.h
+      convert_espa_to_gtif.h espa_geoloc.h convert_modis_to_espa.h
 
 #-----------------------------------------
 # Define the source code and object files:
 #-----------------------------------------
 SRC	= \
 	convert_lpgs_to_espa.c convert_espa_to_hdf.c espa_hdf.c espa_hdf_eos.c \
-    convert_espa_to_gtif.c espa_geoloc.c
+    convert_espa_to_gtif.c convert_modis_to_espa.c espa_geoloc.c
 
 OBJ = $(SRC:.c=.o)
 
