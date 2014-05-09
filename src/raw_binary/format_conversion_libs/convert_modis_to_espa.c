@@ -1089,7 +1089,7 @@ int read_modis_hdf
 {
     char FUNC_NAME[] = "read_modis_hdf";  /* function name */
     char errmsg[STR_SIZE];    /* error message */
-    char basename[STR_SIZE];  /* filename without path */
+    char basename[STR_SIZE];  /* filename without path (uppercase) */
     char core_basename[STR_SIZE]; /* filename without path and extension */
     char strbuf[STR_SIZE];    /* temporary buffer to string data */
     char gridstr[STR_SIZE];   /* list of comma-separated grids in HDF file */
@@ -1191,14 +1191,6 @@ int read_modis_hdf
         }
     }
 
-    /* Make sure the basename is uppercase */
-    cptr = basename;
-    while (*cptr != '\0')
-    {
-        *cptr = toupper ((unsigned char) *cptr);
-        cptr++;
-    }
-
     /* Strip the extension off the basename */
     count = snprintf (core_basename, sizeof (core_basename), "%s", basename);
     if (count < 0 || count >= sizeof (core_basename))
@@ -1211,6 +1203,14 @@ int read_modis_hdf
     cptr = strrchr (core_basename, '.');
     if (cptr != NULL)
         *cptr = '\0';
+
+    /* Make sure the basename is uppercase */
+    cptr = basename;
+    while (*cptr != '\0')
+    {
+        *cptr = toupper ((unsigned char) *cptr);
+        cptr++;
+    }
 
     /* Use the HDF filename to determine the data_provider, satellite,
        instrument, and product. */
@@ -1664,8 +1664,12 @@ int read_modis_hdf
                 gmeta->proj_info.ul_corner[0]) / bmeta[nmodis_bands].nsamps;
             strcpy (bmeta[nmodis_bands].pixel_units, "meters");
 
-            /* Assign the scale, offset, min/max, and fill values */
-            bmeta[nmodis_bands].fill_value = fillvalue[nmodis_bands];
+            /* Assign the scale, offset, min/max, and fill values.  Fill value
+               is required, so assign it as 0 if it doesn't exist. */
+            if (fillvalue[nmodis_bands] == ESPA_INT_META_FILL)
+                bmeta[nmodis_bands].fill_value = 0;
+            else
+                bmeta[nmodis_bands].fill_value = fillvalue[nmodis_bands];
             bmeta[nmodis_bands].scale_factor = scalevalue[nmodis_bands];
             bmeta[nmodis_bands].add_offset = offsetvalue[nmodis_bands];
             bmeta[nmodis_bands].valid_range[0] = minvalue[nmodis_bands];
@@ -1693,7 +1697,9 @@ int read_modis_hdf
             }
 
             /* Get the QA description information.  If it's not fill, then
-               this is a QA band and change the category to flag that. */
+               this is a QA band and change the category to flag that.  The
+               MOD13 products also use Legend for "MIR reflectance" SDSs to
+               provide additional information, but these aren't QA bands. */
             count = snprintf (bmeta[nmodis_bands].qa_desc,
                 sizeof (bmeta[nmodis_bands].qa_desc), "%s",
                 qa_desc[nmodis_bands]);
@@ -1703,7 +1709,8 @@ int read_modis_hdf
                 error_handler (true, FUNC_NAME, errmsg);
                 return (ERROR);
             }
-            if (strcmp (bmeta[nmodis_bands].qa_desc, ESPA_STRING_META_FILL))
+            if (strcmp (bmeta[nmodis_bands].qa_desc, ESPA_STRING_META_FILL) &&
+                !strstr (bmeta[nmodis_bands].name, "MIR reflectance"))
                 strcpy (bmeta[nmodis_bands].category, "qa");
 
             /* Add the production date/time and PGE version from the core

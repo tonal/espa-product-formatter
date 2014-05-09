@@ -277,18 +277,18 @@ int write_metadata
         if (!strcmp (bmeta[i].source, ESPA_STRING_META_FILL)) /*no source type*/
             fprintf (fptr,
                 "        <band product=\"%s\" name=\"%s\" category=\"%s\" "
-                "data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\" "
-                "fill_value=\"%ld\"", bmeta[i].product, bmeta[i].name,
-                bmeta[i].category, my_dtype, bmeta[i].nlines,
-                bmeta[i].nsamps, bmeta[i].fill_value);
+                "data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\"",
+                bmeta[i].product, bmeta[i].name, bmeta[i].category, my_dtype,
+                bmeta[i].nlines, bmeta[i].nsamps);
         else  /* contains a source type */
             fprintf (fptr,
                 "        <band product=\"%s\" source=\"%s\" name=\"%s\" "
-                "category=\"%s\" data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\" "
-                "fill_value=\"%ld\"", bmeta[i].product, bmeta[i].source,
-                bmeta[i].name, bmeta[i].category, my_dtype, bmeta[i].nlines,
-                bmeta[i].nsamps, bmeta[i].fill_value);
+                "category=\"%s\" data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\"",
+                bmeta[i].product, bmeta[i].source, bmeta[i].name,
+                bmeta[i].category, my_dtype, bmeta[i].nlines, bmeta[i].nsamps);
 
+        if (bmeta[i].fill_value != ESPA_INT_META_FILL)
+            fprintf (fptr, " fill_value=\"%ld\"", bmeta[i].fill_value);
         if (bmeta[i].saturate_value != ESPA_INT_META_FILL)
             fprintf (fptr, " saturate_value=\"%d\"",
             bmeta[i].saturate_value);
@@ -302,11 +302,15 @@ int write_metadata
             "            <short_name>%s</short_name>\n"
             "            <long_name>%s</long_name>\n"
             "            <file_name>%s</file_name>\n"
-            "            <pixel_size x=\"%g\" y=\"%g\" units=\"%s\"/>\n"
-            "            <data_units>%s</data_units>\n",
+            "            <pixel_size x=\"%g\" y=\"%g\" units=\"%s\"/>\n",
             bmeta[i].short_name, bmeta[i].long_name, bmeta[i].file_name,
             bmeta[i].pixel_size[0], bmeta[i].pixel_size[1],
-            bmeta[i].pixel_units, bmeta[i].data_units);
+            bmeta[i].pixel_units);
+
+        if (strcmp (bmeta[i].data_units, ESPA_STRING_META_FILL))
+            fprintf (fptr,
+                "            <data_units>%s</data_units>\n",
+                bmeta[i].data_units);
 
         if (bmeta[i].valid_range[0] != ESPA_INT_META_FILL &&
             bmeta[i].valid_range[1] != ESPA_INT_META_FILL)
@@ -502,18 +506,18 @@ int append_metadata
         if (!strcmp (bmeta[i].source, ESPA_STRING_META_FILL)) /*no source type*/
             fprintf (fptr,
                 "        <band product=\"%s\" name=\"%s\" category=\"%s\" "
-                "data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\" "
-                "fill_value=\"%ld\"", bmeta[i].product, bmeta[i].name,
-                bmeta[i].category, my_dtype, bmeta[i].nlines,
-                bmeta[i].nsamps, bmeta[i].fill_value);
+                "data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\"",
+                bmeta[i].product, bmeta[i].name, bmeta[i].category, my_dtype,
+                bmeta[i].nlines, bmeta[i].nsamps);
         else  /* contains a source type */
             fprintf (fptr,
                 "        <band product=\"%s\" source=\"%s\" name=\"%s\" "
-                "category=\"%s\" data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\" "
-                "fill_value=\"%ld\"", bmeta[i].product, bmeta[i].source,
-                bmeta[i].name, bmeta[i].category, my_dtype, bmeta[i].nlines,
-                bmeta[i].nsamps, bmeta[i].fill_value);
+                "category=\"%s\" data_type=\"%s\" nlines=\"%d\" nsamps=\"%d\"",
+                bmeta[i].product, bmeta[i].source, bmeta[i].name,
+                bmeta[i].category, my_dtype, bmeta[i].nlines, bmeta[i].nsamps);
 
+        if (bmeta[i].fill_value != ESPA_INT_META_FILL)
+            fprintf (fptr, " fill_value=\"%ld\"", bmeta[i].fill_value);
         if (bmeta[i].saturate_value != ESPA_INT_META_FILL)
             fprintf (fptr, " saturate_value=\"%d\"",
             bmeta[i].saturate_value);
@@ -527,11 +531,15 @@ int append_metadata
             "            <short_name>%s</short_name>\n"
             "            <long_name>%s</long_name>\n"
             "            <file_name>%s</file_name>\n"
-            "            <pixel_size x=\"%g\" y=\"%g\" units=\"%s\"/>\n"
-            "            <data_units>%s</data_units>\n",
+            "            <pixel_size x=\"%g\" y=\"%g\" units=\"%s\"/>\n",
             bmeta[i].short_name, bmeta[i].long_name, bmeta[i].file_name,
             bmeta[i].pixel_size[0], bmeta[i].pixel_size[1],
-            bmeta[i].pixel_units, bmeta[i].data_units);
+            bmeta[i].pixel_units);
+
+        if (strcmp (bmeta[i].data_units, ESPA_STRING_META_FILL))
+            fprintf (fptr,
+                "            <data_units>%s</data_units>\n",
+                bmeta[i].data_units);
 
         if (bmeta[i].valid_range[0] != ESPA_INT_META_FILL &&
             bmeta[i].valid_range[1] != ESPA_INT_META_FILL)
