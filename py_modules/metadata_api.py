@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Tue Apr 29 09:48:27 2014 by generateDS.py version 2.12b.
+# Generated Thu May  8 13:59:20 2014 by generateDS.py version 2.12b.
 #
 # Generated with the ESPA modified version of generateDS.py
 # See espa google code project.
@@ -2298,6 +2298,117 @@ class wrs(GeneratedsSuper):
 # end class wrs
 
 
+class modis(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, htile=None, vtile=None):
+        self.htile = _cast(None, htile)
+        self.vtile = _cast(None, vtile)
+        pass
+    def factory(*args_, **kwargs_):
+        if modis.subclass:
+            return modis.subclass(*args_, **kwargs_)
+        else:
+            return modis(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_htile(self): return self.htile
+    def set_htile(self, htile): self.htile = htile
+    def get_vtile(self): return self.vtile
+    def set_vtile(self, vtile): self.vtile = vtile
+    def validate_modisHTileType(self, value):
+        # Validate type modisHTileType, a restriction on xs:unsignedByte.
+        pass
+    def validate_modisVTileType(self, value):
+        # Validate type modisVTileType, a restriction on xs:unsignedByte.
+        pass
+    def hasContent_(self):
+        if (
+
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='modis', namespacedef_='', pretty_print=True):
+        # Check if we are at the root level and output the XML header
+        if level == 0:
+            outfile.write('<?xml version="1.0"?>\n')
+            outfile.write('\n')
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        # Check if we are at the root level and output attributes first before namespacedef
+        if level == 0:
+            outfile.write('<%s%s' % (namespace_, name_))
+            already_processed = set()
+            self.exportAttributes(outfile, level, already_processed, namespace_, name_='modis')
+            outfile.write('%s' % (namespacedef_ and ' ' + namespacedef_ or ''))
+        else:
+            outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+            already_processed = set()
+            self.exportAttributes(outfile, level, already_processed, namespace_, name_='modis')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='', name_='modis', pretty_print=pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='modis'):
+        if self.htile is not None and 'htile' not in already_processed:
+            already_processed.add('htile')
+            outfile.write(' htile=%s' % (quote_attrib(self.htile), ))
+        if self.vtile is not None and 'vtile' not in already_processed:
+            already_processed.add('vtile')
+            outfile.write(' vtile=%s' % (quote_attrib(self.vtile), ))
+    def exportChildren(self, outfile, level, namespace_='', name_='modis', fromsubclass_=False, pretty_print=True):
+        pass
+    def exportLiteral(self, outfile, level, name_='modis'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.htile is not None and 'htile' not in already_processed:
+            already_processed.add('htile')
+            showIndent(outfile, level)
+            outfile.write('htile=%d,\n' % (self.htile,))
+        if self.vtile is not None and 'vtile' not in already_processed:
+            already_processed.add('vtile')
+            showIndent(outfile, level)
+            outfile.write('vtile=%d,\n' % (self.vtile,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        pass
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('htile', node)
+        if value is not None and 'htile' not in already_processed:
+            already_processed.add('htile')
+            try:
+                self.htile = int(value)
+            except ValueError, exp:
+                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
+            self.validate_modisHTileType(self.htile)    # validate type modisHTileType
+        value = find_attr_value_('vtile', node)
+        if value is not None and 'vtile' not in already_processed:
+            already_processed.add('vtile')
+            try:
+                self.vtile = int(value)
+            except ValueError, exp:
+                raise_parse_error(node, 'Bad integer attribute: %s' % exp)
+            self.validate_modisVTileType(self.vtile)    # validate type modisVTileType
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        pass
+# end class modis
+
+
 class valid_range(GeneratedsSuper):
     subclass = None
     superclass = None
@@ -2786,7 +2897,7 @@ class class_values(GeneratedsSuper):
 class band(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, product=None, source=None, name=None, category=None, data_type=None, nlines=None, nsamps=None, fill_value=None, saturate_value=None, scale_factor=None, add_offset=None, short_name=None, long_name=None, file_name=None, pixel_size=None, data_units=None, valid_range=None, toa_reflectance=None, bitmap_description=None, class_values=None, calibrated_nt=None, app_version=None, production_date=None):
+    def __init__(self, product=None, source=None, name=None, category=None, data_type=None, nlines=None, nsamps=None, fill_value=None, saturate_value=None, scale_factor=None, add_offset=None, short_name=None, long_name=None, file_name=None, pixel_size=None, data_units=None, valid_range=None, toa_reflectance=None, bitmap_description=None, class_values=None, qa_description=None, calibrated_nt=None, app_version=None, production_date=None):
         self.product = _cast(None, product)
         self.source = _cast(None, source)
         self.name = _cast(None, name)
@@ -2807,6 +2918,7 @@ class band(GeneratedsSuper):
         self.toa_reflectance = toa_reflectance
         self.bitmap_description = bitmap_description
         self.class_values = class_values
+        self.qa_description = qa_description
         self.calibrated_nt = calibrated_nt
         self.app_version = app_version
         if isinstance(production_date, basestring):
@@ -2838,6 +2950,8 @@ class band(GeneratedsSuper):
     def set_bitmap_description(self, bitmap_description): self.bitmap_description = bitmap_description
     def get_class_values(self): return self.class_values
     def set_class_values(self, class_values): self.class_values = class_values
+    def get_qa_description(self): return self.qa_description
+    def set_qa_description(self, qa_description): self.qa_description = qa_description
     def get_calibrated_nt(self): return self.calibrated_nt
     def set_calibrated_nt(self, calibrated_nt): self.calibrated_nt = calibrated_nt
     def get_app_version(self): return self.app_version
@@ -2886,6 +3000,7 @@ class band(GeneratedsSuper):
             self.toa_reflectance is not None or
             self.bitmap_description is not None or
             self.class_values is not None or
+            self.qa_description is not None or
             self.calibrated_nt is not None or
             self.app_version is not None or
             self.production_date is not None
@@ -2981,6 +3096,9 @@ class band(GeneratedsSuper):
             self.bitmap_description.export(outfile, level, namespace_, name_='bitmap_description', pretty_print=pretty_print)
         if self.class_values is not None:
             self.class_values.export(outfile, level, namespace_, name_='class_values', pretty_print=pretty_print)
+        if self.qa_description is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sqa_description>%s</%sqa_description>%s' % (namespace_, self.gds_format_string(quote_xml(self.qa_description).encode(ExternalEncoding), input_name='qa_description'), namespace_, eol_))
         if self.calibrated_nt is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%scalibrated_nt>%s</%scalibrated_nt>%s' % (namespace_, self.gds_format_float(self.calibrated_nt, input_name='calibrated_nt'), namespace_, eol_))
@@ -3084,6 +3202,9 @@ class band(GeneratedsSuper):
             self.class_values.exportLiteral(outfile, level)
             showIndent(outfile, level)
             outfile.write('),\n')
+        if self.qa_description is not None:
+            showIndent(outfile, level)
+            outfile.write('qa_description=%s,\n' % quote_python(self.qa_description).encode(ExternalEncoding))
         if self.calibrated_nt is not None:
             showIndent(outfile, level)
             outfile.write('calibrated_nt=%f,\n' % self.calibrated_nt)
@@ -3203,6 +3324,10 @@ class band(GeneratedsSuper):
             obj_ = class_values.factory()
             obj_.build(child_)
             self.class_values = obj_
+        elif nodeName_ == 'qa_description':
+            qa_description_ = child_.text
+            qa_description_ = self.gds_validate_string(qa_description_, node, 'qa_description')
+            self.qa_description = qa_description_
         elif nodeName_ == 'calibrated_nt':
             sval_ = child_.text
             try:
@@ -3340,7 +3465,7 @@ class espa_metadata(GeneratedsSuper):
 class global_metadataType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, data_provider=None, satellite=None, instrument=None, acquisition_date=None, scene_center_time=None, level1_production_date=None, solar_angles=None, wrs=None, lpgs_metadata_file=None, corner=None, bounding_coordinates=None, projection_information=None, orientation_angle=None):
+    def __init__(self, data_provider=None, satellite=None, instrument=None, acquisition_date=None, scene_center_time=None, level1_production_date=None, solar_angles=None, wrs=None, modis=None, lpgs_metadata_file=None, corner=None, bounding_coordinates=None, projection_information=None, orientation_angle=None):
         self.data_provider = data_provider
         self.satellite = satellite
         self.instrument = instrument
@@ -3361,6 +3486,7 @@ class global_metadataType(GeneratedsSuper):
         self.level1_production_date = initvalue_
         self.solar_angles = solar_angles
         self.wrs = wrs
+        self.modis = modis
         self.lpgs_metadata_file = lpgs_metadata_file
         if corner is None:
             self.corner = []
@@ -3391,6 +3517,8 @@ class global_metadataType(GeneratedsSuper):
     def set_solar_angles(self, solar_angles): self.solar_angles = solar_angles
     def get_wrs(self): return self.wrs
     def set_wrs(self, wrs): self.wrs = wrs
+    def get_modis(self): return self.modis
+    def set_modis(self, modis): self.modis = modis
     def get_lpgs_metadata_file(self): return self.lpgs_metadata_file
     def set_lpgs_metadata_file(self, lpgs_metadata_file): self.lpgs_metadata_file = lpgs_metadata_file
     def get_corner(self): return self.corner
@@ -3413,6 +3541,7 @@ class global_metadataType(GeneratedsSuper):
             self.level1_production_date is not None or
             self.solar_angles is not None or
             self.wrs is not None or
+            self.modis is not None or
             self.lpgs_metadata_file is not None or
             self.corner or
             self.bounding_coordinates is not None or
@@ -3478,6 +3607,8 @@ class global_metadataType(GeneratedsSuper):
             self.solar_angles.export(outfile, level, namespace_, name_='solar_angles', pretty_print=pretty_print)
         if self.wrs is not None:
             self.wrs.export(outfile, level, namespace_, name_='wrs', pretty_print=pretty_print)
+        if self.modis is not None:
+            self.modis.export(outfile, level, namespace_, name_='modis', pretty_print=pretty_print)
         if self.lpgs_metadata_file is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%slpgs_metadata_file>%s</%slpgs_metadata_file>%s' % (namespace_, self.gds_format_string(quote_xml(self.lpgs_metadata_file).encode(ExternalEncoding), input_name='lpgs_metadata_file'), namespace_, eol_))
@@ -3527,6 +3658,12 @@ class global_metadataType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('wrs=model_.wrs(\n')
             self.wrs.exportLiteral(outfile, level)
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.modis is not None:
+            showIndent(outfile, level)
+            outfile.write('modis=model_.modis(\n')
+            self.modis.exportLiteral(outfile, level)
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.lpgs_metadata_file is not None:
@@ -3601,6 +3738,10 @@ class global_metadataType(GeneratedsSuper):
             obj_ = wrs.factory()
             obj_.build(child_)
             self.wrs = obj_
+        elif nodeName_ == 'modis':
+            obj_ = modis.factory()
+            obj_.build(child_)
+            self.modis = obj_
         elif nodeName_ == 'lpgs_metadata_file':
             lpgs_metadata_file_ = child_.text
             lpgs_metadata_file_ = self.gds_validate_string(lpgs_metadata_file_, node, 'lpgs_metadata_file')
@@ -3963,6 +4104,7 @@ __all__ = [
     "corner_point",
     "espa_metadata",
     "global_metadataType",
+    "modis",
     "pixel_size",
     "projection_information",
     "ps_proj_params",
