@@ -70,6 +70,7 @@ int doy_to_month_day
     leap = (bool) (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
 
     /* Determine which month the DOY falls in */
+    *month = 0;
     if (leap)
     {  /* leap year -- start with February */
         for (i = 1; i < 12; i++)
@@ -80,6 +81,13 @@ int doy_to_month_day
                 *day = doy - idoy_lp[i-1] + 1;
                 break;
             }
+        }
+
+        /* if the month isn't set, then it's a December scene */
+        if (*month == 0)
+        {
+            *month = 12;
+            *day = doy - idoy_lp[11] + 1;
         }
     }
     else
@@ -92,6 +100,13 @@ int doy_to_month_day
                 *day = doy - idoy[i-1] + 1;
                 break;
             }
+        }
+
+        /* if the month isn't set, then it's a December scene */
+        if (*month == 0)
+        {
+            *month = 12;
+            *day = doy - idoy[11] + 1;
         }
     }
 
@@ -1253,7 +1268,7 @@ int read_modis_hdf
     /* Year and DOY need to be converted to yyyy-mm-dd */
     if (doy_to_month_day (acq_year, acq_doy, &acq_month, &acq_day) != SUCCESS)
     {
-        sprintf (errmsg, "Error converting %d-%d to yyyy-mm-ddd", acq_year,
+        sprintf (errmsg, "Error converting %d-%d to yyyy-mm-dd", acq_year,
             acq_doy);
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
