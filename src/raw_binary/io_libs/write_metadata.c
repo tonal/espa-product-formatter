@@ -96,9 +96,12 @@ int write_metadata
         "    <global_metadata>\n"
         "        <data_provider>%s</data_provider>\n"
         "        <satellite>%s</satellite>\n"
-        "        <instrument>%s</instrument>\n"
+        "        <instrument>%s</instrument>\n",
+        gmeta->data_provider, gmeta->satellite, gmeta->instrument);
+
+    if (strcmp (gmeta->acquisition_date, ESPA_STRING_META_FILL))
+        fprintf (fptr,
         "        <acquisition_date>%s</acquisition_date>\n",
-        gmeta->data_provider, gmeta->satellite, gmeta->instrument,
         gmeta->acquisition_date);
 
     if (strcmp (gmeta->scene_center_time, ESPA_STRING_META_FILL))

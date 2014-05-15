@@ -409,7 +409,7 @@ elementFormDefault="qualified">
             <xs:element ref="data_provider"/>
             <xs:element ref="satellite"/>
             <xs:element ref="instrument"/>
-            <xs:element ref="acquisition_date"/>
+            <xs:element ref="acquisition_date" minOccurs="0"/>
             <xs:element ref="scene_center_time" minOccurs="0"/>
             <xs:element ref="level1_production_date" minOccurs="0"/>
             <xs:element ref="solar_angles" minOccurs="0"/>
