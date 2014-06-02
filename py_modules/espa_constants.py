@@ -21,4 +21,3 @@ Define standard method return values
 '''
 SUCCESS = 0
 ERROR = -1
-

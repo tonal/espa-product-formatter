@@ -36,7 +36,7 @@ messages.
 __DEBUG_ON__ = False
 
 
-def open_log_handler (file_name):
+def open_log_handler(file_name):
     '''
     Description:
       Opens the log file handle for appending
@@ -47,10 +47,10 @@ def open_log_handler (file_name):
     '''
     global __LOG_HANDLER__
 
-    if (__LOG_HANDLER__ == None) and (file_name != None):
-        __LOG_HANDLER__ = open (file_name, 'a', buffering=1)
+    if (__LOG_HANDLER__ is None) and (file_name is not None):
+        __LOG_HANDLER__ = open(file_name, 'a', buffering=1)
 
-    if (__LOG_HANDLER__ == None):
+    if (__LOG_HANDLER__ is None):
         return ERROR
 
     return SUCCESS
@@ -68,7 +68,7 @@ def close_log_handler():
     '''
     global __LOG_HANDLER__
 
-    if (__LOG_HANDLER__ != None):
+    if (__LOG_HANDLER__ is not None):
         __LOG_HANDLER__.close()
         if not __LOG_HANDLER__.closed:
             return ERROR
@@ -78,7 +78,7 @@ def close_log_handler():
 # END close_log_handler
 
 
-def build_log_message (message, filename, line):
+def build_log_message(message, filename, line):
     '''
     Desacription:
       Builds a standardized log message
@@ -94,19 +94,19 @@ def build_log_message (message, filename, line):
     now = datetime.datetime.now()
     pid = os.getpid()
     return "%s-%s-%s %s:%s.%s %d [%s]:%d %s" % (now.year,
-        str(now.month).zfill(2),
-        str(now.day).zfill(2),
-        str(now.hour).zfill(2),
-        str(now.minute).zfill(2),
-        str(now.second).zfill(2),
-        pid,
-        filename,
-        line,
-        message)
+                                                str(now.month).zfill(2),
+                                                str(now.day).zfill(2),
+                                                str(now.hour).zfill(2),
+                                                str(now.minute).zfill(2),
+                                                str(now.second).zfill(2),
+                                                pid,
+                                                filename,
+                                                line,
+                                                message)
 # END build_log_message
 
 
-def log (message, file=None, line=None):
+def log(message, file=None, line=None):
     '''
     Description:
       Logs a message in the ESPA standard log format to STDOUT or a log file
@@ -124,11 +124,11 @@ def log (message, file=None, line=None):
     filename = os.path.basename(filename)
 
     # Use the one provided
-    if line != None:
+    if line is not None:
         line_number = line
 
     # Use the one provided
-    if file != None:
+    if file is not None:
         filename = file
 
     # Build the message string
@@ -138,11 +138,11 @@ def log (message, file=None, line=None):
     if __LOG_HANDLER__ is None:
         print (message_string)
     else:
-        __LOG_HANDLER__.write (message_string + '\n')
+        __LOG_HANDLER__.write(message_string + '\n')
 # END log
 
 
-def set_debug (on=True):
+def set_debug(on=True):
     '''
     Description:
       Used for turning debug messaging on or off
@@ -153,7 +153,7 @@ def set_debug (on=True):
 # END set_debug
 
 
-def debug (message, file=None, line=None):
+def debug(message, file=None, line=None):
     '''
     Description:
       Write the message to the log it debug is turned on
@@ -161,19 +161,19 @@ def debug (message, file=None, line=None):
     global __DEBUG_ON__
 
     if __DEBUG_ON__:
-        # Get information about the calling code for the filename and line_number
+        # Get information about the calling code for the filename and
+        # line_number
         (frame, filename, line_number, function_name, lines, index) = \
             inspect.getouterframes(inspect.currentframe())[1]
         filename = os.path.basename(filename)
 
         # Use the one provided
-        if line != None:
+        if line is not None:
             line_number = line
 
         # Use the one provided
-        if file != None:
+        if file is not None:
             filename = file
 
-        log (message, filename, line_number)
+        log(message, filename, line_number)
 # END debug
-
