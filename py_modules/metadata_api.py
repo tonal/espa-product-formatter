@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Thu May  8 13:59:20 2014 by generateDS.py version 2.12b.
+# Generated Thu Jun  5 15:05:49 2014 by generateDS.py version 2.12b.
 #
 # Generated with the ESPA modified version of generateDS.py
 # See espa google code project.
@@ -19,6 +19,10 @@ import urllib2
 import datetime as datetime_
 from lxml import etree
 
+# espa-common objects and methods
+from espa_logging import log
+
+
 etree_ = None
 Verbose_import_ = False
 (
@@ -31,35 +35,35 @@ try:
     from lxml import etree as etree_
     XMLParser_import_library = XMLParser_import_lxml
     if Verbose_import_:
-        print("running with lxml.etree")
+        log("running with lxml.etree")
 except ImportError:
     try:
         # cElementTree from Python 2.5+
         import xml.etree.cElementTree as etree_
         XMLParser_import_library = XMLParser_import_elementtree
         if Verbose_import_:
-            print("running with cElementTree on Python 2.5+")
+            log("running with cElementTree on Python 2.5+")
     except ImportError:
         try:
             # ElementTree from Python 2.5+
             import xml.etree.ElementTree as etree_
             XMLParser_import_library = XMLParser_import_elementtree
             if Verbose_import_:
-                print("running with ElementTree on Python 2.5+")
+                log("running with ElementTree on Python 2.5+")
         except ImportError:
             try:
                 # normal cElementTree install
                 import cElementTree as etree_
                 XMLParser_import_library = XMLParser_import_elementtree
                 if Verbose_import_:
-                    print("running with cElementTree")
+                    log("running with cElementTree")
             except ImportError:
                 try:
                     # normal ElementTree install
                     import elementtree.ElementTree as etree_
                     XMLParser_import_library = XMLParser_import_elementtree
                     if Verbose_import_:
-                        print("running with ElementTree")
+                        log("running with ElementTree")
                 except ImportError:
                     raise ImportError(
                         "Failed to import ElementTree from any known place")
@@ -3880,7 +3884,7 @@ Usage: python <Parser>.py [ -s ] <in_xml_file>
 
 
 def usage():
-    print USAGE_TEXT
+    log(USAGE_TEXT)
     sys.exit(1)
 
 
@@ -4011,8 +4015,8 @@ def validate_xml(rootObj, xmlns=None, xmlns_xsi=None, schema_uri=None):
         try:
             schema_root = etree.parse(schema_path)
         except Exception, e:
-            print "Failed reading schema from ESPA_SCHEMA=" + schema_path
-            print "Attempting espa-common installation directory"
+            log("Failed reading schema from ESPA_SCHEMA=" + schema_path)
+            log("Attempting espa-common installation directory")
 
         # Use the espa-common installation directory
         if schema_root == None:
@@ -4022,15 +4026,15 @@ def validate_xml(rootObj, xmlns=None, xmlns_xsi=None, schema_uri=None):
             try:
                 schema_root = etree.parse(schema_path)
             except Exception, e:
-                print "Failed reading schema from " + schema_path
-                print "Attempting schema_uri"
+                log("Failed reading schema from " + schema_path)
+                log("Attempting schema_uri")
 
         # Use the schema_uri
         if schema_root == None:
             schema_source = urllib2.urlopen(schema_uri)
             schema_text = schema_source.read()
             schema_source.close()
-            print "Using schema source %s for validation" % schema_uri
+            log("Using schema source %s for validation" % schema_uri)
             schema_root = etree.fromstring(schema_text)
 
         if schema_root == None:
