@@ -9,7 +9,7 @@ EXTRA = -Wall -g -O2
 
 # Define the include files
 INC = 
-INCDIR  = -I. -I$(ESPAINC) -I$(XML2INC) -I$(TIFFINC) -I$(GEOTIFF_INC) \
+INCDIR  = -I. -I../include -I$(XML2INC) -I$(TIFFINC) -I$(GEOTIFF_INC) \
     -I$(HDFINC) -I$(HDFEOS_INC) -I$(JBIGINC) -I$(LZMAINC)
 NCFLAGS = $(EXTRA) $(INCDIR)
 
@@ -34,30 +34,30 @@ OBJ6 = $(SRC6:.c=.o)
 
 # Define the object libraries
 LIB1   = \
-    -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
+    -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(GEOTIFF_LIB) -lgeotiff -L$(TIFFLIB) -ltiff \
     -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -L$(HDFEOS_GCTPLIB) -lGctp -lz -lm
 
 LIB2   = \
-    -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
+    -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 \
     -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lGctp \
     -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
 
 LIB3   = \
-    -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
+    -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
 
 LIB4   = \
-    -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
+    -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
 
 LIB5   = \
-    -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
+    -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
 
 LIB6   = \
-    -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
+    -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 \
     -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lGctp \
     -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
@@ -68,6 +68,8 @@ EXE = convert_lpgs_to_espa convert_espa_to_hdf convert_espa_to_gtif \
 
 # Target for the executable
 all: $(EXE)
+	install -d ../bin
+	install -m 755 $(EXE) ../bin
 
 convert_lpgs_to_espa: $(OBJ1) $(INC)
 	$(CC) $(NCFLAGS) -o convert_lpgs_to_espa $(OBJ1) $(LIB1)
@@ -89,10 +91,6 @@ convert_modis_to_espa: $(OBJ6) $(INC)
 
 clean:
 	$(RM) *.o $(EXE)
-
-install:
-	install -d $(BIN)
-	install -m 755 $(EXE) $(BIN)
 
 $(OBJ1): $(INC)
 $(OBJ2): $(INC)

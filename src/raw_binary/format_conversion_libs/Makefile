@@ -39,14 +39,12 @@ OBJ = $(SRC:.c=.o)
 #-------------------------------
 $(ARCHIVE): $(OBJ) $(INC)
 	$(AR) $(ARCHIVE) $(OBJ)
-
-all: $(ARCHIVE)
-
-install:
 	install -d ../lib
 	install -d ../include
 	install -m 644 $(ARCHIVE) ../lib
 	install -m 644 $(INC) ../include
+
+all: $(ARCHIVE)
 
 clean:
 	$(RM) $(OBJ) $(ARCHIVE)
