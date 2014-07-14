@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Thu Jun  5 15:05:49 2014 by generateDS.py version 2.12b.
+# Generated Mon Jul 14 14:37:56 2014 by generateDS.py version 2.12b.
 #
 # Generated with the ESPA modified version of generateDS.py
 # See espa google code project.
@@ -4011,12 +4011,15 @@ def validate_xml(rootObj, xmlns=None, xmlns_xsi=None, schema_uri=None):
         schema_root = None
 
         # Search for the environment variable and use that if valid
-        schema_path = os.getenv('ESPA_SCHEMA') 
-        try:
-            schema_root = etree.parse(schema_path)
-        except Exception, e:
-            log("Failed reading schema from ESPA_SCHEMA=" + schema_path)
-            log("Attempting espa-common installation directory")
+        schema_path = os.getenv('ESPA_SCHEMA')
+        if schema_path:
+            try:
+                schema_root = etree.parse(schema_path)
+            except Exception, e:
+                log("Failed reading schema from ESPA_SCHEMA=" + schema_path)
+                log("Attempting espa-common installation directory")
+        else:
+            log("Warning missing environment variable ESPA_SCHEMA defaulting")
 
         # Use the espa-common installation directory
         if schema_root == None:
