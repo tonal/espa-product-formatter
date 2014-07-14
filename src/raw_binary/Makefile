@@ -1,0 +1,35 @@
+LIBDIRS	= common io_libs format_conversion_libs
+EXEDIRS = tools
+
+all:
+# build the libraries
+	@for dir in $(LIBDIRS); do \
+        echo "make all in $$dir..."; \
+        (cd $$dir; $(MAKE)); done
+
+# build the executables
+	@for dir in $(EXEDIRS); do \
+        echo "make all in $$dir..."; \
+        (cd $$dir; $(MAKE)); done
+
+install: all
+# the libraries and executables
+	@for file in `ls bin`; do \
+        echo "installing $$file to $(BIN)"; \
+        install -d $(BIN); \
+        install -m 755 bin/$$file $(BIN); done
+	@for file in `ls lib`; do \
+        echo "installing $$file to $(ESPALIB)"; \
+        install -d $(ESPALIB); \
+        install -m 644 lib/$$file $(ESPALIB); done
+	@for file in `ls include`; do \
+        echo "installing $$file to $(ESPAINC)"; \
+        install -d $(ESPAINC); \
+        install -m 644 include/$$file $(ESPAINC); done
+
+clean:
+# all directories need to be cleaned
+	@for dir in $(LIBDIRS) $(EXEDIRS); do \
+        echo "make clean in $$dir..."; \
+        (cd $$dir; $(MAKE) clean); done
+	rm -r include lib bin
