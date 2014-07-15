@@ -110,8 +110,8 @@ typedef struct
     char data_provider[STR_SIZE]; /* name of the original data provider */
     char satellite[STR_SIZE];     /* name of the satellite (LANDSAT_4,
                                      LANDSAT_5, LANDSAT_7, LANDSAT_8, MODIS) */
-    char instrument[STR_SIZE];    /* name of instrument (MSS, TM, ETM+, OLI,
-                                     AQUA, TERRA, ...) */
+    char instrument[STR_SIZE];    /* name of instrument (MSS, TM, ETM+,
+                                     OLI/TIRS, AQUA, TERRA, ...) */
     char acquisition_date[STR_SIZE]; /* date of scene acquisition (yyyy-mm-dd)*/
     double ul_corner[2];          /* geographic UL lat, long */
     double lr_corner[2];          /* geographic LR lat, long */

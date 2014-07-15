@@ -85,6 +85,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/6/2014     Gail Schmidt     Original development
+6/17/2014    Gail Schmidt     Updated to support L8
 
 NOTES:
 ******************************************************************************/
@@ -312,6 +313,45 @@ int write_global_attributes
             ngain_bias_thm = 0;
         }
     }
+    else if (!strcmp (gmeta->instrument, "OLI_TIRS"))
+    {
+        /* Make sure the gain/bias values actually exist.  Use band 1 for this
+           check.  If it doesn't exist then assume none exist. */
+        if (fabs (xml_metadata->band[0].toa_gain - ESPA_FLOAT_META_FILL) >
+            ESPA_EPSILON &&
+            fabs (xml_metadata->band[0].toa_bias - ESPA_FLOAT_META_FILL) >
+            ESPA_EPSILON)
+        {
+            /* Loop through the bands and store the gain and bias for the
+               reflectance bands */
+            refl_count = 0;
+            thm_count = 0;
+            for (i = 0; i < 11; i++)
+            {
+                if (i == 9 /* band 10 */ || i == 10 /* band 11 */)
+                {   /* populate the thermal band */
+                    gain_thm[thm_count] = xml_metadata->band[i].toa_gain;
+                    bias_thm[thm_count] = xml_metadata->band[i].toa_bias;
+                    thm_count++;
+                }
+                else if (i != 7 /* skip pan band */)
+                {   /* populate the reflectance bands */
+                    gain[refl_count] = xml_metadata->band[i].toa_gain;
+                    bias[refl_count] = xml_metadata->band[i].toa_bias;
+                    refl_count++;
+                }
+            }
+
+            /* Identify the number of values to be written */
+            ngain_bias = refl_count;
+            ngain_bias_thm = thm_count;
+        }
+        else
+        {
+            ngain_bias = 0;
+            ngain_bias_thm = 0;
+        }
+    }
 
     /* Write reflectance gain/bias values */
     if (ngain_bias > 0)
@@ -373,15 +413,19 @@ int write_global_attributes
         }
     }
 
-    /* Write pan gain/bias values if this is ETM+ and the gains/biases
-       exist in the metadata file */
-    if (!strncmp (gmeta->instrument, "ETM", 3) && ngain_bias > 0)
+    /* Write pan gain/bias values if this is ETM+ or OLI_TIRS and the
+       gains/biases exist in the metadata file */
+    if ((!strncmp (gmeta->instrument, "ETM", 3) ||
+         !strcmp (gmeta->instrument, "OLI_TIRS")) && ngain_bias > 0)
     {
         /* Gains */
         attr.type = DFNT_FLOAT64;
         attr.nval = 1;
         attr.name = OUTPUT_PAN_GAIN;
-        dval[0] = (double) xml_metadata->band[8].toa_gain;
+        if (!strncmp (gmeta->instrument, "ETM", 3))
+            dval[0] = (double) xml_metadata->band[8].toa_gain;
+        else if (!strcmp (gmeta->instrument, "OLI_TIRS"))
+            dval[0] = (double) xml_metadata->band[7].toa_gain;
         if (put_attr_double (hdf_id, &attr, dval) != SUCCESS)
         {
             sprintf (errmsg, "Writing global attribute (pan gains)");
@@ -393,7 +437,10 @@ int write_global_attributes
         attr.type = DFNT_FLOAT64;
         attr.nval = 1;
         attr.name = OUTPUT_PAN_BIAS;
-        dval[0] = (double) xml_metadata->band[8].toa_bias;
+        if (!strncmp (gmeta->instrument, "ETM", 3))
+            dval[0] = (double) xml_metadata->band[8].toa_bias;
+        else if (!strcmp (gmeta->instrument, "OLI_TIRS"))
+            dval[0] = (double) xml_metadata->band[7].toa_bias;
         if (put_attr_double (hdf_id, &attr, dval) != SUCCESS)
         {
             sprintf (errmsg, "Writing global attribute (pan biases)");
@@ -570,7 +617,7 @@ int write_sds_attributes
     if (bmeta->valid_range[0] != ESPA_INT_META_FILL &&
         bmeta->valid_range[1] != ESPA_INT_META_FILL)
     {
-        attr.type = DFNT_INT16;
+        attr.type = DFNT_INT32;
         attr.nval = 2;
         attr.name = OUTPUT_VALID_RANGE;
         dval[0] = (double) bmeta->valid_range[0];
@@ -584,7 +631,7 @@ int write_sds_attributes
         }
     }
 
-    attr.type = DFNT_INT16;
+    attr.type = DFNT_INT32;
     attr.nval = 1;
     attr.name = OUTPUT_FILL_VALUE;
     dval[0] = (double) bmeta->fill_value;
@@ -598,7 +645,7 @@ int write_sds_attributes
 
     if (bmeta->saturate_value != ESPA_INT_META_FILL)
     {
-        attr.type = DFNT_INT16;
+        attr.type = DFNT_INT32;
         attr.nval = 1;
         attr.name = OUTPUT_SATU_VALUE;
         dval[0] = (double) bmeta->saturate_value;

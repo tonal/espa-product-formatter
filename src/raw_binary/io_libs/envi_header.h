@@ -65,7 +65,8 @@ typedef struct {
     char interleave[4];  /* "BSQ" for band sequential,
                             "BIL" for band interleave by line,
                             "BIP" for band interleave by pixel */
-    char sensor_type[STR_SIZE];   /* "Landsat TM", "Landat ETM", etc. */
+    char sensor_type[STR_SIZE];   /* "Landsat TM", "Landsat ETM",
+                            "Landsat OLI/TIRS", etc. */
     int proj_type;       /* ENVI projection number (see #defines above) */
     int datum_type;      /* ENVI datum type (see #defines above) */
     int utm_zone;        /* UTM zone; use a negative number if this is a

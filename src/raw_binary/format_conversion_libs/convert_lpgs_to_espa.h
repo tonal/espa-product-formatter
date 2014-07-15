@@ -33,8 +33,10 @@ NOTES:
 #include "envi_header.h"
 
 /* Defines */
-/* maximum number of characters LPGS bands in a file */
-#define MAX_LPGS_BANDS 20
+/* Maximum number of LPGS bands in a file; OLI/TIRS products have the most
+   bands (11 image bands plus the quality band); TM has 7 bands; ETM+ has
+   9 bands */
+#define MAX_LPGS_BANDS 12
 
 /* Prototypes */
 int read_lpgs_mtl
