@@ -377,6 +377,8 @@ Date          Programmer       Reason
 1/23/2014     Gail Schmidt     Original Development
 5/7/2014      Gail Schmidt     Modify to use the first band if band1 is not
                                available
+7/22/2014     Gail Schmidt     Initialized orientation angle, since it wasn't
+                               being initialized correctly from the XML meta
 
 NOTES:
 1. Make sure UL corner pixel is UL corner of the pixel, since that's what
@@ -515,7 +517,7 @@ bool get_geoloc_info
     }
 
     /* Convert the orientation angle to radians */
-    geoloc_info->orientation_angle *= RAD;
+    geoloc_info->orientation_angle = gmeta->orientation_angle * RAD;
  
     /* Successful completion */
     return (true);
