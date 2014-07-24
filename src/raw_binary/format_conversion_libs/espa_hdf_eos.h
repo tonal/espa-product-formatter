@@ -34,6 +34,12 @@ NOTES:
 /* Constants */
 #define NPROJ_PARAM 15
 
+/* Spheroids: defined on page 1-8 of
+   http://newsroom.gsfc.nasa.gov/sdptoolkit/docs/HDF-EOS_REF.pdf */
+#define SPHERE_CLARKE_1866 0
+#define SPHERE_GRS80 8
+#define SPHERE_WGS84 12
+
 /* size of the metadata string for defining the HDF-EOS metadata */
 #define ESPA_MAX_METADATA_SIZE 10240
 
