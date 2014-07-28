@@ -245,7 +245,7 @@ int write_hdf_eos_attr
         case (GCTP_UTM_PROJ): strcpy (proj_str, "UTM"); break;
         case (GCTP_PS_PROJ): strcpy (proj_str, "PS"); break;
         case (GCTP_ALBERS_PROJ): strcpy (proj_str, "ALBERS"); break;
-        case (GCTP_SIN_PROJ): strcpy (proj_str, "SIN"); break;
+        case (GCTP_SIN_PROJ): strcpy (proj_str, "SNSOID"); break;
     }
   
     /* If the grid origin is center, then adjust for the resolution.  The
@@ -668,7 +668,7 @@ int write_hdf_eos_attr
                 case (GCTP_UTM_PROJ): strcpy (proj_str, "UTM"); break;
                 case (GCTP_PS_PROJ): strcpy (proj_str, "PS"); break;
                 case (GCTP_ALBERS_PROJ): strcpy (proj_str, "ALBERS"); break;
-                case (GCTP_SIN_PROJ): strcpy (proj_str, "SIN"); break;
+                case (GCTP_SIN_PROJ): strcpy (proj_str, "SNSOID"); break;
             }
   
             /* If the grid origin is center, then adjust for the resolution.
