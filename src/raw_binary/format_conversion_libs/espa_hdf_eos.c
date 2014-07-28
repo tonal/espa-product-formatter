@@ -489,21 +489,24 @@ int write_hdf_eos_attr
     /* Don't write the sphere code if this is the Geographic projection */
     if (gmeta->proj_info.proj_type != GCTP_GEO_PROJ)
     {
-        count = snprintf (cbuf, sizeof (cbuf),
-            "\t\tSphereCode=%d\n", sphere_code);
-        if (count < 0 || count >= sizeof (cbuf))
+        if (gmeta->proj_info.datum_type != ESPA_NODATUM)
         {
-            sprintf (errmsg, "Overflow of cbuf string");
-            error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
-        }
+            count = snprintf (cbuf, sizeof (cbuf),
+                "\t\tSphereCode=%d\n", sphere_code);
+            if (count < 0 || count >= sizeof (cbuf))
+            {
+                sprintf (errmsg, "Overflow of cbuf string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
 
-        if (!append_meta (struct_meta, &meta_indx, cbuf))
-        {
-            sprintf (errmsg, "Error appending to metadata string (grid "
-                "information end)");
-            error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
+            if (!append_meta (struct_meta, &meta_indx, cbuf))
+            {
+                sprintf (errmsg, "Error appending to metadata string (grid "
+                    "information end)");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
         }
     }
   
@@ -760,6 +763,14 @@ int write_hdf_eos_attr
                 }
             }
 
+            if (!append_meta (struct_meta, &meta_indx, cbuf))
+            {
+                sprintf (errmsg, "Error appending to metadata string (grid "
+                    "information start)");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
             /* Write projection information */
             if (gmeta->proj_info.proj_type == GCTP_UTM_PROJ)
             {
@@ -921,21 +932,24 @@ int write_hdf_eos_attr
                projection */
             if (gmeta->proj_info.proj_type != GCTP_GEO_PROJ)
             {
-                count = snprintf (cbuf, sizeof (cbuf),
-                    "\t\tSphereCode=%d\n", sphere_code);
-                if (count < 0 || count >= sizeof (cbuf))
+                if (gmeta->proj_info.datum_type != ESPA_NODATUM)
                 {
-                    sprintf (errmsg, "Overflow of cbuf string");
-                    error_handler (true, FUNC_NAME, errmsg);
-                    return (ERROR);
-                }
+                    count = snprintf (cbuf, sizeof (cbuf),
+                        "\t\tSphereCode=%d\n", sphere_code);
+                    if (count < 0 || count >= sizeof (cbuf))
+                    {
+                        sprintf (errmsg, "Overflow of cbuf string");
+                        error_handler (true, FUNC_NAME, errmsg);
+                        return (ERROR);
+                    }
         
-                if (!append_meta (struct_meta, &meta_indx, cbuf))
-                {
-                    sprintf (errmsg, "Error appending to metadata string (grid "
-                        "information end)");
-                    error_handler (true, FUNC_NAME, errmsg);
-                    return (ERROR);
+                    if (!append_meta (struct_meta, &meta_indx, cbuf))
+                    {
+                        sprintf (errmsg, "Error appending to metadata string "
+                            "(grid information end)");
+                        error_handler (true, FUNC_NAME, errmsg);
+                        return (ERROR);
+                    }
                 }
             }
         
