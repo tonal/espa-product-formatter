@@ -37,13 +37,13 @@ NOTES:
 #define MYHDF_UINT16H    (      65535u )
 #define MYHDF_UINT16L    (          0u )
 #define MYHDF_INT32H     ( 2147483647l )
-#define MYHDF_INT32L     (-2147483647l )
+#define MYHDF_INT32L     (-2147483648l )
 #define MYHDF_UINT32H    ( 4294967295ul)
 #define MYHDF_UINT32L    (          0ul)
-#define MYHDF_FLOAT32H   (3.4028234e+38f)
-#define MYHDF_FLOAT32L   (1.1754943e-38f)
-#define MYHDF_FLOAT64H   (1.797693134862316e+308)
-#define MYHDF_FLOAT64L   (2.225073858507201e-308)
+#define MYHDF_FLOAT32H   ( 3.4e+38f)
+#define MYHDF_FLOAT32L   (-3.4e+38f)
+#define MYHDF_FLOAT64H   ( 1.7e+308)
+#define MYHDF_FLOAT64L   (-1.7e-308)
 
 
 /******************************************************************************

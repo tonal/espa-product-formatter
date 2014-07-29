@@ -24,6 +24,65 @@ NOTES:
 #define OUTPUT_ORIENTATION_ANGLE_HDF ("OrientationAngle")
 
 /******************************************************************************
+MODULE:  deg_to_dms
+
+PURPOSE:  Converts the decimal degree value to DMS in the form of DDDMMMSSS.ss.
+
+RETURN VALUE:
+Type = double
+Value      Description
+-----      -----------
+{all}      Packed DMS value
+
+PROJECT:  Land Satellites Data System Science Research and Development (LSRD)
+at the USGS EROS
+
+HISTORY:
+Date         Programmer       Reason
+---------    ---------------  -------------------------------------
+7/24/2014    Gail Schmidt     Original Development
+
+NOTES:
+******************************************************************************/
+double deg_to_dms
+(
+    double flt_deg   /* I: input decimal degree value */
+)
+{
+    int deg;         /* integer degree portion of the input value */
+    int min;         /* integer minute portion of the input value */
+    float sec;       /* seconds portion of the input value */
+    double dms;      /* packed degrees, minutes, seconds */
+
+    /* Grab the integer degrees from the input value */
+    deg = (int) flt_deg;
+
+    /* Obtain the integer minutes from the input value */
+    min = (int) ((flt_deg - deg) * 60.0);
+
+    /* Obtain the seconds from the input value */
+    sec = (flt_deg - deg - min / 60.0) * 3600.0;
+
+    /* If the seconds or minutes are 60, handle that case */
+    if (sec >= 60.0)
+    {
+        sec -= 60.0;
+        min++;
+    }
+    if (min >= 60)
+    {
+        min -= 60;
+        deg++;
+    }
+
+    /* Create the packed DMS value */
+    dms = deg * 1000000.0 + min * 1000.0 + sec;
+
+    return (dms);
+}
+
+
+/******************************************************************************
 MODULE:  append_meta
 
 PURPOSE:  Appends the string to the metadata buffer.
@@ -101,6 +160,11 @@ Date         Programmer       Reason
 4/24/2014    Gail Schmidt     Modified grid and dimension naming (in the case
                               of multiple resolutions) for Geographic
                               projections to not use the pixel size
+7/24/2014    Gail Schmidt     Modified the output Grid fields to utilize
+                              packed DMS for lat/long values
+7/24/2014    Gail Schmidt     Need to write the sphere code for correct
+                              handling of the HDF-EOS products.  We will leave
+                              the datum string as an attribute.
 
 NOTES:
 ******************************************************************************/
@@ -120,11 +184,12 @@ int write_hdf_eos_attr
     char datum_str[STR_SIZE];                 /* datum string */
     char dtype[STR_SIZE];                     /* data type */
     char temp_name[STR_SIZE];                 /* temporary grid name */
-    double ul_corner[2];     /* UL corner x,y */
-    double lr_corner[2];     /* LR corner x,y */
+    double ul_corner[2];     /* UL corner x,y -- Geographic is DMS */
+    double lr_corner[2];     /* LR corner x,y -- Geographic is DMS */
     double proj_parms[NPROJ_PARAM];  /* projection parameters */
     double dval;             /* temporary double value */
     int meta_indx;           /* index of current location in metadata buffer */
+    int sphere_code;         /* GCTP value for the associated spheroid */
     int i;                   /* looping variable */
     int count;               /* number of chars copied in snprintf */
     int mycount;             /* integer value to use in the name of the 2nd,
@@ -180,7 +245,7 @@ int write_hdf_eos_attr
         case (GCTP_UTM_PROJ): strcpy (proj_str, "UTM"); break;
         case (GCTP_PS_PROJ): strcpy (proj_str, "PS"); break;
         case (GCTP_ALBERS_PROJ): strcpy (proj_str, "ALBERS"); break;
-        case (GCTP_SIN_PROJ): strcpy (proj_str, "SIN"); break;
+        case (GCTP_SIN_PROJ): strcpy (proj_str, "SNSOID"); break;
     }
   
     /* If the grid origin is center, then adjust for the resolution.  The
@@ -209,19 +274,59 @@ int write_hdf_eos_attr
         "\t\tGridName=\"%s\"\n" 
         "\t\tXDim=%d\n" 
         "\t\tYDim=%d\n" 
-        "\t\tPixelSize=%f,%f\n"
-        "\t\tUpperLeftPointMtrs=(%.6f,%.6f)\n" 
-        "\t\tLowerRightMtrs=(%.6f,%.6f)\n" 
-        "\t\tProjection=GCTP_%s\n", 
+        "\t\tPixelSize=%g,%g\n",
         grid_name, xml_metadata->band[0].nsamps, xml_metadata->band[0].nlines, 
         xml_metadata->band[0].pixel_size[0],
-        xml_metadata->band[0].pixel_size[1],
-        ul_corner[0], ul_corner[1], lr_corner[0], lr_corner[1], proj_str);
+        xml_metadata->band[0].pixel_size[1]);
     if (count < 0 || count >= sizeof (cbuf))
     {
         sprintf (errmsg, "Overflow of cbuf string");
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
+    }
+
+    if (!append_meta (struct_meta, &meta_indx, cbuf))
+    {
+        sprintf (errmsg, "Error appending to metadata string (grid information "
+            "start)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    /* Convert the UL and LR corners to DDDMMMSSS.SS if the projection
+       is geographic, otherwise write the corners as-is. */
+    if (gmeta->proj_info.proj_type == GCTP_GEO)
+    {
+        ul_corner[0] = deg_to_dms (ul_corner[0]);
+        ul_corner[1] = deg_to_dms (ul_corner[1]);
+        lr_corner[0] = deg_to_dms (lr_corner[0]);
+        lr_corner[1] = deg_to_dms (lr_corner[1]);
+
+        count = snprintf (cbuf, sizeof (cbuf),
+            "\t\tUpperLeftPointMtrs=(%.2f,%.2f)\n" 
+            "\t\tLowerRightMtrs=(%.2f,%.2f)\n" 
+            "\t\tProjection=GCTP_%s\n", 
+            ul_corner[0], ul_corner[1], lr_corner[0], lr_corner[1], proj_str);
+        if (count < 0 || count >= sizeof (cbuf))
+        {
+            sprintf (errmsg, "Overflow of cbuf string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+    }
+    else
+    {
+        count = snprintf (cbuf, sizeof (cbuf),
+            "\t\tUpperLeftPointMtrs=(%.6f,%.6f)\n" 
+            "\t\tLowerRightMtrs=(%.6f,%.6f)\n" 
+            "\t\tProjection=GCTP_%s\n", 
+            ul_corner[0], ul_corner[1], lr_corner[0], lr_corner[1], proj_str);
+        if (count < 0 || count >= sizeof (cbuf))
+        {
+            sprintf (errmsg, "Overflow of cbuf string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
     }
 
     if (!append_meta (struct_meta, &meta_indx, cbuf))
@@ -253,8 +358,8 @@ int write_hdf_eos_attr
             return (ERROR);
         }
     }
-    else
-    {
+    else if (gmeta->proj_info.proj_type != GCTP_GEO_PROJ)
+    {  /* don't write projection parameters for Geographic */
         /* Write the projection parameters */
         count = snprintf (cbuf, sizeof (cbuf), "\t\tProjParams=(");
         if (count < 0 || count >= sizeof (cbuf))
@@ -286,24 +391,27 @@ int write_hdf_eos_attr
                 break;
 
             case GCTP_ALBERS_PROJ:
-                proj_parms[2] = gmeta->proj_info.standard_parallel1;
-                proj_parms[3] = gmeta->proj_info.standard_parallel2;
-                proj_parms[4] = gmeta->proj_info.central_meridian;
-                proj_parms[5] = gmeta->proj_info.origin_latitude;
+                proj_parms[2] =
+                    deg_to_dms (gmeta->proj_info.standard_parallel1);
+                proj_parms[3] =
+                    deg_to_dms (gmeta->proj_info.standard_parallel2);
+                proj_parms[4] = deg_to_dms (gmeta->proj_info.central_meridian);
+                proj_parms[5] = deg_to_dms (gmeta->proj_info.origin_latitude);
                 proj_parms[6] = gmeta->proj_info.false_easting;
                 proj_parms[7] = gmeta->proj_info.false_northing;
                 break;
     
             case GCTP_PS_PROJ:
-                proj_parms[4] = gmeta->proj_info.longitude_pole;
-                proj_parms[5] = gmeta->proj_info.latitude_true_scale;
+                proj_parms[4] = deg_to_dms (gmeta->proj_info.longitude_pole);
+                proj_parms[5] =
+                    deg_to_dms (gmeta->proj_info.latitude_true_scale);
                 proj_parms[6] = gmeta->proj_info.false_easting;
                 proj_parms[7] = gmeta->proj_info.false_northing;
                 break;
     
             case GCTP_SIN_PROJ:
                 proj_parms[0] = gmeta->proj_info.sphere_radius;
-                proj_parms[4] = gmeta->proj_info.central_meridian;
+                proj_parms[4] = deg_to_dms (gmeta->proj_info.central_meridian);
                 proj_parms[6] = gmeta->proj_info.false_easting;
                 proj_parms[7] = gmeta->proj_info.false_northing;
                 break;
@@ -360,14 +468,50 @@ int write_hdf_eos_attr
   
     switch (gmeta->proj_info.datum_type)
     {
-        case (ESPA_WGS84): strcpy (datum_str, "WGS84"); break;
-        case (ESPA_NAD83): strcpy (datum_str, "NAD83"); break;
-        case (ESPA_NAD27): strcpy (datum_str, "NAD27"); break;
-        case (ESPA_NODATUM): strcpy (datum_str, "NoDatum"); break;
+        case (ESPA_WGS84):
+            sphere_code = SPHERE_WGS84;
+            strcpy (datum_str, "WGS84");
+            break;
+        case (ESPA_NAD83):
+            sphere_code = SPHERE_GRS80;
+            strcpy (datum_str, "NAD83");
+            break;
+        case (ESPA_NAD27):
+            sphere_code = SPHERE_CLARKE_1866;
+            strcpy (datum_str, "NAD27");
+            break;
+        case (ESPA_NODATUM):
+            sphere_code = -999;
+            strcpy (datum_str, "NoDatum");
+            break;
+    }
+  
+    /* Don't write the sphere code if this is the Geographic projection */
+    if (gmeta->proj_info.proj_type != GCTP_GEO_PROJ)
+    {
+        if (gmeta->proj_info.datum_type != ESPA_NODATUM)
+        {
+            count = snprintf (cbuf, sizeof (cbuf),
+                "\t\tSphereCode=%d\n", sphere_code);
+            if (count < 0 || count >= sizeof (cbuf))
+            {
+                sprintf (errmsg, "Overflow of cbuf string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            if (!append_meta (struct_meta, &meta_indx, cbuf))
+            {
+                sprintf (errmsg, "Error appending to metadata string (grid "
+                    "information end)");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+        }
     }
   
     count = snprintf (cbuf, sizeof (cbuf),
-        "\t\tDatumCode=%s\n"
+        "\t\tDatum=%s\n"
         "\t\tGridOrigin=HDFE_GD_UL\n", datum_str);
     if (count < 0 || count >= sizeof (cbuf))
     {
@@ -524,7 +668,7 @@ int write_hdf_eos_attr
                 case (GCTP_UTM_PROJ): strcpy (proj_str, "UTM"); break;
                 case (GCTP_PS_PROJ): strcpy (proj_str, "PS"); break;
                 case (GCTP_ALBERS_PROJ): strcpy (proj_str, "ALBERS"); break;
-                case (GCTP_SIN_PROJ): strcpy (proj_str, "SIN"); break;
+                case (GCTP_SIN_PROJ): strcpy (proj_str, "SNSOID"); break;
             }
   
             /* If the grid origin is center, then adjust for the resolution.
@@ -560,17 +704,12 @@ int write_hdf_eos_attr
                 "\t\tGridName=\"%s_%d\"\n" 
                 "\t\tXDim=%d\n" 
                 "\t\tYDim=%d\n" 
-                "\t\tPixelSize=%g,%g\n"
-                "\t\tUpperLeftPointMtrs=(%.6f,%.6f)\n" 
-                "\t\tLowerRightMtrs=(%.6f,%.6f)\n" 
-                "\t\tProjection=GCTP_%s\n", 
+                "\t\tPixelSize=%g,%g\n",
                 grid_name, mycount,
                 xml_metadata->band[isds].nsamps,
                 xml_metadata->band[isds].nlines,
                 xml_metadata->band[isds].pixel_size[0],
-                xml_metadata->band[isds].pixel_size[1],
-                ul_corner[0], ul_corner[1],
-                lr_corner[0], lr_corner[1], proj_str);
+                xml_metadata->band[isds].pixel_size[1]);
             if (count < 0 || count >= sizeof (cbuf))
             {
                 sprintf (errmsg, "Overflow of cbuf string");
@@ -586,6 +725,52 @@ int write_hdf_eos_attr
                 return (ERROR);
             }
   
+            /* Convert the UL and LR corners to DDDMMMSSS.SS if the projection
+               is geographic, otherwise write the corners as-is. */
+            if (gmeta->proj_info.proj_type == GCTP_GEO)
+            {
+                ul_corner[0] = deg_to_dms (ul_corner[0]);
+                ul_corner[1] = deg_to_dms (ul_corner[1]);
+                lr_corner[0] = deg_to_dms (lr_corner[0]);
+                lr_corner[1] = deg_to_dms (lr_corner[1]);
+        
+                count = snprintf (cbuf, sizeof (cbuf),
+                    "\t\tUpperLeftPointMtrs=(%.2f,%.2f)\n" 
+                    "\t\tLowerRightMtrs=(%.2f,%.2f)\n" 
+                    "\t\tProjection=GCTP_%s\n", 
+                    ul_corner[0], ul_corner[1], lr_corner[0], lr_corner[1],
+                    proj_str);
+                if (count < 0 || count >= sizeof (cbuf))
+                {
+                    sprintf (errmsg, "Overflow of cbuf string");
+                    error_handler (true, FUNC_NAME, errmsg);
+                    return (ERROR);
+                }
+            }
+            else
+            {
+                count = snprintf (cbuf, sizeof (cbuf),
+                    "\t\tUpperLeftPointMtrs=(%.6f,%.6f)\n" 
+                    "\t\tLowerRightMtrs=(%.6f,%.6f)\n" 
+                    "\t\tProjection=GCTP_%s\n", 
+                    ul_corner[0], ul_corner[1], lr_corner[0], lr_corner[1],
+                    proj_str);
+                if (count < 0 || count >= sizeof (cbuf))
+                {
+                    sprintf (errmsg, "Overflow of cbuf string");
+                    error_handler (true, FUNC_NAME, errmsg);
+                    return (ERROR);
+                }
+            }
+
+            if (!append_meta (struct_meta, &meta_indx, cbuf))
+            {
+                sprintf (errmsg, "Error appending to metadata string (grid "
+                    "information start)");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
             /* Write projection information */
             if (gmeta->proj_info.proj_type == GCTP_UTM_PROJ)
             {
@@ -607,8 +792,8 @@ int write_hdf_eos_attr
                     return (ERROR);
                 }
             }
-            else
-            {
+            else if (gmeta->proj_info.proj_type != GCTP_GEO_PROJ)
+            {  /* don't write projection parameters for Geographic */
                 /* Write the projection parameters */
                 count = snprintf (cbuf, sizeof (cbuf), "\t\tProjParams=(");
                 if (count < 0 || count >= sizeof (cbuf))
@@ -641,28 +826,35 @@ int write_hdf_eos_attr
                         break;
         
                     case GCTP_ALBERS_PROJ:
-                        proj_parms[2] = gmeta->proj_info.standard_parallel1;
-                        proj_parms[3] = gmeta->proj_info.standard_parallel2;
-                        proj_parms[4] = gmeta->proj_info.central_meridian;
-                        proj_parms[5] = gmeta->proj_info.origin_latitude;
+                        proj_parms[2] =
+                            deg_to_dms (gmeta->proj_info.standard_parallel1);
+                        proj_parms[3] =
+                            deg_to_dms (gmeta->proj_info.standard_parallel2);
+                        proj_parms[4] =
+                            deg_to_dms (gmeta->proj_info.central_meridian);
+                        proj_parms[5] =
+                            deg_to_dms (gmeta->proj_info.origin_latitude);
                         proj_parms[6] = gmeta->proj_info.false_easting;
                         proj_parms[7] = gmeta->proj_info.false_northing;
                         break;
             
                     case GCTP_PS_PROJ:
-                        proj_parms[4] = gmeta->proj_info.longitude_pole;
-                        proj_parms[5] = gmeta->proj_info.latitude_true_scale;
+                        proj_parms[4] =
+                            deg_to_dms (gmeta->proj_info.longitude_pole);
+                        proj_parms[5] =
+                            deg_to_dms (gmeta->proj_info.latitude_true_scale);
                         proj_parms[6] = gmeta->proj_info.false_easting;
                         proj_parms[7] = gmeta->proj_info.false_northing;
                         break;
             
                     case GCTP_SIN_PROJ:
                         proj_parms[0] = gmeta->proj_info.sphere_radius;
-                        proj_parms[4] = gmeta->proj_info.central_meridian;
+                        proj_parms[4] =
+                            deg_to_dms (gmeta->proj_info.central_meridian);
                         proj_parms[6] = gmeta->proj_info.false_easting;
                         proj_parms[7] = gmeta->proj_info.false_northing;
                         break;
-            
+
                     default:
                         sprintf (errmsg, "Unsupported projection type (%d).  "
                             "GEO projection code (%d) or UTM projection code "
@@ -677,8 +869,12 @@ int write_hdf_eos_attr
 
                 for (i = 0; i < NPROJ_PARAM; i++)
                 {
-                    count = snprintf (cbuf, sizeof (cbuf), "%.6f,",
-                        proj_parms[i]);
+                    if (i == NPROJ_PARAM-1)
+                        count = snprintf (cbuf, sizeof (cbuf), "%.6f)",
+                            proj_parms[i]);
+                    else
+                        count = snprintf (cbuf, sizeof (cbuf), "%.6f,",
+                            proj_parms[i]);
                     if (count < 0 || count >= sizeof (cbuf))
                     {
                         sprintf (errmsg, "Overflow of cbuf string");
@@ -712,34 +908,61 @@ int write_hdf_eos_attr
                 }
             }
   
-            /* Only print the datum if it's valid */
-            if (gmeta->proj_info.datum_type != ESPA_NODATUM)
+            switch (gmeta->proj_info.datum_type)
             {
-                switch (gmeta->proj_info.datum_type)
-                {
-                    case (ESPA_WGS84): strcpy (datum_str, "WGS84"); break;
-                    case (ESPA_NAD83): strcpy (datum_str, "NAD83"); break;
-                    case (ESPA_NAD27): strcpy (datum_str, "NAD27"); break;
-                }
+                case (ESPA_WGS84):
+                    sphere_code = SPHERE_WGS84;
+                    strcpy (datum_str, "WGS84");
+                    break;
+                case (ESPA_NAD83):
+                    sphere_code = SPHERE_GRS80;
+                    strcpy (datum_str, "NAD83");
+                    break;
+                case (ESPA_NAD27):
+                    sphere_code = SPHERE_CLARKE_1866;
+                    strcpy (datum_str, "NAD27");
+                    break;
+                case (ESPA_NODATUM):
+                    sphere_code = -999;
+                    strcpy (datum_str, "NoDatum");
+                    break;
+            }
           
-                count = snprintf (cbuf, sizeof (cbuf),
-                    "\t\tDatumCode=%s\n", datum_str);
-                if (count < 0 || count >= sizeof (cbuf))
+            /* Don't write the sphere code if this is the Geographic
+               projection */
+            if (gmeta->proj_info.proj_type != GCTP_GEO_PROJ)
+            {
+                if (gmeta->proj_info.datum_type != ESPA_NODATUM)
                 {
-                    sprintf (errmsg, "Overflow of cbuf string");
-                    error_handler (true, FUNC_NAME, errmsg);
-                    return (ERROR);
+                    count = snprintf (cbuf, sizeof (cbuf),
+                        "\t\tSphereCode=%d\n", sphere_code);
+                    if (count < 0 || count >= sizeof (cbuf))
+                    {
+                        sprintf (errmsg, "Overflow of cbuf string");
+                        error_handler (true, FUNC_NAME, errmsg);
+                        return (ERROR);
+                    }
+        
+                    if (!append_meta (struct_meta, &meta_indx, cbuf))
+                    {
+                        sprintf (errmsg, "Error appending to metadata string "
+                            "(grid information end)");
+                        error_handler (true, FUNC_NAME, errmsg);
+                        return (ERROR);
+                    }
                 }
             }
         
             count = snprintf (cbuf, sizeof (cbuf),
-                "\t\tGridOrigin=HDFE_GD_UL\n");
+                "\t\tDatum=%s\n"
+                "\t\tGridOrigin=HDFE_GD_UL\n", datum_str);
             if (count < 0 || count >= sizeof (cbuf))
             {
                 sprintf (errmsg, "Overflow of cbuf string");
                 error_handler (true, FUNC_NAME, errmsg);
                 return (ERROR);
             }
+        
             if (!append_meta (struct_meta, &meta_indx, cbuf))
             {
                 sprintf (errmsg, "Error appending to metadata string (grid "
