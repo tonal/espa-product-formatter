@@ -36,6 +36,7 @@ NOTES:
 #define ESPA_NS "http://espa.cr.usgs.gov/v1.0"
 #define ESPA_SCHEMA_LOCATION "http://espa.cr.usgs.gov/v1.0"
 #define ESPA_SCHEMA "http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd"
+#define LOCAL_ESPA_SCHEMA "/usr/local/espa-common/schema/espa_internal_metadata_v1_0.xsd"
 
 /* Data types */
 enum Espa_data_type
