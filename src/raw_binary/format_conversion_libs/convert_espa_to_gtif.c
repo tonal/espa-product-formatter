@@ -82,7 +82,7 @@ int convert_espa_to_gtif
     /* Get the ESPA schema environment variable which specifies the location
        of the XML schema to be used */
     schema = getenv ("ESPA_SCHEMA");
-    if (schema == NULL || stat (schema, &statbuf) == -1)
+    if (schema == NULL)
     {  /* ESPA schema environment variable wasn't defined. Try the version in
           /usr/local... */
         schema = LOCAL_ESPA_SCHEMA;
