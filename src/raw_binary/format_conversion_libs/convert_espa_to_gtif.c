@@ -20,9 +20,7 @@ NOTES:
      the ESPA internal metadata format is available at
      http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd.
 *****************************************************************************/
-
 #include <unistd.h>
-#include <sys/stat.h>
 #include "convert_espa_to_gtif.h"
 
 /******************************************************************************
@@ -47,8 +45,6 @@ Date         Programmer       Reason
                               specified to be deleted
 4/30/2014    Gail Schmidt     Remove the .tif.aux.xml files that were created
                               by GDAL in the conversion to GeoTIFF
-8/5/2014     Gail Schmidt     Obtain the location of the ESPA schema file from
-                              an environment variable vs. the ESPA http site
 
 NOTES:
   1. The GDAL tools will be used for converting the raw binary (ENVI format)
@@ -71,37 +67,15 @@ int convert_espa_to_gtif
     char hdr_file[STR_SIZE];    /* name of the header file for this band */
     char xml_file[STR_SIZE];    /* new XML file for the GeoTIFF product */
     char tmpfile[STR_SIZE];     /* filename of file.tif.aux.xml */
-    char *schema = NULL;        /* ESPA schema file */
     char *cptr = NULL;          /* pointer to empty space in the band name */
     int i;                      /* looping variable for each band */
     int count;                  /* number of chars copied in snprintf */
     Espa_internal_meta_t xml_metadata;  /* XML metadata structure to be
                                    populated by reading the XML metadata file */
-    struct stat statbuf;        /* buffer for the file stat function */
-
-    /* Get the ESPA schema environment variable which specifies the location
-       of the XML schema to be used */
-    schema = getenv ("ESPA_SCHEMA");
-    if (schema == NULL)
-    {  /* ESPA schema environment variable wasn't defined. Try the version in
-          /usr/local... */
-        schema = LOCAL_ESPA_SCHEMA;
-        if (stat (schema, &statbuf) == -1)
-        {  /* /usr/local ESPA schema file doesn't exist.  Try the version on
-              the ESPA http site... */
-            schema = ESPA_SCHEMA;
-        }
-    }
 
     /* Validate the input metadata file */
-    printf ("Validating schema with %s ...\n", schema);
-    if (validate_xml_file (espa_xml_file, schema) != SUCCESS)
+    if (validate_xml_file (espa_xml_file) != SUCCESS)
     {  /* Error messages already written */
-        sprintf (errmsg, "Possible schema file not found.  ESPA_SCHEMA "
-            "environment variable isn't defined.  The first default schema "
-            "location of %s doesn't exist.  And the second default location of "
-            "%s was used as the last default.", LOCAL_ESPA_SCHEMA, ESPA_SCHEMA);
-        error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
 

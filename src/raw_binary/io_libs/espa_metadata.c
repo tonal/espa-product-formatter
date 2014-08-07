@@ -21,7 +21,7 @@ NOTES:
      http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd.
   2. This code relies on the libxml2 library developed for the Gnome project.
 *****************************************************************************/
-
+#include <sys/stat.h>
 #include "espa_metadata.h"
 
 /******************************************************************************
@@ -40,24 +40,43 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/13/2013   Gail Schmidt     Original development
+8/5/2014     Gail Schmidt     Obtain the location of the ESPA schema file from
+                              an environment variable vs. the ESPA http site
 
 NOTES:
 ******************************************************************************/
 int validate_xml_file
 (
-    char *meta_file,          /* I: name of metadata file to be validated */
-    char *schema_file         /* I: name of schema file or URL to be validated
-                                    against */
+    char *meta_file           /* I: name of metadata file to be validated */
 )
 {
     char FUNC_NAME[] = "validate_xml_file";   /* function name */
     char errmsg[STR_SIZE];        /* error message */
+    char *schema_file = NULL;     /* name of schema file or URL to be validated
+                                     against */
     int status;                   /* return status */
     xmlDocPtr doc = NULL;         /* resulting document tree */
     xmlSchemaPtr schema = NULL;   /* pointer to the schema */
     xmlSchemaParserCtxtPtr ctxt = NULL;  /* parser context for the schema */
     xmlSchemaValidCtxtPtr valid_ctxt = NULL;  /* pointer to validate from the
                                                  schema */
+    struct stat statbuf;          /* buffer for the file stat function */
+
+    /* Get the ESPA schema environment variable which specifies the location
+       of the XML schema to be used */
+    schema_file = getenv ("ESPA_SCHEMA");
+    if (schema_file == NULL)
+    {  /* ESPA schema environment variable wasn't defined. Try the version in
+          /usr/local... */
+        schema_file = LOCAL_ESPA_SCHEMA;
+        if (stat (schema_file, &statbuf) == -1)
+        {  /* /usr/local ESPA schema file doesn't exist.  Try the version on
+              the ESPA http site... */
+            schema_file = ESPA_SCHEMA;
+        }
+    }
+    printf ("Validating %s metadata file with %s ...\n", meta_file,
+        schema_file);
 
     /* Set up the schema parser and parse the schema file/URL */
     xmlLineNumbersDefault (1);
@@ -74,6 +93,11 @@ int validate_xml_file
     if (doc == NULL)
     {
         sprintf (errmsg, "Could not parse %s", meta_file);
+        error_handler (true, FUNC_NAME, errmsg);
+        sprintf (errmsg, "Possible schema file not found.  ESPA_SCHEMA "
+            "environment variable isn't defined.  The first default schema "
+            "location of %s doesn't exist.  And the second default location of "
+            "%s was used as the last default.", LOCAL_ESPA_SCHEMA, ESPA_SCHEMA);
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }

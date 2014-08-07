@@ -23,9 +23,7 @@ NOTES:
      the ESPA internal metadata format is available at
      http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd.
 *****************************************************************************/
-
 #include <math.h>
-#include <sys/stat.h>
 #include "subset_metadata.h"
 
 /******************************************************************************
@@ -949,8 +947,6 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/10/2014    Gail Schmidt     Original development
-8/5/2014     Gail Schmidt     Obtain the location of the ESPA schema file from
-                              an environment variable vs. the ESPA http site
 
 NOTES:
   1. If no bands match the product type, then the global and projection
@@ -968,36 +964,14 @@ int subset_xml_by_product
 {
     char FUNC_NAME[] = "subset_xml_by_product";   /* function name */
     char errmsg[STR_SIZE];   /* error message */
-    char *schema = NULL;     /* ESPA schema file */
     Espa_internal_meta_t in_xml_metadata;  /* XML metadata structure to be
                                 populated by reading the input XML file */
     Espa_internal_meta_t out_xml_metadata; /* XML metadata structure to be
                                 populated by subsetting the input XML */
-    struct stat statbuf;     /* buffer for the file stat function */
-
-    /* Get the ESPA schema environment variable which specifies the location
-       of the XML schema to be used */
-    schema = getenv ("ESPA_SCHEMA");
-    if (schema == NULL || stat (schema, &statbuf) == -1)
-    {  /* ESPA schema environment variable wasn't defined. Try the version in
-          /usr/local... */
-        schema = LOCAL_ESPA_SCHEMA;
-        if (stat (schema, &statbuf) == -1)
-        {  /* /usr/local ESPA schema file doesn't exist.  Try the version on
-              the ESPA http site... */
-            schema = ESPA_SCHEMA;
-        }
-    }
 
     /* Validate the input metadata file */
-    printf ("Validating schema with %s ...\n", schema);
-    if (validate_xml_file (in_xml_file, schema) != SUCCESS)
+    if (validate_xml_file (in_xml_file) != SUCCESS)
     {  /* Error messages already written */
-        sprintf (errmsg, "Possible schema file not found.  ESPA_SCHEMA "
-            "environment variable isn't defined.  The first default schema "
-            "location of %s doesn't exist.  And the second default location of "
-            "%s was used as the last default.", LOCAL_ESPA_SCHEMA, ESPA_SCHEMA);
-        error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
 
@@ -1028,14 +1002,8 @@ int subset_xml_by_product
     }
 
     /* Validate the output metadata file */
-    printf ("Validating schema with %s ...\n", schema);
-    if (validate_xml_file (out_xml_file, schema) != SUCCESS)
+    if (validate_xml_file (out_xml_file) != SUCCESS)
     {  /* Error messages already written */
-        sprintf (errmsg, "Possible schema file not found.  ESPA_SCHEMA "
-            "environment variable isn't defined.  The first default schema "
-            "location of %s doesn't exist.  And the second default location of "
-            "%s was used as the last default.", LOCAL_ESPA_SCHEMA, ESPA_SCHEMA);
-        error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
 
@@ -1081,36 +1049,14 @@ int subset_xml_by_band
 {
     char FUNC_NAME[] = "subset_xml_by_band";   /* function name */
     char errmsg[STR_SIZE];   /* error message */
-    char *schema = NULL;     /* ESPA schema file */
     Espa_internal_meta_t in_xml_metadata;  /* XML metadata structure to be
                                 populated by reading the input XML file */
     Espa_internal_meta_t out_xml_metadata; /* XML metadata structure to be
                                 populated by subsetting the input XML */
-    struct stat statbuf;     /* buffer for the file stat function */
-
-    /* Get the ESPA schema environment variable which specifies the location
-       of the XML schema to be used */
-    schema = getenv ("ESPA_SCHEMA");
-    if (schema == NULL || stat (schema, &statbuf) == -1)
-    {  /* ESPA schema environment variable wasn't defined. Try the version in
-          /usr/local... */
-        schema = LOCAL_ESPA_SCHEMA;
-        if (stat (schema, &statbuf) == -1)
-        {  /* /usr/local ESPA schema file doesn't exist.  Try the version on
-              the ESPA http site... */
-            schema = ESPA_SCHEMA;
-        }
-    }
 
     /* Validate the input metadata file */
-    printf ("Validating schema with %s ...\n", schema);
-    if (validate_xml_file (in_xml_file, schema) != SUCCESS)
+    if (validate_xml_file (in_xml_file) != SUCCESS)
     {  /* Error messages already written */
-        sprintf (errmsg, "Possible schema file not found.  ESPA_SCHEMA "
-            "environment variable isn't defined.  The first default schema "
-            "location of %s doesn't exist.  And the second default location of "
-            "%s was used as the last default.", LOCAL_ESPA_SCHEMA, ESPA_SCHEMA);
-        error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
 
@@ -1141,13 +1087,8 @@ int subset_xml_by_band
     }
 
     /* Validate the output metadata file */
-    if (validate_xml_file (out_xml_file, schema) != SUCCESS)
+    if (validate_xml_file (out_xml_file) != SUCCESS)
     {  /* Error messages already written */
-        sprintf (errmsg, "Possible schema file not found.  ESPA_SCHEMA "
-            "environment variable isn't defined.  The first default schema "
-            "location of %s doesn't exist.  And the second default location of "
-            "%s was used as the last default.", LOCAL_ESPA_SCHEMA, ESPA_SCHEMA);
-        error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
 

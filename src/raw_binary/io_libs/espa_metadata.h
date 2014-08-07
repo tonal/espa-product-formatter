@@ -188,9 +188,7 @@ typedef struct
 /* Prototypes */
 int validate_xml_file
 (
-    char *meta_file,          /* I: name of metadata file to be validated */
-    char *schema_file         /* I: name of schema file or URL to be validated
-                                    against */
+    char *meta_file           /* I: name of metadata file to be validated */
 );
 
 void init_metadata_struct

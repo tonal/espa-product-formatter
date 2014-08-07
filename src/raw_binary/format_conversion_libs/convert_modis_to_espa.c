@@ -20,7 +20,6 @@ NOTES:
      the ESPA internal metadata format is available at
      http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd.
 *****************************************************************************/
-
 #include <unistd.h>
 #include <math.h>
 #include <ctype.h>
@@ -2056,24 +2055,8 @@ int convert_modis_to_espa
 {
     char FUNC_NAME[] = "convert_modis_to_espa";  /* function name */
     char errmsg[STR_SIZE];   /* error message */
-    char *schema = NULL;     /* ESPA schema file */
     Espa_internal_meta_t xml_metadata;  /* XML metadata structure to be
                                 populated by reading the MTL metadata file */
-    struct stat statbuf;     /* buffer for the file stat function */
-
-    /* Get the ESPA schema environment variable which specifies the location
-       of the XML schema to be used */
-    schema = getenv ("ESPA_SCHEMA");
-    if (schema == NULL)
-    {  /* ESPA schema environment variable wasn't defined. Try the version in
-          /usr/local... */
-        schema = LOCAL_ESPA_SCHEMA;
-        if (stat (schema, &statbuf) == -1)
-        {  /* /usr/local ESPA schema file doesn't exist.  Try the version on
-              the ESPA http site... */
-            schema = ESPA_SCHEMA;
-        }
-    }
 
     /* Initialize the metadata structure */
     init_metadata_struct (&xml_metadata);
@@ -2095,14 +2078,8 @@ int convert_modis_to_espa
     }
 
     /* Validate the output metadata file */
-    printf ("Validating schema with %s ...\n", schema);
-    if (validate_xml_file (espa_xml_file, schema) != SUCCESS)
+    if (validate_xml_file (espa_xml_file) != SUCCESS)
     {  /* Error messages already written */
-        sprintf (errmsg, "Possible schema file not found.  ESPA_SCHEMA "
-            "environment variable isn't defined.  The first default schema "
-            "location of %s doesn't exist.  And the second default location of "
-            "%s was used as the last default.", LOCAL_ESPA_SCHEMA, ESPA_SCHEMA);
-        error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
 
