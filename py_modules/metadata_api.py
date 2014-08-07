@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Mon Jul 14 14:37:56 2014 by generateDS.py version 2.12b.
+# Generated Thu Aug  7 11:29:30 2014 by generateDS.py version 2.12b.
 #
 # Generated with the ESPA modified version of generateDS.py
 # See espa google code project.
@@ -4067,7 +4067,7 @@ def validate_xml(rootObj, xmlns=None, xmlns_xsi=None, schema_uri=None):
 
 # ESPA - Added a module method to allow exporting from the module level with
 #        validation
-def export(outFile, rootObj, xmlns='http://espa.cr.usgs.gov/v1.0', xmlns_xsi='http://www.w3.org/2001/XMLSchema-instance', schema_uri='http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd'):
+def export(outFile, rootObj, xmlns='http://espa.cr.usgs.gov/v1.0', xmlns_xsi='http://www.w3.org/2001/XMLSchema-instance', schema_uri='http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_0.xsd'):
     ns_def = build_ns_def(xmlns, xmlns_xsi, schema_uri)
 
     rootObj.set_version('1.0.0')
