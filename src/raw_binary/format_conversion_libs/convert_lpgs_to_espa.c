@@ -1416,6 +1416,9 @@ int convert_lpgs_to_espa
     char lpgs_bands[MAX_LPGS_BANDS][STR_SIZE];  /* array containing the file
                                 names of the LPGS bands */
 
+    /* Initialize the metadata structure */
+    init_metadata_struct (&xml_metadata);
+
     /* Read the LPGS MTL file and populate our internal ESPA metadata
        structure */
     if (read_lpgs_mtl (lpgs_mtl_file, &xml_metadata, &nlpgs_bands,
