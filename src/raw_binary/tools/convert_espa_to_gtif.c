@@ -20,7 +20,7 @@ NOTES:
   1. The XML metadata format parsed or written via this library follows the
      ESPA internal metadata format found in ESPA Raw Binary Format v1.0.doc.
      The schema for the ESPA internal metadata format is available at
-     http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd.
+     http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_0.xsd.
 *****************************************************************************/
 #include <getopt.h>
 #include "convert_espa_to_gtif.h"

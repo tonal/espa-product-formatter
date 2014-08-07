@@ -20,7 +20,7 @@ NOTES:
   1. The XML metadata format written via this library follows the ESPA internal
      metadata format found in ESPA Raw Binary Format v1.0.doc.  The schema for
      the ESPA internal metadata format is available at
-     http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd.
+     http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_0.xsd.
 *****************************************************************************/
 
 #include <math.h>
@@ -120,13 +120,13 @@ int write_metadata
         "        <solar_angles zenith=\"%f\" azimuth=\"%f\" units=\"%s\"/>\n",
         gmeta->solar_zenith, gmeta->solar_azimuth, gmeta->solar_units);
 
-    if (fabs (gmeta->wrs_system != ESPA_INT_META_FILL))
+    if (gmeta->wrs_system != ESPA_INT_META_FILL)
         fprintf (fptr,
         "        <wrs system=\"%d\" path=\"%d\" row=\"%d\"/>\n",
         gmeta->wrs_system, gmeta->wrs_path, gmeta->wrs_row);
 
-    if (fabs (gmeta->htile != ESPA_INT_META_FILL) &&
-        fabs (gmeta->vtile != ESPA_INT_META_FILL))
+    if (gmeta->htile != ESPA_INT_META_FILL &&
+        gmeta->vtile != ESPA_INT_META_FILL)
         fprintf (fptr,
         "        <modis htile=\"%d\" vtile=\"%d\"/>\n",
         gmeta->htile, gmeta->vtile);
@@ -524,9 +524,9 @@ int append_metadata
         if (bmeta[i].saturate_value != ESPA_INT_META_FILL)
             fprintf (fptr, " saturate_value=\"%d\"",
             bmeta[i].saturate_value);
-        if (fabs (bmeta[i].scale_factor-ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        if (fabs (bmeta[i].scale_factor - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
             fprintf (fptr, " scale_factor=\"%f\"", bmeta[i].scale_factor);
-        if (fabs (bmeta[i].add_offset-ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        if (fabs (bmeta[i].add_offset - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
             fprintf (fptr, " add_offset=\"%f\"", bmeta[i].add_offset);
         fprintf (fptr, ">\n");
 
@@ -594,7 +594,7 @@ int append_metadata
                 "            <qa_description>%s"
                 "            </qa_description>\n", bmeta[i].qa_desc);
 
-        if (fabs (bmeta[i].calibrated_nt-ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        if (fabs (bmeta[i].calibrated_nt - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
         {
             fprintf (fptr,
                 "            <calibrated_nt>%f</calibrated_nt>\n",
