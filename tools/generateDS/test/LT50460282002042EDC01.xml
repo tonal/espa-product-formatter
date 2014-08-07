@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<espa_metadata version="1.0.0"
+xmlns="http://espa.cr.usgs.gov/v1.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://espa.cr.usgs.gov/v1.0 http://espa.cr.usgs.gov/static/schema/espa_internal_metadata_v1_0.xsd">
+
+    <global_metadata>
+        <data_provider>USGS/EROS</data_provider>
+        <satellite>LANDSAT_5</satellite>
+        <instrument>TM</instrument>
+        <acquisition_date>2002-02-11</acquisition_date>
+        <scene_center_time>18:34:40.5660000Z</scene_center_time>
+        <level1_production_date>2014-01-13T06:49:56Z</level1_production_date>
+        <solar_angles zenith="64.810051" azimuth="150.464523" units="degrees"/>
+        <wrs system="2" path="46" row="28"/>
+        <lpgs_metadata_file>LT50460282002042EDC01_MTL.txt</lpgs_metadata_file>
+        <corner location="UL" latitude="47.018340" longitude="-124.013170"/>
+        <corner location="LR" latitude="45.027950" longitude="-120.949910"/>
+        <bounding_coordinates>
+            <west>-124.013367</west>
+            <east>-120.875356</east>
+            <north>47.022955</north>
+            <south>45.027814</south>
+        </bounding_coordinates>
+        <projection_information projection="UTM" sphere_code="12"
+            units="meters">
+            <corner_point location="UL" x="423000.000000" y="5207700.000000"/>
+            <corner_point location="LR" x="661500.000000" y="4988100.000000"/>
+            <grid_origin>CENTER</grid_origin>
+            <utm_proj_params>
+                <zone_code>10</zone_code>
+            </utm_proj_params>
+        </projection_information>
+        <orientation_angle>0.000000</orientation_angle>
+    </global_metadata>
+
+    <bands>
+        <band product="L1T" name="band1" category="image" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="0">
+            <short_name>LT5DN</short_name>
+            <long_name>band 1 digital numbers</long_name>
+            <file_name>LT50460282002042EDC01_B1.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>digital numbers</data_units>
+            <valid_range min="1" max="255"/>
+            <toa_reflectance gain="0.766000" bias="-2.285830"/>
+            <app_version>LPGS_12.3.1</app_version>
+            <production_date>2014-01-13T06:49:56Z</production_date>
+        </band>
+        <band product="L1T" name="band2" category="image" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="0">
+            <short_name>LT5DN</short_name>
+            <long_name>band 2 digital numbers</long_name>
+            <file_name>LT50460282002042EDC01_B2.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>digital numbers</data_units>
+            <valid_range min="1" max="255"/>
+            <toa_reflectance gain="1.448000" bias="-4.288190"/>
+            <app_version>LPGS_12.3.1</app_version>
+            <production_date>2014-01-13T06:49:56Z</production_date>
+        </band>
+        <band product="L1T" name="band3" category="image" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="0">
+            <short_name>LT5DN</short_name>
+            <long_name>band 3 digital numbers</long_name>
+            <file_name>LT50460282002042EDC01_B3.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>digital numbers</data_units>
+            <valid_range min="1" max="255"/>
+            <toa_reflectance gain="1.044000" bias="-2.213980"/>
+            <app_version>LPGS_12.3.1</app_version>
+            <production_date>2014-01-13T06:49:56Z</production_date>
+        </band>
+        <band product="L1T" name="band4" category="image" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="0">
+            <short_name>LT5DN</short_name>
+            <long_name>band 4 digital numbers</long_name>
+            <file_name>LT50460282002042EDC01_B4.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>digital numbers</data_units>
+            <valid_range min="1" max="255"/>
+            <toa_reflectance gain="0.876000" bias="-2.386020"/>
+            <app_version>LPGS_12.3.1</app_version>
+            <production_date>2014-01-13T06:49:56Z</production_date>
+        </band>
+        <band product="L1T" name="band5" category="image" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="0">
+            <short_name>LT5DN</short_name>
+            <long_name>band 5 digital numbers</long_name>
+            <file_name>LT50460282002042EDC01_B5.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>digital numbers</data_units>
+            <valid_range min="1" max="255"/>
+            <toa_reflectance gain="0.120000" bias="-0.490350"/>
+            <app_version>LPGS_12.3.1</app_version>
+            <production_date>2014-01-13T06:49:56Z</production_date>
+        </band>
+        <band product="L1T" name="band6" category="image" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="0">
+            <short_name>LT5DN</short_name>
+            <long_name>band 6 digital numbers</long_name>
+            <file_name>LT50460282002042EDC01_B6.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>digital numbers</data_units>
+            <valid_range min="1" max="255"/>
+            <toa_reflectance gain="0.055000" bias="1.182430"/>
+            <app_version>LPGS_12.3.1</app_version>
+            <production_date>2014-01-13T06:49:56Z</production_date>
+        </band>
+        <band product="L1T" name="band7" category="image" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="0">
+            <short_name>LT5DN</short_name>
+            <long_name>band 7 digital numbers</long_name>
+            <file_name>LT50460282002042EDC01_B7.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>digital numbers</data_units>
+            <valid_range min="1" max="255"/>
+            <toa_reflectance gain="0.066000" bias="-0.215550"/>
+            <app_version>LPGS_12.3.1</app_version>
+            <production_date>2014-01-13T06:49:56Z</production_date>
+        </band>
+        <band product="toa_refl" source="level1" name="toa_band1" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5REF</short_name>
+            <long_name>band 1 TOA reflectance</long_name>
+            <file_name>LT50460282002042EDC01_toa_band1.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-100" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:41Z</production_date>
+        </band>
+        <band product="toa_refl" source="level1" name="toa_band2" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5REF</short_name>
+            <long_name>band 2 TOA reflectance</long_name>
+            <file_name>LT50460282002042EDC01_toa_band2.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-100" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:41Z</production_date>
+        </band>
+        <band product="toa_refl" source="level1" name="toa_band3" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5REF</short_name>
+            <long_name>band 3 TOA reflectance</long_name>
+            <file_name>LT50460282002042EDC01_toa_band3.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-100" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:41Z</production_date>
+        </band>
+        <band product="toa_refl" source="level1" name="toa_band4" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5REF</short_name>
+            <long_name>band 4 TOA reflectance</long_name>
+            <file_name>LT50460282002042EDC01_toa_band4.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-100" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:41Z</production_date>
+        </band>
+        <band product="toa_refl" source="level1" name="toa_band5" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5REF</short_name>
+            <long_name>band 5 TOA reflectance</long_name>
+            <file_name>LT50460282002042EDC01_toa_band5.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-100" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:41Z</production_date>
+        </band>
+        <band product="toa_refl" source="level1" name="toa_band7" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5REF</short_name>
+            <long_name>band 7 TOA reflectance</long_name>
+            <file_name>LT50460282002042EDC01_toa_band7.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-100" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:41Z</production_date>
+        </band>
+        <band product="toa_refl" source="level1" name="toa_qa" category="qa" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="1">
+            <short_name>LT5REF</short_name>
+            <long_name>QA band</long_name>
+            <file_name>LT50460282002042EDC01_toa_qa.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>bitmap</data_units>
+            <valid_range min="0" max="255"/>
+            <bitmap_description>
+                <bit num="0">Data Fill Flag (0 = valid data, 1 = invalid data)</bit>
+                <bit num="1">Band 1 Data Saturation Flag (0 = valid data, 1 = saturated data)</bit>
+                <bit num="2">Band 2 Data Saturation Flag (0 = valid data, 1 = saturated data)</bit>
+                <bit num="3">Band 3 Data Saturation Flag (0 = valid data, 1 = saturated data)</bit>
+                <bit num="4">Band 4 Data Saturation Flag (0 = valid data, 1 = saturated data)</bit>
+                <bit num="5">Band 5 Data Saturation Flag (0 = valid data, 1 = saturated data)</bit>
+                <bit num="6">Band 6 Data Saturation Flag (not set)</bit>
+                <bit num="7">Band 7 Data Saturation Flag (0 = valid data, 1 = saturated data)</bit>
+            </bitmap_description>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:41Z</production_date>
+        </band>
+        <band product="toa_bt" source="level1" name="toa_band6" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.100000" add_offset="0.000000">
+            <short_name>LT5BT</short_name>
+            <long_name>band 6 brightness temperature</long_name>
+            <file_name>LT50460282002042EDC01_toa_band6.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>temperature (kelvin)</data_units>
+            <valid_range min="1500" max="3500"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:41Z</production_date>
+        </band>
+        <band product="toa_bt" source="level1" name="toa_bt_qa" category="qa" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="1">
+            <short_name>LT5BT</short_name>
+            <long_name>QA band</long_name>
+            <file_name>LT50460282002042EDC01_toa_bt_qa.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>bitmap</data_units>
+            <valid_range min="0" max="255"/>
+            <bitmap_description>
+                <bit num="0">Data Fill Flag (0 = valid data, 1 = invalid data)</bit>
+                <bit num="1">Band 1 Data Saturation Flag (not set)</bit>
+                <bit num="2">Band 2 Data Saturation Flag (not set)</bit>
+                <bit num="3">Band 3 Data Saturation Flag (not set)</bit>
+                <bit num="4">Band 4 Data Saturation Flag (not set)</bit>
+                <bit num="5">Band 5 Data Saturation Flag (not set)</bit>
+                <bit num="6">Band 6 Data Saturation Flag (0 = valid data, 1 = saturated data)</bit>
+                <bit num="7">Band 7 Data Saturation Flag (not set)</bit>
+            </bitmap_description>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:41Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_band1" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5SR</short_name>
+            <long_name>band 1 surface reflectance</long_name>
+            <file_name>LT50460282002042EDC01_sr_band1.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-2000" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_band2" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5SR</short_name>
+            <long_name>band 2 surface reflectance</long_name>
+            <file_name>LT50460282002042EDC01_sr_band2.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-2000" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_band3" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5SR</short_name>
+            <long_name>band 3 surface reflectance</long_name>
+            <file_name>LT50460282002042EDC01_sr_band3.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-2000" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_band4" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5SR</short_name>
+            <long_name>band 4 surface reflectance</long_name>
+            <file_name>LT50460282002042EDC01_sr_band4.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-2000" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_band5" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5SR</short_name>
+            <long_name>band 5 surface reflectance</long_name>
+            <file_name>LT50460282002042EDC01_sr_band5.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-2000" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_band7" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100" add_offset="0.000000">
+            <short_name>LT5SR</short_name>
+            <long_name>band 7 surface reflectance</long_name>
+            <file_name>LT50460282002042EDC01_sr_band7.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-2000" max="16000"/>
+            <calibrated_nt>5.000000</calibrated_nt>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_atmos_opacity" category="image" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" scale_factor="0.001000">
+            <short_name>LT5SR</short_name>
+            <long_name>atmos_opacity</long_name>
+            <file_name>LT50460282002042EDC01_sr_atmos_opacity.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>reflectance</data_units>
+            <valid_range min="-2000" max="16000"/>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_fill_qa" category="qa" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="0">
+            <short_name>LT5SR</short_name>
+            <long_name>fill_qa</long_name>
+            <file_name>LT50460282002042EDC01_sr_fill_qa.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>quality/feature classification</data_units>
+            <valid_range min="0" max="255"/>
+            <class_values>
+                <class num="0">fill</class>
+                <class num="255">not fill</class>
+            </class_values>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_ddv_qa" category="qa" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="255">
+            <short_name>LT5SR</short_name>
+            <long_name>ddv_qa</long_name>
+            <file_name>LT50460282002042EDC01_sr_ddv_qa.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>quality/feature classification</data_units>
+            <valid_range min="0" max="255"/>
+            <class_values>
+                <class num="0">dark dense vegetation</class>
+                <class num="255">not dark dense vegetation</class>
+            </class_values>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_cloud_qa" category="qa" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="255">
+            <short_name>LT5SR</short_name>
+            <long_name>cloud_qa</long_name>
+            <file_name>LT50460282002042EDC01_sr_cloud_qa.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>quality/feature classification</data_units>
+            <valid_range min="0" max="255"/>
+            <class_values>
+                <class num="0">cloud</class>
+                <class num="255">not cloud</class>
+            </class_values>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_cloud_shadow_qa" category="qa" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="255">
+            <short_name>LT5SR</short_name>
+            <long_name>cloud_shadow_qa</long_name>
+            <file_name>LT50460282002042EDC01_sr_cloud_shadow_qa.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>quality/feature classification</data_units>
+            <valid_range min="0" max="255"/>
+            <class_values>
+                <class num="0">cloud shadow</class>
+                <class num="255">not cloud shadow</class>
+            </class_values>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_snow_qa" category="qa" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="255">
+            <short_name>LT5SR</short_name>
+            <long_name>snow_qa</long_name>
+            <file_name>LT50460282002042EDC01_sr_snow_qa.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>quality/feature classification</data_units>
+            <valid_range min="0" max="255"/>
+            <class_values>
+                <class num="0">snow</class>
+                <class num="255">not snow</class>
+            </class_values>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_land_water_qa" category="qa" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="255">
+            <short_name>LT5SR</short_name>
+            <long_name>land_water_qa</long_name>
+            <file_name>LT50460282002042EDC01_sr_land_water_qa.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>quality/feature classification</data_units>
+            <valid_range min="0" max="255"/>
+            <class_values>
+                <class num="0">land</class>
+                <class num="255">water</class>
+            </class_values>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="sr_refl" source="toa_refl" name="sr_adjacent_cloud_qa" category="qa" data_type="UINT8" nlines="7321" nsamps="7951" fill_value="255">
+            <short_name>LT5SR</short_name>
+            <long_name>adjacent_cloud_qa</long_name>
+            <file_name>LT50460282002042EDC01_sr_adjacent_cloud_qa.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>quality/feature classification</data_units>
+            <valid_range min="0" max="255"/>
+            <class_values>
+                <class num="0">adjacent cloud</class>
+                <class num="255">not adjacent cloud</class>
+            </class_values>
+            <app_version>LEDAPS_2.0.0</app_version>
+            <production_date>2014-03-24T14:59:51Z</production_date>
+        </band>
+        <band product="spectral_indices" source="sr_refl" name="ndvi" category="index" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100">
+            <short_name>LT5NDVI</short_name>
+            <long_name>normalized difference vegetation index</long_name>
+            <file_name>LT50460282002042EDC01_sr_ndvi.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>band ratio index value</data_units>
+            <valid_range min="-10000" max="10000"/>
+            <app_version>spectral_indices_1.3.0</app_version>
+            <production_date>2014-03-24T15:09:43Z</production_date>
+        </band>
+        <band product="spectral_indices" source="sr_refl" name="evi" category="index" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100">
+            <short_name>LT5EVI</short_name>
+            <long_name>enhanced vegetation index</long_name>
+            <file_name>LT50460282002042EDC01_sr_evi.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>band ratio index value</data_units>
+            <valid_range min="-10000" max="10000"/>
+            <app_version>spectral_indices_1.3.0</app_version>
+            <production_date>2014-03-24T15:09:43Z</production_date>
+        </band>
+        <band product="spectral_indices" source="sr_refl" name="ndmi" category="index" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100">
+            <short_name>LT5NDMI</short_name>
+            <long_name>normalized difference moisture index</long_name>
+            <file_name>LT50460282002042EDC01_sr_ndmi.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>band ratio index value</data_units>
+            <valid_range min="-10000" max="10000"/>
+            <app_version>spectral_indices_1.3.0</app_version>
+            <production_date>2014-03-24T15:09:43Z</production_date>
+        </band>
+        <band product="spectral_indices" source="sr_refl" name="savi" category="index" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100">
+            <short_name>LT5SAVI</short_name>
+            <long_name>soil adjusted vegetation index</long_name>
+            <file_name>LT50460282002042EDC01_sr_savi.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>band ratio index value</data_units>
+            <valid_range min="-10000" max="10000"/>
+            <app_version>spectral_indices_1.3.0</app_version>
+            <production_date>2014-03-24T15:09:43Z</production_date>
+        </band>
+        <band product="spectral_indices" source="sr_refl" name="msavi" category="index" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100">
+            <short_name>LT5MSAVI</short_name>
+            <long_name>modified soil adjusted vegetation index</long_name>
+            <file_name>LT50460282002042EDC01_sr_msavi.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>band ratio index value</data_units>
+            <valid_range min="-10000" max="10000"/>
+            <app_version>spectral_indices_1.3.0</app_version>
+            <production_date>2014-03-24T15:09:43Z</production_date>
+        </band>
+        <band product="spectral_indices" source="sr_refl" name="nbr" category="index" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100">
+            <short_name>LT5NBR</short_name>
+            <long_name>normalized burn ratio</long_name>
+            <file_name>LT50460282002042EDC01_sr_nbr.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>band ratio index value</data_units>
+            <valid_range min="-10000" max="10000"/>
+            <app_version>spectral_indices_1.3.0</app_version>
+            <production_date>2014-03-24T15:09:43Z</production_date>
+        </band>
+        <band product="spectral_indices" source="sr_refl" name="nbr2" category="index" data_type="INT16" nlines="7321" nsamps="7951" fill_value="-9999" saturate_value="20000" scale_factor="0.000100">
+            <short_name>LT5NBR2</short_name>
+            <long_name>normalized burn ratio 2</long_name>
+            <file_name>LT50460282002042EDC01_sr_nbr2.img</file_name>
+            <pixel_size x="30.000000" y="30.000000" units="meters"/>
+            <data_units>band ratio index value</data_units>
+            <valid_range min="-10000" max="10000"/>
+            <app_version>spectral_indices_1.3.0</app_version>
+            <production_date>2014-03-24T15:09:43Z</production_date>
+        </band>
+    </bands>
+</espa_metadata>
