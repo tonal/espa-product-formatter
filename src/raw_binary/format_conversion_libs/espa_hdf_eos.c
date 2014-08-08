@@ -134,6 +134,7 @@ bool append_meta
     return true;
 }
 
+
 /******************************************************************************
 MODULE:  write_hdf_eos_attr
 
@@ -1338,6 +1339,766 @@ int write_hdf_eos_attr
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
         }
+    }
+
+    /* Close access */
+    if (Vend (hdf_id) == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error ending Vgroup access");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (Hclose (hdf_id) == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error ending HDF access");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    return (SUCCESS);
+}
+
+
+/******************************************************************************
+MODULE:  write_hdf_eos_attr_old
+
+PURPOSE:  Write the spatial definition HDF-EOS attributes to the old-style HDF
+file and move the SDSs to the Grid.  This will only write out particular SDSs
+based on the hdfname_mapping specified in this routine.
+
+RETURN VALUE:
+Type = int
+Value      Description
+-----      -----------
+ERROR      Error occurred writing the metadata to the HDF file
+SUCCESS    Successful completion
+
+PROJECT:  Land Satellites Data System Science Research and Development (LSRD)
+at the USGS EROS
+
+HISTORY:
+Date         Programmer       Reason
+---------    ---------------  -------------------------------------
+8/7/2014     Gail Schmidt     Original Development
+
+NOTES:
+******************************************************************************/
+int write_hdf_eos_attr_old
+(
+    char *hdf_file,            /* I: HDF file to write attributes to */
+    Espa_internal_meta_t *xml_metadata   /* I: XML metadata structure */
+)
+{
+    char FUNC_NAME[] = "write_hdf_eos_attr_old";  /* function name */
+    char errmsg[STR_SIZE];                    /* error message */
+    char grid_name[] = "Grid";                /* name of the HDF-EOS grid */
+    char struct_meta[ESPA_MAX_METADATA_SIZE]; /* structural metadata */
+    char cbuf[ESPA_MAX_METADATA_SIZE];        /* temp buffer for metadata */
+    char *dim_names[2] = {"YDim", "XDim"};    /* base names for dimensions */
+    char proj_str[STR_SIZE];                  /* projection string */
+    char datum_str[STR_SIZE];                 /* datum string */
+    char dtype[STR_SIZE];                     /* data type */
+    char temp_name[STR_SIZE];                 /* temporary grid name */
+    double ul_corner[2];     /* UL corner x,y -- Geographic is DMS */
+    double lr_corner[2];     /* LR corner x,y -- Geographic is DMS */
+    double proj_parms[NPROJ_PARAM];  /* projection parameters */
+    double dval;             /* temporary double value */
+    int meta_indx;           /* index of current location in metadata buffer */
+    int sphere_code;         /* GCTP value for the associated spheroid */
+    int i;                   /* looping variable */
+    int indx;                /* band index for sr_band1 */
+    int bnd;                 /* looping variable for the desired bands */
+    int count;               /* number of chars copied in snprintf */
+    int isds;                /* looping variable for SDSs */
+    int nfields;             /* number of fields written for this grid */
+    int32 hdf_id;            /* HDF-EOS file ID */
+    int32 hdf_file_id;       /* HDF file ID */
+    int32 vgroup_id[3];      /* array to hold Vgroup IDs */
+    int32 sds_index;         /* index of SDS in the HDF file */
+    int32 sds_id;            /* SDS ID */
+    Espa_hdf_attr_t attr;    /* attributes for writing the metadata */
+    Espa_global_meta_t *gmeta = &xml_metadata->global;
+                             /* pointer to global metadata structure */
+
+    /* This identifies the mapping of SDS names that we will use for the new
+       HDF file to the old HDF file.  Also identifies the order in which the
+       SDSs will be written to the old HDF file format. */
+    #define NOLD_SR 17
+    const char hdfname_mapping[NOLD_SR][2][STR_SIZE] = {
+       {"sr_band1", "band1"},
+       {"sr_band2", "band2"},
+       {"sr_band3", "band3"},
+       {"sr_band4", "band4"},
+       {"sr_band5", "band5"},
+       {"sr_band7", "band7"},
+       {"sr_atmos_opacity", "atmos_opacity"},
+       {"sr_fill_qa", "fill_QA"},
+       {"sr_ddv_qa", "DDV_QA"},
+       {"sr_cloud_qa", "cloud_QA"},
+       {"sr_cloud_shadow_qa", "cloud_shadow_QA"},
+       {"sr_snow_qa", "snow_QA"},
+       {"sr_land_water_qa", "land_water_QA"},
+       {"sr_adjacent_cloud_qa", "adjacent_cloud_QA"},
+       {"toa_band6", "band6"},
+       {"toa_band6_qa", "band6_fill_QA"},
+       {"fmask", "fmask_band"}};
+  
+    /* Write out the Grid info based on the sr_band1 file */
+    indx = -99;
+    for (i = 0; i < xml_metadata->nbands; i++)
+    {
+        /* If this is the sr_band1 then use it for the Grid info */
+        if (!strcmp (xml_metadata->band[i].name, hdfname_mapping[0][0]))
+            indx = i;
+    }
+
+    /* Build the HDF-EOS header */
+    meta_indx = 0;
+    count = snprintf (cbuf, sizeof (cbuf),
+        "\nGROUP=SwathStructure\n" 
+        "END_GROUP=SwathStructure\n" 
+        "GROUP=GridStructure\n" 
+        "\tGROUP=GRID_1\n");
+    if (count < 0 || count >= sizeof (cbuf))
+    {
+        sprintf (errmsg, "Overflow of cbuf string");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    if (!append_meta (struct_meta, &meta_indx, cbuf))
+    {
+        sprintf (errmsg, "Error appending to the start of the metadata string");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    /** Build the metadata for the first grid (possibly the only grid if this
+        isn't a multi-resolution product) using the information from the first
+        band **/
+    /* Get the projection name string */
+    switch (gmeta->proj_info.proj_type)
+    {
+        case (GCTP_GEO_PROJ): strcpy (proj_str, "GEO"); break;
+        case (GCTP_UTM_PROJ): strcpy (proj_str, "UTM"); break;
+        case (GCTP_PS_PROJ): strcpy (proj_str, "PS"); break;
+        case (GCTP_ALBERS_PROJ): strcpy (proj_str, "ALBERS"); break;
+        case (GCTP_SIN_PROJ): strcpy (proj_str, "SNSOID"); break;
+    }
+  
+    /* If the grid origin is center, then adjust for the resolution.  The
+       corners will be written for the UL of the corner. */
+    if (!strcmp (gmeta->proj_info.grid_origin, "CENTER"))
+    {
+        ul_corner[0] = gmeta->proj_info.ul_corner[0] -
+            0.5 * xml_metadata->band[indx].pixel_size[0];
+        ul_corner[1] = gmeta->proj_info.ul_corner[1] +
+            0.5 * xml_metadata->band[indx].pixel_size[1];
+        lr_corner[0] = gmeta->proj_info.lr_corner[0] -
+            0.5 * xml_metadata->band[indx].pixel_size[0];
+        lr_corner[1] = gmeta->proj_info.lr_corner[1] +
+            0.5 * xml_metadata->band[indx].pixel_size[1];
+    }
+    else
+    {
+        ul_corner[0] = gmeta->proj_info.ul_corner[0];
+        ul_corner[1] = gmeta->proj_info.ul_corner[1];
+        lr_corner[0] = gmeta->proj_info.lr_corner[0];
+        lr_corner[1] = gmeta->proj_info.lr_corner[1];
+    }
+
+    /* Write the Grid information for the first resolution in the product */
+    count = snprintf (cbuf, sizeof (cbuf),
+        "\t\tGridName=\"%s\"\n" 
+        "\t\tXDim=%d\n" 
+        "\t\tYDim=%d\n" 
+        "\t\tPixelSize=%g,%g\n",
+        grid_name, xml_metadata->band[indx].nsamps,
+        xml_metadata->band[indx].nlines, 
+        xml_metadata->band[indx].pixel_size[0],
+        xml_metadata->band[indx].pixel_size[1]);
+    if (count < 0 || count >= sizeof (cbuf))
+    {
+        sprintf (errmsg, "Overflow of cbuf string");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    if (!append_meta (struct_meta, &meta_indx, cbuf))
+    {
+        sprintf (errmsg, "Error appending to metadata string (grid information "
+            "start)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    /* Convert the UL and LR corners to DDDMMMSSS.SS if the projection
+       is geographic, otherwise write the corners as-is. */
+    if (gmeta->proj_info.proj_type == GCTP_GEO)
+    {
+        ul_corner[0] = deg_to_dms (ul_corner[0]);
+        ul_corner[1] = deg_to_dms (ul_corner[1]);
+        lr_corner[0] = deg_to_dms (lr_corner[0]);
+        lr_corner[1] = deg_to_dms (lr_corner[1]);
+
+        count = snprintf (cbuf, sizeof (cbuf),
+            "\t\tUpperLeftPointMtrs=(%.2f,%.2f)\n" 
+            "\t\tLowerRightMtrs=(%.2f,%.2f)\n" 
+            "\t\tProjection=GCTP_%s\n", 
+            ul_corner[0], ul_corner[1], lr_corner[0], lr_corner[1], proj_str);
+        if (count < 0 || count >= sizeof (cbuf))
+        {
+            sprintf (errmsg, "Overflow of cbuf string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+    }
+    else
+    {
+        count = snprintf (cbuf, sizeof (cbuf),
+            "\t\tUpperLeftPointMtrs=(%.6f,%.6f)\n" 
+            "\t\tLowerRightMtrs=(%.6f,%.6f)\n" 
+            "\t\tProjection=GCTP_%s\n", 
+            ul_corner[0], ul_corner[1], lr_corner[0], lr_corner[1], proj_str);
+        if (count < 0 || count >= sizeof (cbuf))
+        {
+            sprintf (errmsg, "Overflow of cbuf string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+    }
+
+    if (!append_meta (struct_meta, &meta_indx, cbuf))
+    {
+        sprintf (errmsg, "Error appending to metadata string (grid information "
+            "start)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    /* Write projection information */
+    if (gmeta->proj_info.proj_type == GCTP_UTM_PROJ)
+    {
+        /* Write the UTM zone */
+        count = snprintf (cbuf, sizeof (cbuf),
+            "\t\tZoneCode=%d\n", gmeta->proj_info.utm_zone);
+        if (count < 0 || count >= sizeof (cbuf))
+        {
+            sprintf (errmsg, "Overflow of cbuf string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        if (!append_meta (struct_meta, &meta_indx, cbuf))
+        {
+            sprintf (errmsg, "Error appending to metadata string (zone "
+                "number)");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+    }
+    else if (gmeta->proj_info.proj_type != GCTP_GEO_PROJ)
+    {  /* don't write projection parameters for Geographic */
+        /* Write the projection parameters */
+        count = snprintf (cbuf, sizeof (cbuf), "\t\tProjParams=(");
+        if (count < 0 || count >= sizeof (cbuf))
+        {
+            sprintf (errmsg, "Overflow of cbuf string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        if (!append_meta (struct_meta, &meta_indx, cbuf))
+        {
+            sprintf (errmsg, "Error appending to metadata string (grid "
+                "projection parameters start)");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+  
+        for (i = 0; i < NPROJ_PARAM; i++)
+            proj_parms[i] = 0.0;
+
+        switch (gmeta->proj_info.proj_type)
+        {
+            case GCTP_GEO_PROJ:
+                /* just use the already initialized zeros for the proj parms */
+                break;
+    
+            case GCTP_UTM_PROJ:
+                /* UTM handled in the if statement above */
+                break;
+
+            case GCTP_ALBERS_PROJ:
+                proj_parms[2] =
+                    deg_to_dms (gmeta->proj_info.standard_parallel1);
+                proj_parms[3] =
+                    deg_to_dms (gmeta->proj_info.standard_parallel2);
+                proj_parms[4] = deg_to_dms (gmeta->proj_info.central_meridian);
+                proj_parms[5] = deg_to_dms (gmeta->proj_info.origin_latitude);
+                proj_parms[6] = gmeta->proj_info.false_easting;
+                proj_parms[7] = gmeta->proj_info.false_northing;
+                break;
+    
+            case GCTP_PS_PROJ:
+                proj_parms[4] = deg_to_dms (gmeta->proj_info.longitude_pole);
+                proj_parms[5] =
+                    deg_to_dms (gmeta->proj_info.latitude_true_scale);
+                proj_parms[6] = gmeta->proj_info.false_easting;
+                proj_parms[7] = gmeta->proj_info.false_northing;
+                break;
+    
+            case GCTP_SIN_PROJ:
+                proj_parms[0] = gmeta->proj_info.sphere_radius;
+                proj_parms[4] = deg_to_dms (gmeta->proj_info.central_meridian);
+                proj_parms[6] = gmeta->proj_info.false_easting;
+                proj_parms[7] = gmeta->proj_info.false_northing;
+                break;
+    
+            default:
+                sprintf (errmsg, "Unsupported projection type (%d).  GEO "
+                    "projection code (%d) or UTM projection code (%d) or "
+                    "ALBERS projection code (%d) or PS projection code (%d) or "
+                    "SIN projection code (%d) expected.",
+                    gmeta->proj_info.proj_type, GCTP_GEO_PROJ, GCTP_UTM_PROJ,
+                    GCTP_ALBERS_PROJ, GCTP_PS_PROJ, GCTP_SIN_PROJ);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+        }
+
+        for (i = 0; i < NPROJ_PARAM; i++)
+        {
+            if (i == NPROJ_PARAM-1)
+                count = snprintf (cbuf, sizeof (cbuf), "%.6f)", proj_parms[i]);
+            else
+                count = snprintf (cbuf, sizeof (cbuf), "%.6f,", proj_parms[i]);
+            if (count < 0 || count >= sizeof (cbuf))
+            {
+                sprintf (errmsg, "Overflow of cbuf string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            if (!append_meta (struct_meta, &meta_indx, cbuf))
+            {
+                sprintf (errmsg, "Error appending to metadata string ("
+                    "individual grid projection parameters)");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+        }
+
+        count = snprintf (cbuf, sizeof (cbuf), "\n");
+        if (count < 0 || count >= sizeof (cbuf))
+        {
+            sprintf (errmsg, "Overflow of cbuf string");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        if (!append_meta (struct_meta, &meta_indx, cbuf))
+        {
+            sprintf (errmsg, "Error appending to metadata string (grid "
+                "projection parameters end)");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+    }
+  
+    switch (gmeta->proj_info.datum_type)
+    {
+        case (ESPA_WGS84):
+            sphere_code = SPHERE_WGS84;
+            strcpy (datum_str, "WGS84");
+            break;
+        case (ESPA_NAD83):
+            sphere_code = SPHERE_GRS80;
+            strcpy (datum_str, "NAD83");
+            break;
+        case (ESPA_NAD27):
+            sphere_code = SPHERE_CLARKE_1866;
+            strcpy (datum_str, "NAD27");
+            break;
+        case (ESPA_NODATUM):
+            sphere_code = -999;
+            strcpy (datum_str, "NoDatum");
+            break;
+    }
+  
+    /* Don't write the sphere code if this is the Geographic projection */
+    if (gmeta->proj_info.proj_type != GCTP_GEO_PROJ)
+    {
+        if (gmeta->proj_info.datum_type != ESPA_NODATUM)
+        {
+            count = snprintf (cbuf, sizeof (cbuf),
+                "\t\tSphereCode=%d\n", sphere_code);
+            if (count < 0 || count >= sizeof (cbuf))
+            {
+                sprintf (errmsg, "Overflow of cbuf string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            if (!append_meta (struct_meta, &meta_indx, cbuf))
+            {
+                sprintf (errmsg, "Error appending to metadata string (grid "
+                    "information end)");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+        }
+    }
+  
+    count = snprintf (cbuf, sizeof (cbuf),
+        "\t\tDatum=%s\n"
+        "\t\tGridOrigin=HDFE_GD_UL\n", datum_str);
+    if (count < 0 || count >= sizeof (cbuf))
+    {
+        sprintf (errmsg, "Overflow of cbuf string");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    if (!append_meta (struct_meta, &meta_indx, cbuf))
+    {
+        sprintf (errmsg, "Error appending to metadata string (grid information "
+            "end)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    /* Put SDS group */
+    count = snprintf (cbuf, sizeof (cbuf),
+        "\t\tGROUP=Dimension\n" 
+        "\t\tEND_GROUP=Dimension\n"
+        "\t\tGROUP=DataField\n");
+    if (count < 0 || count >= sizeof (cbuf))
+    {
+        sprintf (errmsg, "Overflow of cbuf string");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    if (!append_meta (struct_meta, &meta_indx, cbuf))
+    {
+        sprintf (errmsg, "Error appending to metadata string (SDS group "
+            "start)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    /* Loop through the bands in the XML file and write each as a member of
+       the current grid.  We want to write in a particular order however,
+       versus the order of the bands in the XML file. */
+    nfields = 0;
+    for (bnd = 0; bnd < NOLD_SR; bnd++)
+    {
+        for (isds = 0; isds < xml_metadata->nbands; isds++)
+        {
+            /* If this is the band we are looking for currently, then process
+               it.  Otherwise skip. */
+            if (!strcmp (xml_metadata->band[isds].name,
+                hdfname_mapping[bnd][0]))
+            {
+                switch (xml_metadata->band[isds].data_type)
+                {
+                    case ESPA_INT8: strcpy (dtype, "DFNT_INT8"); break;
+                    case ESPA_UINT8: strcpy (dtype, "DFNT_UINT8"); break;
+                    case ESPA_INT16: strcpy (dtype, "DFNT_INT16"); break;
+                    case ESPA_UINT16: strcpy (dtype, "DFNT_UINT16"); break;
+                    case ESPA_INT32: strcpy (dtype, "DFNT_INT32"); break;
+                    case ESPA_UINT32: strcpy (dtype, "DFNT_UINT32"); break;
+                    case ESPA_FLOAT32: strcpy (dtype, "DFNT_FLOAT32"); break;
+                    case ESPA_FLOAT64: strcpy (dtype, "DFNT_FLOAT64"); break;
+                }
+
+                count = snprintf (cbuf, sizeof (cbuf),
+                    "\t\t\tOBJECT=DataField_%d\n"
+                    "\t\t\t\tDataFieldName=\"%s\"\n"
+                    "\t\t\t\tDataType=%s\n"
+                    "\t\t\t\tDimList=(\"%s\",\"%s\")\n"
+                    "\t\t\tEND_OBJECT=DataField_%d\n",
+                    nfields+1, hdfname_mapping[bnd][1], dtype,
+                    dim_names[0], dim_names[1], nfields+1);
+                if (count < 0 || count >= sizeof (cbuf))
+                {
+                    sprintf (errmsg, "Overflow of cbuf string");
+                    error_handler (true, FUNC_NAME, errmsg);
+                    return (ERROR);
+                }
+
+                if (!append_meta (struct_meta, &meta_indx, cbuf))
+                {
+                    sprintf (errmsg, "Error appending to metadata string "
+                        "(SDS group)");
+                    error_handler (true, FUNC_NAME, errmsg);
+                    return (ERROR);
+                }
+                nfields++;
+            }
+        }  /* for isds */
+    }  /* for bnd */
+  
+    /* Close off the grid */
+    count = snprintf (cbuf, sizeof (cbuf),
+      "\t\tEND_GROUP=DataField\n" 
+      "\t\tGROUP=MergedFields\n" 
+      "\t\tEND_GROUP=MergedFields\n"
+      "\tEND_GROUP=GRID_1\n");
+    if (count < 0 || count >= sizeof (cbuf))
+    {
+        sprintf (errmsg, "Overflow of cbuf string");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    if (!append_meta (struct_meta, &meta_indx, cbuf))
+    {
+        sprintf (errmsg, "Error appending to metadata string (SDS group end)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    /* Put trailer */
+    count = snprintf (cbuf, sizeof (cbuf),
+        "END_GROUP=GridStructure\n"
+        "GROUP=PointStructure\n"
+        "END_GROUP=PointStructure\n"
+        "END\n");
+    if (count < 0 || count >= sizeof (cbuf))
+    {
+        sprintf (errmsg, "Overflow of cbuf string");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    if (!append_meta (struct_meta, &meta_indx, cbuf))
+    {
+        sprintf (errmsg, "Error appending to metadata string (tail)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    /* Write file attributes */
+    hdf_file_id = SDstart ((char *) hdf_file, DFACC_RDWR);
+    if (hdf_file_id == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error opening file for SD access: %s", hdf_file);
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    
+    attr.type = DFNT_FLOAT64;
+    attr.nval = 1;
+    attr.name = OUTPUT_ORIENTATION_ANGLE_HDF;
+    dval = (double) gmeta->orientation_angle;
+    if (put_attr_double (hdf_file_id, &attr, &dval) != SUCCESS)
+    {
+        sprintf (errmsg, "Error writing attribute (orientation angle)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    attr.type = DFNT_CHAR8;
+    attr.nval = strlen (struct_meta);
+    attr.name = OUTPUT_STRUCT_METADATA;
+    if (put_attr_string (hdf_file_id, &attr, struct_meta) != SUCCESS)
+    {
+        sprintf (errmsg, "Error writing attribute (struct_meta)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    if (SDend (hdf_file_id) == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error ending SD access");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    /* Setup the HDF Vgroup */
+    hdf_id = Hopen ((char *)hdf_file, DFACC_RDWR, 0);
+    if (hdf_id == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error opening the HDF file for Vgroup access: %s",
+            hdf_file);
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    /* Start the Vgroup access */
+    if (Vstart (hdf_id) == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error starting Vgroup access");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    /* Create Vgroup for current Grid */
+    vgroup_id[0] = Vattach (hdf_id, -1, "w");
+    if (vgroup_id[0] == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error getting Grid Vgroup ID");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    count = snprintf (temp_name, sizeof (temp_name), "%s", grid_name);
+    if (count < 0 || count >= sizeof (temp_name))
+    {
+        sprintf (errmsg, "Overflow of temp_name string");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+
+    if (Vsetname (vgroup_id[0], temp_name) == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error setting Grid Vgroup name: %s", temp_name);
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (Vsetclass (vgroup_id[0], "GRID") == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error setting Grid Vgroup class to GRID");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    /* Create Data Fields Vgroup */
+    vgroup_id[1] = Vattach (hdf_id, -1, "w");
+    if (vgroup_id[1] == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error getting Data Fields Vgroup ID");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (Vsetname (vgroup_id[1], "Data Fields") == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error setting Data Fields Vgroup name");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (Vsetclass (vgroup_id[1], "GRID Vgroup") == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error setting Data Fields Vgroup class");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (Vinsert (vgroup_id[0], vgroup_id[1]) == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error inserting Data Fields Vgroup");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    /* Create Attributes Vgroup */
+    vgroup_id[2] = Vattach (hdf_id, -1, "w");
+    if (vgroup_id[2] == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error getting attributes Vgroup ID");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (Vsetname (vgroup_id[2], "Grid Attributes") == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error setting attributes Vgroup name");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (Vsetclass (vgroup_id[2], "GRID Vgroup") == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error setting attributes Vgroup class");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (Vinsert (vgroup_id[0], vgroup_id[2]) == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error inserting attributes Vgroup");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    /* Attach SDSs to Data Fields Vgroup */
+    hdf_file_id = SDstart ((char *)hdf_file, DFACC_RDWR);
+    if (hdf_file_id == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error opening output file for SD access");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    /* Loop through the bands and attach those that are desired in our SDS
+       mapping */
+    for (bnd = 0; bnd < NOLD_SR; bnd++)
+    {
+        for (isds = 0; isds < xml_metadata->nbands; isds++)
+        {
+            /* If this is the band we are looking for currently, then process
+               it.  Otherwise skip. */
+            if (strcmp (xml_metadata->band[isds].name, hdfname_mapping[bnd][0]))
+                continue;
+
+            sds_index = SDnametoindex (hdf_file_id, 
+                hdfname_mapping[bnd][1]);
+            if (sds_index == HDF_ERROR) 
+            {
+                sprintf (errmsg, "Error getting SDS index for SDS[%d]: %s",
+                    isds, hdfname_mapping[bnd][1]);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            sds_id = SDselect (hdf_file_id, sds_index);
+            if (sds_id == HDF_ERROR) 
+            {
+                sprintf (errmsg, "Error getting SDS ID");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            if (Vaddtagref (vgroup_id[1], DFTAG_NDG, SDidtoref(sds_id)) == 
+                HDF_ERROR) 
+            {
+                sprintf (errmsg, "Error adding reference tag to SDS");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            if (SDendaccess (sds_id) == HDF_ERROR) 
+            {
+                sprintf (errmsg, "Error ending access to SDS");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+        }  /* for isds */
+    }  /* for bnd */
+    
+    if (SDend (hdf_file_id) == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error ending SD access");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+
+    /* Detach Vgroups */
+    if (Vdetach (vgroup_id[0]) == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error detaching from Grid Vgroup");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (Vdetach (vgroup_id[1]) == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error detaching from Data Fields Vgroup");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (Vdetach (vgroup_id[2]) == HDF_ERROR) 
+    {
+        sprintf (errmsg, "Error detaching from Attributes Vgroup");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
     }
 
     /* Close access */

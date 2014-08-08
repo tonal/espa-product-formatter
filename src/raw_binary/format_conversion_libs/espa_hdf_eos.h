@@ -57,4 +57,10 @@ int write_hdf_eos_attr
     Espa_internal_meta_t *xml_metadata  /* I: XML metadata structure */
 );
 
+int write_hdf_eos_attr_old
+(
+    char *hdf_file,            /* I: HDF file to write attributes to */
+    Espa_internal_meta_t *xml_metadata  /* I: XML metadata structure */
+);
+
 #endif
