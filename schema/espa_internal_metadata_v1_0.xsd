@@ -8,21 +8,21 @@ elementFormDefault="qualified">
 <xs:simpleType name="angleType">
   <xs:restriction base="xs:float">
     <xs:minInclusive value="-360.0"/>
-    <xs:maxExclusive value="360.0"/>
+    <xs:maxInclusive value="360.0"/>
   </xs:restriction>
 </xs:simpleType>
 
 <xs:simpleType name="latAngleType">
   <xs:restriction base="xs:float">
     <xs:minInclusive value="-90.0"/>
-    <xs:maxExclusive value="90.0"/>
+    <xs:maxInclusive value="90.0"/>
   </xs:restriction>
 </xs:simpleType>
 
 <xs:simpleType name="longAngleType">
   <xs:restriction base="xs:float">
     <xs:minInclusive value="-180.0"/>
-    <xs:maxExclusive value="180.0"/>
+    <xs:maxInclusive value="180.0"/>
   </xs:restriction>
 </xs:simpleType>
 
