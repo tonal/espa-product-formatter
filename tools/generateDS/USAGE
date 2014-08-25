@@ -1,0 +1,5 @@
+Copy your XML schema.xsd file to this location and run the following command
+substituting where needed.
+
+./generateDS.py --external-encoding='UTF-8' -o <module name>.py <schema>.xsd
+

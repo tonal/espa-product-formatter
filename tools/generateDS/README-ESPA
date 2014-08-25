@@ -1,0 +1,24 @@
+
+The files in this directory were originally developed by Dave Kuhlman.
+See the LICENSE file.
+
+The original files copied from version 2.12b are:
+    generateDS.py
+    process_includes.py
+    README
+    LICENSE
+
+Each of the above files has been extracted from the orignal source tarball,
+and are all that are required to generate the python data structures that we
+need from our XML schema.  The original distribution contains a bunch of crap
+that is not required and seems to be for other things, such as django hooks.
+However, some files that maybe imported into generateDS.py have not been
+copied over simply because we do not have an XML schema that uses them, or we
+are not using those command line options.
+
+# ************************************************************************** #
+generateDS.py has been modified in several places so that the output ESPA XML
+created by the generated code matches our expected ESPA XML format as close as
+possible to the C code output format.
+# ************************************************************************** #
+
