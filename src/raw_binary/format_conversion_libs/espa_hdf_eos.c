@@ -165,6 +165,8 @@ Date         Programmer       Reason
 7/24/2014    Gail Schmidt     Need to write the sphere code for correct
                               handling of the HDF-EOS products.  We will leave
                               the datum string as an attribute.
+9/11/2014    Gail Schmidt     Modified to make the lower right corner in meters
+                              represent the outer extent (i.e. LR of the LR)
 
 NOTES:
 ******************************************************************************/
@@ -249,24 +251,33 @@ int write_hdf_eos_attr
     }
   
     /* If the grid origin is center, then adjust for the resolution.  The
-       corners will be written for the UL of the corner. */
+       corners will be written for the outter extents of the corner. */
     if (!strcmp (gmeta->proj_info.grid_origin, "CENTER"))
     {
+        /* UL corner - go from center to UL of UL */
         ul_corner[0] = gmeta->proj_info.ul_corner[0] -
             0.5 * xml_metadata->band[0].pixel_size[0];
         ul_corner[1] = gmeta->proj_info.ul_corner[1] +
             0.5 * xml_metadata->band[0].pixel_size[1];
-        lr_corner[0] = gmeta->proj_info.lr_corner[0] -
+
+        /* LR corner - go from center to LR of LR */
+        lr_corner[0] = gmeta->proj_info.lr_corner[0] +
             0.5 * xml_metadata->band[0].pixel_size[0];
-        lr_corner[1] = gmeta->proj_info.lr_corner[1] +
+        lr_corner[1] = gmeta->proj_info.lr_corner[1] -
             0.5 * xml_metadata->band[0].pixel_size[1];
     }
     else
-    {
+    {  /* Metadata corners are UL of the pixel, thus make the LR corner the
+          outter extent of the corner. */
+        /* UL already represents the UL of UL */
         ul_corner[0] = gmeta->proj_info.ul_corner[0];
         ul_corner[1] = gmeta->proj_info.ul_corner[1];
-        lr_corner[0] = gmeta->proj_info.lr_corner[0];
-        lr_corner[1] = gmeta->proj_info.lr_corner[1];
+
+        /* LR corner - go from UL of LR to LR of LR */
+        lr_corner[0] = gmeta->proj_info.lr_corner[0] +
+            xml_metadata->band[0].pixel_size[0];
+        lr_corner[1] = gmeta->proj_info.lr_corner[1] +
+            xml_metadata->band[0].pixel_size[1];
     }
 
     /* Write the Grid information for the first resolution in the product */
