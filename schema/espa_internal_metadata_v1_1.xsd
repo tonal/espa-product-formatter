@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://espa.cr.usgs.gov/schema"
+xmlns="http://espa.cr.usgs.gov/schema"
+elementFormDefault="qualified">
+
+<!-- definition of simple types -->
+<xs:simpleType name="angleType">
+  <xs:restriction base="xs:float">
+    <xs:minInclusive value="-360.0"/>
+    <xs:maxInclusive value="360.0"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="latAngleType">
+  <xs:restriction base="xs:float">
+    <xs:minInclusive value="-90.0"/>
+    <xs:maxInclusive value="90.0"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="longAngleType">
+  <xs:restriction base="xs:float">
+    <xs:minInclusive value="-180.0"/>
+    <xs:maxInclusive value="180.0"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<!-- support both WRS 1 and 2
+     WRS 1 - paths go from 1 to 251
+           - rows go from 1 to 248
+     WRS 2 - paths go from 1 to 233
+           - rows go from 1 to 248
+-->
+<xs:simpleType name="wrsSystemType">
+  <xs:restriction base="xs:unsignedByte">
+    <xs:minInclusive value="1"/>
+    <xs:maxInclusive value="2"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="wrsPathType">
+  <xs:restriction base="xs:unsignedByte">
+    <xs:minInclusive value="1"/>
+    <xs:maxInclusive value="251"/>  <!-- max of paths for WRS 1 and 2 -->
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="wrsRowType">
+  <xs:restriction base="xs:unsignedByte">
+    <xs:minInclusive value="1"/>
+    <xs:maxInclusive value="248"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="modisHTileType">
+  <xs:restriction base="xs:unsignedByte">
+    <xs:minInclusive value="0"/>
+    <xs:maxInclusive value="35"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="modisVTileType">
+  <xs:restriction base="xs:unsignedByte">
+    <xs:minInclusive value="0"/>
+    <xs:maxInclusive value="17"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="zoneCodeType">
+  <xs:restriction base="xs:int">
+    <xs:minInclusive value="-60"/>
+    <xs:maxInclusive value="60"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="cornerType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="UL"/>
+    <xs:enumeration value="UR"/>
+    <xs:enumeration value="LL"/>
+    <xs:enumeration value="LR"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="projectionType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="GEO"/>
+    <xs:enumeration value="UTM"/>
+    <xs:enumeration value="PS"/>
+    <xs:enumeration value="ALBERS"/>
+    <xs:enumeration value="SIN"/>
+    <!-- Additional projection types can/will be added as needed -->
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="datumType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="WGS84"/>
+    <xs:enumeration value="NAD83"/>
+    <xs:enumeration value="NAD27"/>
+    <!-- Additional datums can/will be added as needed -->
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="gridOriginType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="UL"/>
+    <xs:enumeration value="CENTER"/>
+    <!-- Additional origin types can be added if needed -->
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="sourceType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="level1"/>
+    <xs:enumeration value="toa_refl"/>
+    <xs:enumeration value="sr_refl"/>
+    <!-- Additional data types can be added if needed -->
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="dataType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="INT8"/>
+    <xs:enumeration value="UINT8"/>
+    <xs:enumeration value="INT16"/>
+    <xs:enumeration value="UINT16"/>
+    <xs:enumeration value="INT32"/>
+    <xs:enumeration value="UINT32"/>
+    <xs:enumeration value="FLOAT32"/>
+    <xs:enumeration value="FLOAT64"/>
+    <!-- Additional data types can be added if needed -->
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="categoryType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="image"/>
+    <xs:enumeration value="qa"/>
+    <xs:enumeration value="browse"/>
+    <xs:enumeration value="index"/>
+    <!-- Additional data types can be added if needed -->
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="projectionUnitsType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="meters"/>
+    <xs:enumeration value="degrees"/>
+    <!-- Additional pixel units can be added if needed -->
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="resamplingType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="cubic convolution"/>
+    <xs:enumeration value="nearest neighbor"/>
+    <xs:enumeration value="bilinear"/>
+    <xs:enumeration value="none"/>
+    <!-- Additional resampling types can be added if needed -->
+  </xs:restriction>
+</xs:simpleType>
+
+
+<!-- definition of simple elements -->
+<xs:element name="data_provider" type="xs:string"/>
+<xs:element name="satellite" type="xs:string"/>
+<xs:element name="instrument" type="xs:string"/>
+<xs:element name="acquisition_date" type="xs:date"/>
+<xs:element name="scene_center_time" type="xs:time"/>
+<xs:element name="level1_production_date" type="xs:dateTime"/>
+<xs:element name="lpgs_metadata_file" type="xs:string"/>
+<xs:element name="east" type="longAngleType"/>
+<xs:element name="west" type="longAngleType"/>
+<xs:element name="north" type="latAngleType"/>
+<xs:element name="south" type="latAngleType"/>
+<xs:element name="zone_code" type="zoneCodeType"/>
+<xs:element name="longitude_pole" type="longAngleType"/>
+<xs:element name="latitude_true_scale" type="latAngleType"/>
+<xs:element name="false_easting" type="xs:double"/>
+<xs:element name="false_northing" type="xs:double"/>
+<xs:element name="standard_parallel1" type="latAngleType"/>
+<xs:element name="standard_parallel2" type="latAngleType"/>
+<xs:element name="central_meridian" type="longAngleType"/>
+<xs:element name="origin_latitude" type="latAngleType"/>
+<xs:element name="sphere_radius" type="xs:double"/>
+<xs:element name="grid_origin" type="gridOriginType"/>
+<xs:element name="orientation_angle" type="angleType"/>
+<xs:element name="short_name" type="xs:string"/>
+<xs:element name="long_name" type="xs:string"/>
+<xs:element name="file_name" type="xs:string"/>
+<xs:element name="data_units" type="xs:string"/>
+<xs:element name="qa_description" type="xs:string"/>
+<xs:element name="calibrated_nt" type="xs:float"/>
+<xs:element name="resampling_option" type="resamplingType"/>
+<xs:element name="app_version" type="xs:string"/>
+<xs:element name="production_date" type="xs:dateTime"/>
+<xs:element name="num" type="xs:int"/>
+<xs:element name="desc" type="xs:string"/>
+<xs:element name="class_num" type="xs:int"/>
+<xs:element name="index_desc" type="xs:string"/>
+
+
+<!-- definition of complex elements -->
+<xs:element name="corner">
+  <xs:complexType>
+    <xs:attribute name="location" type="cornerType" use="required"/>
+    <xs:attribute name="latitude" type="latAngleType" use="required"/>
+    <xs:attribute name="longitude" type="longAngleType" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="bounding_coordinates">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="west"/>
+      <xs:element ref="east"/>
+      <xs:element ref="north"/>
+      <xs:element ref="south"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="corner_point">
+  <xs:complexType>
+    <xs:attribute name="location" type="cornerType" use="required"/>
+    <xs:attribute name="x" type="xs:double" use="required"/>
+    <xs:attribute name="y" type="xs:double" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+<!-- geographic proj parms are not needed -->
+
+<xs:element name="utm_proj_params">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="zone_code"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="ps_proj_params">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="longitude_pole"/>
+      <xs:element ref="latitude_true_scale"/>
+      <xs:element ref="false_easting"/>
+      <xs:element ref="false_northing"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="albers_proj_params">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="standard_parallel1"/>
+      <xs:element ref="standard_parallel2"/>
+      <xs:element ref="central_meridian"/>
+      <xs:element ref="origin_latitude"/>
+      <xs:element ref="false_easting"/>
+      <xs:element ref="false_northing"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="sin_proj_params">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="sphere_radius"/>
+      <xs:element ref="central_meridian"/>
+      <xs:element ref="false_easting"/>
+      <xs:element ref="false_northing"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="projection_information">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="corner_point" minOccurs="1" maxOccurs="4"/>
+      <xs:element ref="grid_origin"/>
+
+      <!-- One of the following need to be identified, depending on the
+           projection type. No projection parameters are needed for
+           Geographic. -->
+      <xs:element ref="utm_proj_params" minOccurs="0"/>
+      <xs:element ref="ps_proj_params" minOccurs="0"/>
+      <xs:element ref="albers_proj_params" minOccurs="0"/>
+      <xs:element ref="sin_proj_params" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="projection" type="projectionType" use="required"/>
+    <xs:attribute name="datum" type="datumType" use="optional"/>
+    <xs:attribute name="units" type="projectionUnitsType" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="pixel_size">
+  <xs:complexType>
+    <xs:attribute name="x" type="xs:double" use="required"/>
+    <xs:attribute name="y" type="xs:double" use="required"/>
+    <xs:attribute name="units" type="projectionUnitsType" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="toa_reflectance">
+  <xs:complexType>
+    <xs:attribute name="gain" type="xs:double" use="required"/>
+    <xs:attribute name="bias" type="xs:double" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="solar_angles">
+  <xs:complexType>
+    <xs:attribute name="zenith" type="angleType" use="required"/>
+    <xs:attribute name="azimuth" type="angleType" use="required"/>
+    <xs:attribute name="units" type="projectionUnitsType" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="wrs">
+  <xs:complexType>
+    <xs:attribute name="system" type="wrsSystemType" use="required"/>
+    <xs:attribute name="path" type="wrsPathType" use="required"/>
+    <xs:attribute name="row" type="wrsRowType" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="modis">
+  <xs:complexType>
+    <xs:attribute name="htile" type="modisHTileType" use="required"/>
+    <xs:attribute name="vtile" type="modisVTileType" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="valid_range">
+  <xs:complexType>
+    <xs:attribute name="min" type="xs:long" use="required"/>
+    <xs:attribute name="max" type="xs:long" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="bit">
+  <xs:complexType>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="num" type="xs:int" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="bitmap_description">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="bit" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="class">
+  <xs:complexType>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="num" type="xs:int" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="class_values">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="class" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="band">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="short_name"/>
+      <xs:element ref="long_name"/>
+      <xs:element ref="file_name"/>
+      <xs:element ref="pixel_size"/>
+      <xs:element ref="resampling_option" minOccurs="0"/>
+      <xs:element ref="data_units" minOccurs="0"/>
+      <xs:element ref="valid_range" minOccurs="0"/>
+      <xs:element ref="toa_reflectance" minOccurs="0"/>
+      <xs:element ref="bitmap_description" minOccurs="0"/>
+      <xs:element ref="class_values" minOccurs="0"/>
+      <xs:element ref="qa_description" minOccurs="0"/>
+      <xs:element ref="calibrated_nt" minOccurs="0"/>
+      <xs:element ref="app_version"/>
+      <xs:element ref="production_date"/>
+    </xs:sequence>
+    <xs:attribute name="product" type="xs:string" use="required"/>
+    <xs:attribute name="source" type="sourceType" use="optional"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="category" type="categoryType" use="required"/>
+    <xs:attribute name="data_type" type="dataType" use="required"/>
+    <xs:attribute name="nlines" type="xs:int" use="required"/>
+    <xs:attribute name="nsamps" type="xs:int" use="required"/>
+    <xs:attribute name="fill_value" type="xs:long" use="optional"/>
+    <xs:attribute name="saturate_value" type="xs:int" use="optional"/>
+    <xs:attribute name="scale_factor" type="xs:float" use="optional"/>
+    <xs:attribute name="add_offset" type="xs:float" use="optional"/>
+  </xs:complexType>
+</xs:element>
+
+
+<!-- Start of main XML file -->
+<xs:element name="espa_metadata">
+  <xs:complexType>
+    <xs:sequence>
+
+      <!-- Overall global metadata container -->
+      <xs:element name="global_metadata">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="data_provider"/>
+            <xs:element ref="satellite"/>
+            <xs:element ref="instrument"/>
+            <xs:element ref="acquisition_date" minOccurs="0"/>
+            <xs:element ref="scene_center_time" minOccurs="0"/>
+            <xs:element ref="level1_production_date" minOccurs="0"/>
+            <xs:element ref="solar_angles" minOccurs="0"/>
+            <xs:element ref="wrs" minOccurs="0"/>
+            <xs:element ref="modis" minOccurs="0"/>
+            <xs:element ref="lpgs_metadata_file" minOccurs="0"/>
+            <xs:element ref="corner" minOccurs="1" maxOccurs="4"/>
+            <xs:element ref="bounding_coordinates"/>
+            <xs:element ref="projection_information"/>
+            <xs:element ref="orientation_angle" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      
+      <!-- Overall bands container -->
+      <xs:element name="bands">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="band" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="version" type="xs:string" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema> 
+
