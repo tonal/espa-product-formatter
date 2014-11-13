@@ -1491,6 +1491,7 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/27/2013   Gail Schmidt     Original development
 2/25/2014    Gail Schmidt     Added support for source and category attributes
+11/13/2014   Gail Schmidt     Added support for resampling_option
 
 NOTES:
 ******************************************************************************/
@@ -1751,6 +1752,30 @@ int add_band_metadata
                 error_handler (true, FUNC_NAME, errmsg);
                 return (ERROR);
             }
+        }
+        else if (xmlStrEqual (cur_node->name,
+            (const xmlChar *) "resampling_option"))
+        {
+            /* Expect the child node to be a text node containing the value of
+               this field */
+            if (child_node == NULL || child_node->type != XML_TEXT_NODE) 
+            {
+                sprintf (errmsg, "Processing band metadata element: %s.",
+                    cur_node->name);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            /* Copy the content of the child node into value for this field */
+            if (xmlStrEqual (attr_val, (const xmlChar *) "cubic convolution"))
+                bmeta->resampling_option = ESPA_CC;
+            else if (xmlStrEqual (attr_val,
+                (const xmlChar *) "nearest neighbor"))
+                bmeta->resampling_option = ESPA_NN;
+            else if (xmlStrEqual (attr_val, (const xmlChar *) "bilinear"))
+                bmeta->resampling_option = ESPA_BI;
+            else if (xmlStrEqual (attr_val, (const xmlChar *) "none"))
+                bmeta->resampling_option = ESPA_NONE;
         }
         else if (xmlStrEqual (cur_node->name, (const xmlChar *) "valid_range"))
         {
