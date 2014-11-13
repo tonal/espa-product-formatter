@@ -39,6 +39,7 @@ Date         Programmer       Reason
 12/12/2013   Gail Schmidt     Original development
 4/17/2014    Gail Schmidt     Modified to support additional projections
 4/23/2014    Gail Schmidt     Modified to support additional datums
+11/13/2014   Gail Schmidt     fill_value is now optional
 
 NOTES:
   1. Only supports GEO, UTM, ALBERS, PS, and SIN projections.
@@ -154,13 +155,17 @@ int write_envi_hdr
         "header offset = %d\n"
         "byte order = %d\n"
         "file type = %s\n"
-        "data type = %d\n"
-        "data ignore value = %ld\n"
+        "data type = %d\n",
+        hdr->description, hdr->nsamps, hdr->nlines, hdr->nbands,
+        hdr->header_offset, hdr->byte_order, hdr->file_type, hdr->data_type);
+
+    if (hdr->data_ignore_value != ESPA_INT_META_FILL)
+        fprintf (hdr_fptr, "data ignore value = %ld\n", hdr->data_ignore_value);
+   
+    fprintf (hdr_fptr,
         "interleave = %s\n"
         "sensor_type = %s\n",
-        hdr->description, hdr->nsamps, hdr->nlines, hdr->nbands,
-        hdr->header_offset, hdr->byte_order, hdr->file_type, hdr->data_type,
-        hdr->data_ignore_value, hdr->interleave, hdr->sensor_type);
+        hdr->interleave, hdr->sensor_type);
    
     if (hdr->proj_type == GCTP_GEO_PROJ)
     {
