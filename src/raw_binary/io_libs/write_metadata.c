@@ -45,6 +45,7 @@ Date         Programmer       Reason
 4/17/2014    Gail Schmidt     Modified to support additional projections
 4/22/2014    Gail Schmidt     Modified to support additional datums
 5/7/2014     Gail Schmidt     Updated to support modis tiles
+11/12/2014   Gail Schmidt     Updated to support resampling types
 
 NOTES:
   1. If the XML file specified already exists, it will be overwritten.
@@ -66,6 +67,7 @@ int write_metadata
     char myproj[STR_SIZE];   /* projection type string */
     char mydatum[STR_SIZE];  /* datum string */
     char my_dtype[STR_SIZE]; /* data type string */
+    char my_rtype[STR_SIZE]; /* resampling type string */
     int i, j;                /* looping variables */
     FILE *fptr = NULL;       /* file pointer to the XML metadata file */
     Espa_global_meta_t *gmeta = &metadata->global;  /* pointer to the global
@@ -277,6 +279,15 @@ int write_metadata
             default: strcpy (my_dtype, "undefined"); break;
         }
 
+        switch (bmeta[i].resampling_option)
+        {
+            case ESPA_CC: strcpy (my_rtype, "cubic convolution"); break;
+            case ESPA_NN: strcpy (my_rtype, "nearest neighbor"); break;
+            case ESPA_BI: strcpy (my_rtype, "bilinear"); break;
+            case ESPA_NONE: strcpy (my_rtype, "none"); break;
+            default: strcpy (my_rtype, "undefined"); break;
+        }
+
         if (!strcmp (bmeta[i].source, ESPA_STRING_META_FILL)) /*no source type*/
             fprintf (fptr,
                 "        <band product=\"%s\" name=\"%s\" category=\"%s\" "
@@ -305,10 +316,11 @@ int write_metadata
             "            <short_name>%s</short_name>\n"
             "            <long_name>%s</long_name>\n"
             "            <file_name>%s</file_name>\n"
-            "            <pixel_size x=\"%g\" y=\"%g\" units=\"%s\"/>\n",
+            "            <pixel_size x=\"%g\" y=\"%g\" units=\"%s\"/>\n"
+            "            <resampling_option>%s</resampling_option>\n",
             bmeta[i].short_name, bmeta[i].long_name, bmeta[i].file_name,
             bmeta[i].pixel_size[0], bmeta[i].pixel_size[1],
-            bmeta[i].pixel_units);
+            bmeta[i].pixel_units, my_rtype);
 
         if (strcmp (bmeta[i].data_units, ESPA_STRING_META_FILL))
             fprintf (fptr,

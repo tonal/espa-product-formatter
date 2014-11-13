@@ -45,6 +45,7 @@ Date         Programmer       Reason
 2/28/2014    Gail Schmidt     Added support for the band category; band source
                               will be left blank for the L1 LPGS data
 6/17/2014    Gail Schmidt     Updated for OLI_TIRS
+11/12/2014   Gail Schmidt     Added support for the resampling option
 
 NOTES:
 1. The new MTL files contain the gain and bias coefficients for the TOA
@@ -359,6 +360,23 @@ int read_lpgs_mtl
                 sscanf (tokenptr, "%lf", &gmeta->proj_info.false_easting);
             else if (!strcmp (label, "FALSE_NORTHING"))
                 sscanf (tokenptr, "%lf", &gmeta->proj_info.false_northing);
+
+            else if (!strcmp (label, "RESAMPLING_OPTION"))
+            {
+                if (!strcmp (tokenptr, "CUBIC_CONVOLUTION"))
+                    tmp_bmeta.resampling_option = ESPA_CC;
+                else if (!strcmp (tokenptr, "NEAREST_NEIGHBOR"))
+                    tmp_bmeta.resampling_option = ESPA_NN;
+                else if (!strcmp (tokenptr, "BILINEAR"))
+                    tmp_bmeta.resampling_option = ESPA_BI;
+                else
+                {
+                    sprintf (errmsg, "Unsupported resampling option: %s",
+                        tokenptr);
+                    error_handler (true, FUNC_NAME, errmsg);
+                    return (ERROR);
+                }
+            }
 
             else if (!strcmp (label, "END"))
             {
@@ -901,6 +919,7 @@ int read_lpgs_mtl
             return (ERROR);
         }
 
+        bmeta[i].resampling_option = tmp_bmeta.resampling_option;
         if (!strcmp (gmeta->instrument, "TM"))
         {
             bmeta[i].data_type = ESPA_UINT8;

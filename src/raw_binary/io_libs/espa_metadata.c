@@ -268,6 +268,7 @@ int allocate_band_metadata
         bmeta[i].saturate_value = ESPA_INT_META_FILL;
         bmeta[i].scale_factor = ESPA_FLOAT_META_FILL;
         bmeta[i].add_offset = ESPA_FLOAT_META_FILL;
+        bmeta[i].resampling_option = ESPA_NONE;
         strcpy (bmeta[i].short_name, ESPA_STRING_META_FILL);
         strcpy (bmeta[i].long_name, ESPA_STRING_META_FILL);
         strcpy (bmeta[i].file_name, ESPA_STRING_META_FILL);

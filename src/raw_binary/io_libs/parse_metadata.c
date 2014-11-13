@@ -15,6 +15,7 @@ Date         Programmer       Reason
 2/25/2014    Gail Schmidt     Added support for source and category attributes
                               for the band metadata
 4/17/2014    Gail Schmidt     Added support for additional projections
+11/12/2014   Gail Schmidt     Added support for resampling option
 
 NOTES:
   1. The XML metadata format parsed or written via this library follows the
@@ -1603,6 +1604,18 @@ int add_band_metadata
             bmeta->scale_factor = atof ((const char *) attr_val);
         else if (xmlStrEqual (attr->name, (const xmlChar *) "add_offset"))
             bmeta->add_offset = atof ((const char *) attr_val);
+        else if (xmlStrEqual (attr->name,
+            (const xmlChar *) "resampling_option"))
+        {
+            if (xmlStrEqual (attr_val, (const xmlChar *) "CC"))
+                bmeta->resampling_option = ESPA_CC;
+            else if (xmlStrEqual (attr_val, (const xmlChar *) "NN"))
+                bmeta->resampling_option = ESPA_NN;
+            else if (xmlStrEqual (attr_val, (const xmlChar *) "BI"))
+                bmeta->resampling_option = ESPA_BI;
+            else if (xmlStrEqual (attr_val, (const xmlChar *) "none"))
+                bmeta->resampling_option = ESPA_NONE;
+        }
         else
         {
             sprintf (errmsg, "WARNING: unknown attribute for element (%s): "
