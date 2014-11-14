@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-targetNamespace="http://espa.cr.usgs.gov/schema"
-xmlns="http://espa.cr.usgs.gov/schema"
+targetNamespace="http://espa.cr.usgs.gov/v1.1"
+xmlns="http://espa.cr.usgs.gov/v1.1"
 elementFormDefault="qualified">
 
 <!-- definition of simple types -->
@@ -193,7 +193,7 @@ elementFormDefault="qualified">
 <xs:element name="data_units" type="xs:string"/>
 <xs:element name="qa_description" type="xs:string"/>
 <xs:element name="calibrated_nt" type="xs:float"/>
-<xs:element name="resampling_option" type="resamplingType"/>
+<xs:element name="resample_method" type="resamplingType"/>
 <xs:element name="app_version" type="xs:string"/>
 <xs:element name="production_date" type="xs:dateTime"/>
 <xs:element name="num" type="xs:int"/>
@@ -383,7 +383,7 @@ elementFormDefault="qualified">
       <xs:element ref="long_name"/>
       <xs:element ref="file_name"/>
       <xs:element ref="pixel_size"/>
-      <xs:element ref="resampling_option" minOccurs="0"/>
+      <xs:element ref="resample_method" minOccurs="0"/>
       <xs:element ref="data_units" minOccurs="0"/>
       <xs:element ref="valid_range" minOccurs="0"/>
       <xs:element ref="toa_reflectance" minOccurs="0"/>
