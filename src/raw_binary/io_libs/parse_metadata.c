@@ -15,7 +15,7 @@ Date         Programmer       Reason
 2/25/2014    Gail Schmidt     Added support for source and category attributes
                               for the band metadata
 4/17/2014    Gail Schmidt     Added support for additional projections
-11/12/2014   Gail Schmidt     Added support for resampling option
+11/12/2014   Gail Schmidt     Added support for resample_method
 
 NOTES:
   1. The XML metadata format parsed or written via this library follows the
@@ -1491,7 +1491,7 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/27/2013   Gail Schmidt     Original development
 2/25/2014    Gail Schmidt     Added support for source and category attributes
-11/13/2014   Gail Schmidt     Added support for resampling_option
+11/13/2014   Gail Schmidt     Added support for resample_method
 
 NOTES:
 ******************************************************************************/
@@ -1605,18 +1605,6 @@ int add_band_metadata
             bmeta->scale_factor = atof ((const char *) attr_val);
         else if (xmlStrEqual (attr->name, (const xmlChar *) "add_offset"))
             bmeta->add_offset = atof ((const char *) attr_val);
-        else if (xmlStrEqual (attr->name,
-            (const xmlChar *) "resampling_option"))
-        {
-            if (xmlStrEqual (attr_val, (const xmlChar *) "CC"))
-                bmeta->resampling_option = ESPA_CC;
-            else if (xmlStrEqual (attr_val, (const xmlChar *) "NN"))
-                bmeta->resampling_option = ESPA_NN;
-            else if (xmlStrEqual (attr_val, (const xmlChar *) "BI"))
-                bmeta->resampling_option = ESPA_BI;
-            else if (xmlStrEqual (attr_val, (const xmlChar *) "none"))
-                bmeta->resampling_option = ESPA_NONE;
-        }
         else
         {
             sprintf (errmsg, "WARNING: unknown attribute for element (%s): "
@@ -1731,6 +1719,39 @@ int add_band_metadata
                 xmlFree (attr_val);
             }
         }
+        else if (xmlStrEqual (cur_node->name,
+            (const xmlChar *) "resample_method"))
+        {
+            /* Expect the child node to be a text node containing the value of
+               this field */
+            if (child_node == NULL || child_node->type != XML_TEXT_NODE) 
+            {
+                sprintf (errmsg, "Processing band metadata element: %s.",
+                    cur_node->name);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            /* Use the attribute value to set the resample_method */
+            if (xmlStrEqual (child_node->content,
+                (const xmlChar *) "cubic convolution"))
+                bmeta->resample_method = ESPA_CC;
+            else if (xmlStrEqual (child_node->content,
+                (const xmlChar *) "nearest neighbor"))
+                bmeta->resample_method = ESPA_NN;
+            else if (xmlStrEqual (child_node->content,
+                (const xmlChar *) "bilinear"))
+                bmeta->resample_method = ESPA_BI;
+            else if (xmlStrEqual (child_node->content,
+                (const xmlChar *) "none"))
+                bmeta->resample_method = ESPA_NONE;
+            else
+            {
+                sprintf (errmsg, "WARNING: unknown option for element (%s): "
+                    "%s\n", cur_node->name, child_node->content);
+                error_handler (false, FUNC_NAME, errmsg);
+            }
+        }
         else if (xmlStrEqual (cur_node->name, (const xmlChar *) "data_units"))
         {
             /* Expect the child node to be a text node containing the value of
@@ -1754,7 +1775,7 @@ int add_band_metadata
             }
         }
         else if (xmlStrEqual (cur_node->name,
-            (const xmlChar *) "resampling_option"))
+            (const xmlChar *) "resample_method"))
         {
             /* Expect the child node to be a text node containing the value of
                this field */
@@ -1768,14 +1789,14 @@ int add_band_metadata
 
             /* Copy the content of the child node into value for this field */
             if (xmlStrEqual (attr_val, (const xmlChar *) "cubic convolution"))
-                bmeta->resampling_option = ESPA_CC;
+                bmeta->resample_method = ESPA_CC;
             else if (xmlStrEqual (attr_val,
                 (const xmlChar *) "nearest neighbor"))
-                bmeta->resampling_option = ESPA_NN;
+                bmeta->resample_method = ESPA_NN;
             else if (xmlStrEqual (attr_val, (const xmlChar *) "bilinear"))
-                bmeta->resampling_option = ESPA_BI;
+                bmeta->resample_method = ESPA_BI;
             else if (xmlStrEqual (attr_val, (const xmlChar *) "none"))
-                bmeta->resampling_option = ESPA_NONE;
+                bmeta->resample_method = ESPA_NONE;
         }
         else if (xmlStrEqual (cur_node->name, (const xmlChar *) "valid_range"))
         {

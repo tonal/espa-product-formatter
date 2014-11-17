@@ -45,7 +45,7 @@ Date         Programmer       Reason
 4/17/2014    Gail Schmidt     Modified to support additional projections
 4/22/2014    Gail Schmidt     Modified to support additional datums
 5/7/2014     Gail Schmidt     Updated to support modis tiles
-11/12/2014   Gail Schmidt     Updated to support resampling option
+11/12/2014   Gail Schmidt     Updated to support resample_option
 
 NOTES:
   1. If the XML file specified already exists, it will be overwritten.
@@ -279,7 +279,7 @@ int write_metadata
             default: strcpy (my_dtype, "undefined"); break;
         }
 
-        switch (bmeta[i].resampling_option)
+        switch (bmeta[i].resample_method)
         {
             case ESPA_CC: strcpy (my_rtype, "cubic convolution"); break;
             case ESPA_NN: strcpy (my_rtype, "nearest neighbor"); break;
@@ -317,7 +317,7 @@ int write_metadata
             "            <long_name>%s</long_name>\n"
             "            <file_name>%s</file_name>\n"
             "            <pixel_size x=\"%g\" y=\"%g\" units=\"%s\"/>\n"
-            "            <resampling_option>%s</resampling_option>\n",
+            "            <resample_method>%s</resample_method>\n",
             bmeta[i].short_name, bmeta[i].long_name, bmeta[i].file_name,
             bmeta[i].pixel_size[0], bmeta[i].pixel_size[1],
             bmeta[i].pixel_units, my_rtype);
@@ -421,7 +421,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/30/2013   Gail Schmidt     Original development
-11/12/2014   Gail Schmidt     Updated to support resampling option
+11/12/2014   Gail Schmidt     Updated to support resample_option
 
 NOTES:
   1. If the XML file specified already exists, it will be overwritten.
@@ -520,7 +520,7 @@ int append_metadata
             default: strcpy (my_dtype, "undefined"); break;
         }
 
-        switch (bmeta[i].resampling_option)
+        switch (bmeta[i].resample_method)
         {
             case ESPA_CC: strcpy (my_rtype, "cubic convolution"); break;
             case ESPA_NN: strcpy (my_rtype, "nearest neighbor"); break;
@@ -558,7 +558,7 @@ int append_metadata
             "            <long_name>%s</long_name>\n"
             "            <file_name>%s</file_name>\n"
             "            <pixel_size x=\"%g\" y=\"%g\" units=\"%s\"/>\n"
-            "            <resampling_option>%s</resampling_option>\n",
+            "            <resample_method>%s</resample_method>\n",
             bmeta[i].short_name, bmeta[i].long_name, bmeta[i].file_name,
             bmeta[i].pixel_size[0], bmeta[i].pixel_size[1],
             bmeta[i].pixel_units, my_rtype);
