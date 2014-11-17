@@ -1091,7 +1091,7 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 4/22/2014    Gail Schmidt     Original development
-11/12/2014   Gail Schmidt     Added support for the resampling option
+11/12/2014   Gail Schmidt     Added support for the resample_method
 
 NOTES:
 ******************************************************************************/
@@ -1690,9 +1690,9 @@ int read_modis_hdf
             bmeta[nmodis_bands].valid_range[0] = minvalue[nmodis_bands];
             bmeta[nmodis_bands].valid_range[1] = maxvalue[nmodis_bands];
 
-            /* Set the resampling type to nearest neighbor, since it's not
+            /* Set the resample method to nearest neighbor, since it's not
                available in the MODIS file but it's a known entity. */
-            bmeta[nmodis_bands].resampling_option = ESPA_NN;
+            bmeta[nmodis_bands].resample_method = ESPA_NN;
 
             /* Assign the long_name and data_units values */
             count = snprintf (bmeta[nmodis_bands].long_name,

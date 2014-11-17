@@ -86,6 +86,8 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/6/2014     Gail Schmidt     Original development
 6/17/2014    Gail Schmidt     Updated to support L8
+11/17/2014   Gail Schmidt     Added support for OLI-only instrumentation
+                              vs. combined OLI/TIRS scenes.
 
 NOTES:
 ******************************************************************************/
@@ -313,7 +315,7 @@ int write_global_attributes
             ngain_bias_thm = 0;
         }
     }
-    else if (!strcmp (gmeta->instrument, "OLI_TIRS"))
+    else if (!strncmp (gmeta->instrument, "OLI", 3))
     {
         /* Make sure the gain/bias values actually exist.  Use band 1 for this
            check.  If it doesn't exist then assume none exist. */
@@ -416,7 +418,7 @@ int write_global_attributes
     /* Write pan gain/bias values if this is ETM+ or OLI_TIRS and the
        gains/biases exist in the metadata file */
     if ((!strncmp (gmeta->instrument, "ETM", 3) ||
-         !strcmp (gmeta->instrument, "OLI_TIRS")) && ngain_bias > 0)
+         !strncmp (gmeta->instrument, "OLI", 3)) && ngain_bias > 0)
     {
         /* Gains */
         attr.type = DFNT_FLOAT64;
@@ -424,7 +426,7 @@ int write_global_attributes
         attr.name = OUTPUT_PAN_GAIN;
         if (!strncmp (gmeta->instrument, "ETM", 3))
             dval[0] = (double) xml_metadata->band[8].toa_gain;
-        else if (!strcmp (gmeta->instrument, "OLI_TIRS"))
+        else if (!strncmp (gmeta->instrument, "OLI", 3))
             dval[0] = (double) xml_metadata->band[7].toa_gain;
         if (put_attr_double (hdf_id, &attr, dval) != SUCCESS)
         {
@@ -439,7 +441,7 @@ int write_global_attributes
         attr.name = OUTPUT_PAN_BIAS;
         if (!strncmp (gmeta->instrument, "ETM", 3))
             dval[0] = (double) xml_metadata->band[8].toa_bias;
-        else if (!strcmp (gmeta->instrument, "OLI_TIRS"))
+        else if (!strncmp (gmeta->instrument, "OLI", 3))
             dval[0] = (double) xml_metadata->band[7].toa_bias;
         if (put_attr_double (hdf_id, &attr, dval) != SUCCESS)
         {

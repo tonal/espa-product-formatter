@@ -45,7 +45,9 @@ Date         Programmer       Reason
 2/28/2014    Gail Schmidt     Added support for the band category; band source
                               will be left blank for the L1 LPGS data
 6/17/2014    Gail Schmidt     Updated for OLI_TIRS
-11/12/2014   Gail Schmidt     Added support for the resampling option
+11/12/2014   Gail Schmidt     Added support for the resample_method
+11/17/2014   Gail Schmidt     Added support for OLI-only instrumentation
+                              vs. combined OLI/TIRS scenes.
 
 NOTES:
 1. The new MTL files contain the gain and bias coefficients for the TOA
@@ -364,11 +366,11 @@ int read_lpgs_mtl
             else if (!strcmp (label, "RESAMPLING_OPTION"))
             {
                 if (!strcmp (tokenptr, "CUBIC_CONVOLUTION"))
-                    tmp_bmeta.resampling_option = ESPA_CC;
+                    tmp_bmeta.resample_method = ESPA_CC;
                 else if (!strcmp (tokenptr, "NEAREST_NEIGHBOR"))
-                    tmp_bmeta.resampling_option = ESPA_NN;
+                    tmp_bmeta.resample_method = ESPA_NN;
                 else if (!strcmp (tokenptr, "BILINEAR"))
-                    tmp_bmeta.resampling_option = ESPA_BI;
+                    tmp_bmeta.resample_method = ESPA_BI;
                 else
                 {
                     sprintf (errmsg, "Unsupported resampling option: %s",
@@ -461,7 +463,8 @@ int read_lpgs_mtl
                      !strcmp (label, "BAND7_FILE_NAME"))
             {
                 if (!strcmp (gmeta->instrument, "TM") ||
-                    !strcmp (gmeta->instrument, "OLI_TIRS"))
+                    !strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
                 {  /* only a single band 6 so count is normal */
                     count = snprintf (band_fname[6], sizeof (band_fname[6]),
                         "%s", tokenptr);
@@ -487,7 +490,8 @@ int read_lpgs_mtl
             else if (!strcmp (label, "FILE_NAME_BAND_8") ||
                      !strcmp (label, "BAND8_FILE_NAME"))
             {
-                if (!strcmp (gmeta->instrument, "OLI_TIRS"))
+                if (!strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
                 {  /* only a single band 6 so count is normal */
                     count = snprintf (band_fname[7], sizeof (band_fname[7]),
                         "%s", tokenptr);
@@ -572,13 +576,28 @@ int read_lpgs_mtl
             }
             else if (!strcmp (label, "FILE_NAME_BAND_QUALITY"))
             {
-                count = snprintf (band_fname[11], sizeof (band_fname[11]), "%s",
-                    tokenptr);
-                if (count < 0 || count >= sizeof (band_fname[11]))
-                {
-                    sprintf (errmsg, "Overflow of band_fname[11] string");
-                    error_handler (true, FUNC_NAME, errmsg);
-                    return (ERROR);
+                if (!strcmp (gmeta->instrument, "OLI"))
+                {  /* only 9 bands total so QA is 10 */
+                    count = snprintf (band_fname[9], sizeof (band_fname[9]),
+                        "%s", tokenptr);
+                    if (count < 0 || count >= sizeof (band_fname[9]))
+                    {
+                        sprintf (errmsg, "Overflow of band_fname[9] string");
+                        error_handler (true, FUNC_NAME, errmsg);
+                        return (ERROR);
+                    }
+                }
+                else
+                {  /* OLI_TIRS has 11 bands total so QA is 12 */
+
+                    count = snprintf (band_fname[11], sizeof (band_fname[11]),
+                        "%s", tokenptr);
+                    if (count < 0 || count >= sizeof (band_fname[11]))
+                    {
+                        sprintf (errmsg, "Overflow of band_fname[11] string");
+                        error_handler (true, FUNC_NAME, errmsg);
+                        return (ERROR);
+                    }
                 }
             }
 
@@ -605,7 +624,8 @@ int read_lpgs_mtl
                      !strcmp (label, "QCALMIN_BAND7"))
             {
                 if (!strcmp (gmeta->instrument, "TM") ||
-                    !strcmp (gmeta->instrument, "OLI_TIRS"))
+                    !strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
                     sscanf (tokenptr, "%d", &band_min[6]);
                 else if (!strncmp (gmeta->instrument, "ETM", 3))
                     sscanf (tokenptr, "%d", &band_min[7]);
@@ -613,7 +633,8 @@ int read_lpgs_mtl
             else if (!strcmp (label, "QUANTIZE_CAL_MIN_BAND_8") ||
                      !strcmp (label, "QCALMIN_BAND8"))
             {
-                if (!strcmp (gmeta->instrument, "OLI_TIRS"))
+                if (!strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
                     sscanf (tokenptr, "%d", &band_min[7]);
                 else if (!strncmp (gmeta->instrument, "ETM", 3))
                     sscanf (tokenptr, "%d", &band_min[8]);
@@ -654,7 +675,8 @@ int read_lpgs_mtl
                      !strcmp (label, "QCALMAX_BAND7"))
             {
                 if (!strcmp (gmeta->instrument, "TM") ||
-                    !strcmp (gmeta->instrument, "OLI_TIRS"))
+                    !strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
                     sscanf (tokenptr, "%d", &band_max[6]);
                 else if (!strncmp (gmeta->instrument, "ETM", 3))
                     sscanf (tokenptr, "%d", &band_max[7]);
@@ -662,7 +684,8 @@ int read_lpgs_mtl
             else if (!strcmp (label, "QUANTIZE_CAL_MAX_BAND_8") ||
                      !strcmp (label, "QCALMAX_BAND8"))
             {
-                if (!strcmp (gmeta->instrument, "OLI_TIRS"))
+                if (!strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
                     sscanf (tokenptr, "%d", &band_max[7]);
                 else if (!strncmp (gmeta->instrument, "ETM", 3))
                     sscanf (tokenptr, "%d", &band_max[8]);
@@ -702,14 +725,16 @@ int read_lpgs_mtl
             else if (!strcmp (label, "RADIANCE_MULT_BAND_7"))
             {
                 if (!strcmp (gmeta->instrument, "TM") ||
-                    !strcmp (gmeta->instrument, "OLI_TIRS"))
+                    !strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
                     sscanf (tokenptr, "%f", &band_gain[6]);
                 else if (!strncmp (gmeta->instrument, "ETM", 3))
                     sscanf (tokenptr, "%f", &band_gain[7]);
             }
             else if (!strcmp (label, "RADIANCE_MULT_BAND_8"))
             {
-                if (!strcmp (gmeta->instrument, "OLI_TIRS"))
+                if (!strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
                     sscanf (tokenptr, "%f", &band_gain[7]);
                 else if (!strncmp (gmeta->instrument, "ETM", 3))
                     sscanf (tokenptr, "%f", &band_gain[8]);
@@ -741,14 +766,16 @@ int read_lpgs_mtl
             else if (!strcmp (label, "RADIANCE_ADD_BAND_7"))
             {
                 if (!strcmp (gmeta->instrument, "TM") ||
-                    !strcmp (gmeta->instrument, "OLI_TIRS"))
+                    !strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
                     sscanf (tokenptr, "%f", &band_bias[6]);
                 else if (!strncmp (gmeta->instrument, "ETM", 3))
                     sscanf (tokenptr, "%f", &band_bias[7]);
             }
             else if (!strcmp (label, "RADIANCE_ADD_BAND_8"))
             {
-                if (!strcmp (gmeta->instrument, "OLI_TIRS"))
+                if (!strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
                     sscanf (tokenptr, "%f", &band_bias[7]);
                 else if (!strncmp (gmeta->instrument, "ETM", 3))
                     sscanf (tokenptr, "%f", &band_bias[8]);
@@ -806,10 +833,12 @@ int read_lpgs_mtl
         metadata->nbands = 9;
     else if (!strcmp (gmeta->instrument, "OLI_TIRS"))
         metadata->nbands = 12;  /* 11 image plus QA band */
+    else if (!strcmp (gmeta->instrument, "OLI"))
+        metadata->nbands = 10;  /* 9 image plus QA band */
     else
     {
-        sprintf (errmsg, "Unsupported instrument type: %s. Only TM, ETM+, and "
-            "OLI_TIRS are currently supported.", gmeta->instrument);
+        sprintf (errmsg, "Unsupported instrument type: %s. Only TM, ETM+, OLI, "
+            "and OLI_TIRS are currently supported.", gmeta->instrument);
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
@@ -862,8 +891,10 @@ int read_lpgs_mtl
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
         }
-        if (!strcmp (gmeta->instrument, "OLI_TIRS") &&
-            i == 11 /* band quality */)
+        if ((!strcmp (gmeta->instrument, "OLI_TIRS") &&
+             i == 11 /* band quality */) ||
+            (!strcmp (gmeta->instrument, "OLI") &&
+             i == 9 /* band quality */))
         {
             /* This is a QA band and needs the class values set up */
             strcpy (bmeta[i].category, "qa");
@@ -919,7 +950,7 @@ int read_lpgs_mtl
             return (ERROR);
         }
 
-        bmeta[i].resampling_option = tmp_bmeta.resampling_option;
+        bmeta[i].resample_method = tmp_bmeta.resample_method;
         if (!strcmp (gmeta->instrument, "TM"))
         {
             bmeta[i].data_type = ESPA_UINT8;
@@ -941,8 +972,14 @@ int read_lpgs_mtl
             bmeta[i].fill_value = 0;
             strcpy (bmeta[i].short_name, "LC8DN");
         }
+        else if (!strcmp (gmeta->instrument, "OLI"))
+        {
+            bmeta[i].data_type = ESPA_UINT16;
+            bmeta[i].fill_value = 0;
+            strcpy (bmeta[i].short_name, "LO8DN");
+        }
 
-        /* Handle the ETM+ thermal bands */
+        /* Handle the ETM+ and TIRS thermal bands */
         if ((!strncmp (gmeta->instrument, "ETM", 3) &&
             ((i == 5 /* band 61 */) || (i == 6 /* band 62 */))) ||
             (!strcmp (gmeta->instrument, "TM") &&
@@ -1001,7 +1038,7 @@ int read_lpgs_mtl
         /* Handle the pan bands */
         else if ((!strncmp (gmeta->instrument, "ETM", 3) &&
             (i == 8 /* band 8 */)) ||
-            (!strcmp (gmeta->instrument, "OLI_TIRS") &&
+            (!strncmp (gmeta->instrument, "OLI", 3) &&
             ((i == 7 /* band 8 */))))
         {
             strcpy (bmeta[i].name, "band8");
@@ -1022,8 +1059,10 @@ int read_lpgs_mtl
         }
 
         /* Handle the OLI_TIRS quality band */
-        else if (!strcmp (gmeta->instrument, "OLI_TIRS") &&
-            (i == 11 /* quality band */))
+        else if ((!strcmp (gmeta->instrument, "OLI_TIRS") &&
+            (i == 11 /* quality band */)) ||
+            (!strcmp (gmeta->instrument, "OLI") &&
+            (i == 9 /* quality band */)))
         {
             strcpy (bmeta[i].name, "qa");
             strcpy (bmeta[i].long_name, "band quality");
@@ -1079,8 +1118,10 @@ int read_lpgs_mtl
 
         /* If this is the OLI_TIRS QA band, then overwrite some things for the
            QA band itself */
-        if (!strcmp (gmeta->instrument, "OLI_TIRS") &&
-            i == 11 /* band quality */)
+        if ((!strcmp (gmeta->instrument, "OLI_TIRS") &&
+             i == 11 /* band quality */) ||
+            ((!strcmp (gmeta->instrument, "OLI") &&
+             i == 9 /* band quality */)))
         {
             count = snprintf (bmeta[i].data_units, sizeof (bmeta[i].data_units),
                 "quality/feature classification");
