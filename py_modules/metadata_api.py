@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Thu Aug  7 11:29:30 2014 by generateDS.py version 2.12b.
+# Generated Tue Nov 18 08:10:10 2014 by generateDS.py version 2.12b.
 #
 # Generated with the ESPA modified version of generateDS.py
 # See espa google code project.
@@ -2901,7 +2901,7 @@ class class_values(GeneratedsSuper):
 class band(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, product=None, source=None, name=None, category=None, data_type=None, nlines=None, nsamps=None, fill_value=None, saturate_value=None, scale_factor=None, add_offset=None, short_name=None, long_name=None, file_name=None, pixel_size=None, data_units=None, valid_range=None, toa_reflectance=None, bitmap_description=None, class_values=None, qa_description=None, calibrated_nt=None, app_version=None, production_date=None):
+    def __init__(self, product=None, source=None, name=None, category=None, data_type=None, nlines=None, nsamps=None, fill_value=None, saturate_value=None, scale_factor=None, add_offset=None, short_name=None, long_name=None, file_name=None, pixel_size=None, resample_method=None, data_units=None, valid_range=None, toa_reflectance=None, bitmap_description=None, class_values=None, qa_description=None, calibrated_nt=None, app_version=None, production_date=None):
         self.product = _cast(None, product)
         self.source = _cast(None, source)
         self.name = _cast(None, name)
@@ -2917,6 +2917,7 @@ class band(GeneratedsSuper):
         self.long_name = long_name
         self.file_name = file_name
         self.pixel_size = pixel_size
+        self.resample_method = resample_method
         self.data_units = data_units
         self.valid_range = valid_range
         self.toa_reflectance = toa_reflectance
@@ -2944,6 +2945,8 @@ class band(GeneratedsSuper):
     def set_file_name(self, file_name): self.file_name = file_name
     def get_pixel_size(self): return self.pixel_size
     def set_pixel_size(self, pixel_size): self.pixel_size = pixel_size
+    def get_resample_method(self): return self.resample_method
+    def set_resample_method(self, resample_method): self.resample_method = resample_method
     def get_data_units(self): return self.data_units
     def set_data_units(self, data_units): self.data_units = data_units
     def get_valid_range(self): return self.valid_range
@@ -2999,6 +3002,7 @@ class band(GeneratedsSuper):
             self.long_name is not None or
             self.file_name is not None or
             self.pixel_size is not None or
+            self.resample_method is not None or
             self.data_units is not None or
             self.valid_range is not None or
             self.toa_reflectance is not None or
@@ -3089,6 +3093,9 @@ class band(GeneratedsSuper):
             outfile.write('<%sfile_name>%s</%sfile_name>%s' % (namespace_, self.gds_format_string(quote_xml(self.file_name).encode(ExternalEncoding), input_name='file_name'), namespace_, eol_))
         if self.pixel_size is not None:
             self.pixel_size.export(outfile, level, namespace_, name_='pixel_size', pretty_print=pretty_print)
+        if self.resample_method is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%sresample_method>%s</%sresample_method>%s' % (namespace_, self.gds_format_string(quote_xml(self.resample_method).encode(ExternalEncoding), input_name='resample_method'), namespace_, eol_))
         if self.data_units is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%sdata_units>%s</%sdata_units>%s' % (namespace_, self.gds_format_string(quote_xml(self.data_units).encode(ExternalEncoding), input_name='data_units'), namespace_, eol_))
@@ -3179,6 +3186,9 @@ class band(GeneratedsSuper):
             self.pixel_size.exportLiteral(outfile, level)
             showIndent(outfile, level)
             outfile.write('),\n')
+        if self.resample_method is not None:
+            showIndent(outfile, level)
+            outfile.write('resample_method=%s,\n' % quote_python(self.resample_method).encode(ExternalEncoding))
         if self.data_units is not None:
             showIndent(outfile, level)
             outfile.write('data_units=%s,\n' % quote_python(self.data_units).encode(ExternalEncoding))
@@ -3308,6 +3318,10 @@ class band(GeneratedsSuper):
             obj_ = pixel_size.factory()
             obj_.build(child_)
             self.pixel_size = obj_
+        elif nodeName_ == 'resample_method':
+            resample_method_ = child_.text
+            resample_method_ = self.gds_validate_string(resample_method_, node, 'resample_method')
+            self.resample_method = resample_method_
         elif nodeName_ == 'data_units':
             data_units_ = child_.text
             data_units_ = self.gds_validate_string(data_units_, node, 'data_units')
@@ -4067,10 +4081,10 @@ def validate_xml(rootObj, xmlns=None, xmlns_xsi=None, schema_uri=None):
 
 # ESPA - Added a module method to allow exporting from the module level with
 #        validation
-def export(outFile, rootObj, xmlns='http://espa.cr.usgs.gov/v1.0', xmlns_xsi='http://www.w3.org/2001/XMLSchema-instance', schema_uri='http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_0.xsd'):
+def export(outFile, rootObj, xmlns='http://espa.cr.usgs.gov/v1.1', xmlns_xsi='http://www.w3.org/2001/XMLSchema-instance', schema_uri='http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_1.xsd'):
     ns_def = build_ns_def(xmlns, xmlns_xsi, schema_uri)
 
-    rootObj.set_version('1.0.0')
+    rootObj.set_version('1.1.0')
 
     xml_text = ''
     try:
