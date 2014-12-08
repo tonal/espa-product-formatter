@@ -838,6 +838,8 @@ Date         Programmer       Reason
 4/24/2014    Gail Schmidt     Modified grid and dimension naming (in the case
                               of multiple resolutions) for Geographic
                               projections to not use the pixel size
+12/8/2014    Gail Schmidt     Delete the source files immediately after the
+                              new big endian files are created
 
 
 NOTES:
@@ -850,13 +852,16 @@ NOTES:
 int create_hdf_metadata
 (
     char *hdf_file,                     /* I: output HDF filename */
-    Espa_internal_meta_t *xml_metadata  /* I: XML metadata structure */
+    Espa_internal_meta_t *xml_metadata, /* I: XML metadata structure */
+    bool del_src           /* I: should the source files be removed after
+                                 conversion? */
 )
 {
     char FUNC_NAME[] = "create_hdf_metadata";  /* function name */
     char errmsg[STR_SIZE];        /* error message */
     char bendian_file[STR_SIZE];  /* name of output big endian img file */
     char dim_name[2][STR_SIZE];   /* array of dimension names */
+    char hdr_file[STR_SIZE];      /* ENVI header file */
     char *cptr = NULL;            /* pointer to the file extension */
     int i;                        /* looping variable for each SDS */
     int nbytes;                   /* number of bytes in the data type */
@@ -1110,6 +1115,40 @@ int create_hdf_metadata
         /* Free the file buffer */
         free (file_buf);
         file_buf = NULL;
+
+        /* Remove the source files if specified */
+        if (del_src)
+        {
+            /* .img file */
+            printf ("  Removing %s\n", xml_metadata->band[i].file_name);
+            if (unlink (xml_metadata->band[i].file_name) != 0)
+            {
+                sprintf (errmsg, "Deleting source file: %s",
+                    xml_metadata->band[i].file_name);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            /* .hdr file */
+            count = snprintf (hdr_file, sizeof (hdr_file), "%s",
+                xml_metadata->band[i].file_name);
+            if (count < 0 || count >= sizeof (hdr_file))
+            {
+                sprintf (errmsg, "Overflow of hdr_file string");
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+
+            cptr = strrchr (hdr_file, '.');
+            strcpy (cptr, ".hdr");
+            printf ("  Removing %s\n", hdr_file);
+            if (unlink (hdr_file) != 0)
+            {
+                sprintf (errmsg, "Deleting source file: %s", hdr_file);
+                error_handler (true, FUNC_NAME, errmsg);
+                return (ERROR);
+            }
+        }
     }
 
     /* Write the global metadata */
@@ -1156,6 +1195,9 @@ Date         Programmer       Reason
                               .img and .hdr files
 4/3/2014     Gail Schmidt     Remove the .xml file as well if source files are
                               specified to be deleted
+12/8/2014    Gail Schmidt     Delete the source files immediately after the
+                              new big endian files are created vs. doing the
+                              cleanup after all the bands have been converted
 
 NOTES:
   1. The ESPA raw binary band files will be used, as-is, and linked to as
@@ -1201,8 +1243,9 @@ int convert_espa_to_hdf
         return (ERROR);
     }
 
-    /* Create the HDF file for the HDF metadata from the XML metadata */
-    if (create_hdf_metadata (hdf_file, &xml_metadata) != SUCCESS)
+    /* Create the HDF file for the HDF metadata from the XML metadata.  This
+       also creates the big endian files for the HDF file. */
+    if (create_hdf_metadata (hdf_file, &xml_metadata, del_src) != SUCCESS)
     {
         sprintf (errmsg, "Creating the HDF metadata file (%s) which links to "
             "the raw binary bands as external SDSs.", hdf_file);
@@ -1293,39 +1336,6 @@ int convert_espa_to_hdf
     /* Remove the source files if specified */
     if (del_src)
     {
-        for (i = 0; i < xml_metadata.nbands; i++)
-        {
-            /* .img file */
-            printf ("  Removing %s\n", xml_metadata.band[i].file_name);
-            if (unlink (xml_metadata.band[i].file_name) != 0)
-            {
-                sprintf (errmsg, "Deleting source file: %s",
-                    xml_metadata.band[i].file_name);
-                error_handler (true, FUNC_NAME, errmsg);
-                return (ERROR);
-            }
-
-            /* .hdr file */
-            count = snprintf (hdr_file, sizeof (hdr_file), "%s",
-                xml_metadata.band[i].file_name);
-            if (count < 0 || count >= sizeof (hdr_file))
-            {
-                sprintf (errmsg, "Overflow of hdr_file string");
-                error_handler (true, FUNC_NAME, errmsg);
-                return (ERROR);
-            }
-
-            cptr = strrchr (hdr_file, '.');
-            strcpy (cptr, ".hdr");
-            printf ("  Removing %s\n", hdr_file);
-            if (unlink (hdr_file) != 0)
-            {
-                sprintf (errmsg, "Deleting source file: %s", hdr_file);
-                error_handler (true, FUNC_NAME, errmsg);
-                return (ERROR);
-            }
-        }
-
         /* XML file */
         printf ("  Removing %s\n", espa_xml_file);
         if (unlink (espa_xml_file) != 0)
