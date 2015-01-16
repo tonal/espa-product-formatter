@@ -573,6 +573,8 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 1/6/2014     Gail Schmidt     Original development
 3/21/2014    Gail Schmidt     Added the application version for band attributes
+1/15/2015    Gail Schmidt     Check the fill value to see if it is META_FILL
+                              before writing
 
 NOTES:
 ******************************************************************************/
@@ -633,16 +635,19 @@ int write_sds_attributes
         }
     }
 
-    attr.type = DFNT_INT32;
-    attr.nval = 1;
-    attr.name = OUTPUT_FILL_VALUE;
-    dval[0] = (double) bmeta->fill_value;
-    if (put_attr_double (sds_id, &attr, dval) != SUCCESS)
+    if (bmeta->fill_value != ESPA_INT_META_FILL)
     {
-        sprintf (errmsg, "Writing attribute (fill value) to SDS: %s",
-            bmeta->name);
-        error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        attr.type = DFNT_INT32;
+        attr.nval = 1;
+        attr.name = OUTPUT_FILL_VALUE;
+        dval[0] = (double) bmeta->fill_value;
+        if (put_attr_double (sds_id, &attr, dval) != SUCCESS)
+        {
+            sprintf (errmsg, "Writing attribute (fill value) to SDS: %s",
+                bmeta->name);
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
     }
 
     if (bmeta->saturate_value != ESPA_INT_META_FILL)
