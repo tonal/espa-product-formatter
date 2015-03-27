@@ -16,6 +16,7 @@ Date         Programmer       Reason
 1/10/2014    Gail Schmidt     Original development
 2/25/2014    Gail Schmidt     Added support for source and category attributes
                               for the band metadata
+11/12/2014   Gail Schmidt     Added resample_method to be copied
 
 NOTES:
   1. The XML metadata format written via this library follows the ESPA internal
@@ -311,6 +312,7 @@ int subset_metadata_by_product
         outmeta->band[iband].saturate_value = inmeta->band[i].saturate_value;
         outmeta->band[iband].scale_factor = inmeta->band[i].scale_factor;
         outmeta->band[iband].add_offset = inmeta->band[i].add_offset;
+        outmeta->band[iband].resample_method = inmeta->band[i].resample_method;
         count = snprintf (outmeta->band[iband].short_name,
             sizeof (outmeta->band[iband].short_name), "%s",
             inmeta->band[i].short_name);
@@ -773,6 +775,7 @@ int subset_metadata_by_band
         outmeta->band[iband].saturate_value = inmeta->band[j].saturate_value;
         outmeta->band[iband].scale_factor = inmeta->band[j].scale_factor;
         outmeta->band[iband].add_offset = inmeta->band[j].add_offset;
+        outmeta->band[iband].resample_method = inmeta->band[j].resample_method;
         count = snprintf (outmeta->band[iband].short_name,
             sizeof (outmeta->band[iband].short_name), "%s",
             inmeta->band[j].short_name);

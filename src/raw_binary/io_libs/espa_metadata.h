@@ -12,6 +12,9 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/13/2013   Gail Schmidt     Original development
+11/13/2014   Gail Schmidt     Updated to support the resample_method in the
+                              XML file and a version change of the schema to
+                              v1.1
 
 NOTES:
 *****************************************************************************/
@@ -32,17 +35,23 @@ NOTES:
 
 /* Defines */
 #define LIBXML_SCHEMAS_ENABLED
-#define ESPA_SCHEMA_VERSION "1.0.0"
-#define ESPA_NS "http://espa.cr.usgs.gov/v1.0"
-#define ESPA_SCHEMA_LOCATION "http://espa.cr.usgs.gov/v1.0"
-#define ESPA_SCHEMA "http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_0.xsd"
-#define LOCAL_ESPA_SCHEMA "/usr/local/espa-common/schema/espa_internal_metadata_v1_0.xsd"
+#define ESPA_SCHEMA_VERSION "1.1"
+#define ESPA_NS "http://espa.cr.usgs.gov/v1.1"
+#define ESPA_SCHEMA_LOCATION "http://espa.cr.usgs.gov/v1.1"
+#define ESPA_SCHEMA "http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_1.xsd"
+#define LOCAL_ESPA_SCHEMA "/usr/local/espa-common/schema/espa_internal_metadata_v1_1.xsd"
 
 /* Data types */
 enum Espa_data_type
 {
     ESPA_INT8, ESPA_UINT8, ESPA_INT16, ESPA_UINT16, ESPA_INT32, ESPA_UINT32,
     ESPA_FLOAT32, ESPA_FLOAT64
+};
+
+/* Resampling types */
+enum Espa_resampling_type
+{
+    ESPA_CC, ESPA_NN, ESPA_BI, ESPA_NONE
 };
 
 /* Geographic types */
@@ -149,6 +158,8 @@ typedef struct
     int saturate_value;          /* saturation value (for Landsat) */
     float scale_factor;          /* scaling factor */
     float add_offset;            /* offset to be added */
+    enum Espa_resampling_type resample_method;
+                                 /* resampling method for this band */
     char short_name[STR_SIZE];   /* short band name */
     char long_name[STR_SIZE];    /* long band name */
     char file_name[STR_SIZE];    /* raw binary file name for this band w/o the

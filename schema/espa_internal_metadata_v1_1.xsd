@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-targetNamespace="http://espa.cr.usgs.gov/v1.0"
-xmlns="http://espa.cr.usgs.gov/v1.0"
+targetNamespace="http://espa.cr.usgs.gov/v1.1"
+xmlns="http://espa.cr.usgs.gov/v1.1"
 elementFormDefault="qualified">
 
 <!-- definition of simple types -->
@@ -152,6 +152,16 @@ elementFormDefault="qualified">
   </xs:restriction>
 </xs:simpleType>
 
+<xs:simpleType name="resamplingType">
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="cubic convolution"/>
+    <xs:enumeration value="nearest neighbor"/>
+    <xs:enumeration value="bilinear"/>
+    <xs:enumeration value="none"/>
+    <!-- Additional resampling types can be added if needed -->
+  </xs:restriction>
+</xs:simpleType>
+
 
 <!-- definition of simple elements -->
 <xs:element name="data_provider" type="xs:string"/>
@@ -183,6 +193,7 @@ elementFormDefault="qualified">
 <xs:element name="data_units" type="xs:string"/>
 <xs:element name="qa_description" type="xs:string"/>
 <xs:element name="calibrated_nt" type="xs:float"/>
+<xs:element name="resample_method" type="resamplingType"/>
 <xs:element name="app_version" type="xs:string"/>
 <xs:element name="production_date" type="xs:dateTime"/>
 <xs:element name="num" type="xs:int"/>
@@ -372,6 +383,7 @@ elementFormDefault="qualified">
       <xs:element ref="long_name"/>
       <xs:element ref="file_name"/>
       <xs:element ref="pixel_size"/>
+      <xs:element ref="resample_method" minOccurs="0"/>
       <xs:element ref="data_units" minOccurs="0"/>
       <xs:element ref="valid_range" minOccurs="0"/>
       <xs:element ref="toa_reflectance" minOccurs="0"/>
@@ -389,7 +401,7 @@ elementFormDefault="qualified">
     <xs:attribute name="data_type" type="dataType" use="required"/>
     <xs:attribute name="nlines" type="xs:int" use="required"/>
     <xs:attribute name="nsamps" type="xs:int" use="required"/>
-    <xs:attribute name="fill_value" type="xs:long" use="required"/>
+    <xs:attribute name="fill_value" type="xs:long" use="optional"/>
     <xs:attribute name="saturate_value" type="xs:int" use="optional"/>
     <xs:attribute name="scale_factor" type="xs:float" use="optional"/>
     <xs:attribute name="add_offset" type="xs:float" use="optional"/>

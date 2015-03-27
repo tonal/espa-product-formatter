@@ -53,7 +53,9 @@ int write_sds_attributes
 int create_hdf_metadata
 (
     char *hdf_file,                     /* I: output HDF filename */
-    Espa_internal_meta_t *xml_metadata  /* I: XML metadata structure */
+    Espa_internal_meta_t *xml_metadata, /* I: XML metadata structure */
+    bool del_src           /* I: should the source files be removed after
+                                 conversion? */
 );
 
 int convert_espa_to_hdf
