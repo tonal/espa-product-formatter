@@ -153,6 +153,7 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/18/2013   Gail Schmidt     Original development
 5/7/2014     Gail Schmidt     Updated for modis tiles
+3/30/2015    Gail Schmidt     Updated for earth-sun distance
 
 NOTES:
 ******************************************************************************/
@@ -180,6 +181,7 @@ void init_metadata_struct
     gmeta->solar_zenith = ESPA_FLOAT_META_FILL;
     gmeta->solar_azimuth = ESPA_FLOAT_META_FILL;
     strcpy (gmeta->solar_units, ESPA_STRING_META_FILL);
+    gmeta->earth_sun_dist = ESPA_FLOAT_META_FILL;
     gmeta->wrs_system = ESPA_INT_META_FILL;
     gmeta->wrs_path = ESPA_INT_META_FILL;
     gmeta->wrs_row = ESPA_INT_META_FILL;
@@ -216,6 +218,11 @@ Date         Programmer       Reason
 12/18/2013   Gail Schmidt     Original development
 2/25/2014    Gail Schmidt     Added support for source and category attributes
                               for the band metadata
+3/30/2015    Gail Schmidt     Added support for Earth-Sun Distance, reflectance
+                              gain/bias, and K1/K2 constants. Changed
+                              toa_gain/bias to rad_gain/bias to be consistent
+                              with refl_gain/bias.
+
 
 NOTES:
   1. Initializes the bitmap_description and class_values for each band to NULL
@@ -276,8 +283,12 @@ int allocate_band_metadata
         strcpy (bmeta[i].pixel_units, ESPA_STRING_META_FILL);
         strcpy (bmeta[i].data_units, ESPA_STRING_META_FILL);
         bmeta[i].valid_range[0] = bmeta[i].valid_range[1] = ESPA_INT_META_FILL;
-        bmeta[i].toa_gain = ESPA_INT_META_FILL;
-        bmeta[i].toa_bias = ESPA_INT_META_FILL;
+        bmeta[i].rad_gain = ESPA_FLOAT_META_FILL;
+        bmeta[i].rad_bias = ESPA_FLOAT_META_FILL;
+        bmeta[i].refl_gain = ESPA_FLOAT_META_FILL;
+        bmeta[i].refl_bias = ESPA_FLOAT_META_FILL;
+        bmeta[i].k1_const = ESPA_FLOAT_META_FILL;
+        bmeta[i].k2_const = ESPA_FLOAT_META_FILL;
         bmeta[i].calibrated_nt = ESPA_FLOAT_META_FILL;
         strcpy (bmeta[i].qa_desc, ESPA_STRING_META_FILL);
         strcpy (bmeta[i].app_version, ESPA_STRING_META_FILL);

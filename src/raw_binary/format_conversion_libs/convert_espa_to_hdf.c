@@ -35,18 +35,13 @@ NOTES:
 #define OUTPUT_LPGS_METADATA ("LPGSMetadataFile")
 #define OUTPUT_SUN_ZEN ("SolarZenith")
 #define OUTPUT_SUN_AZ ("SolarAzimuth")
+#define OUTPUT_EARTH_SUN_DIST ("EarthSunDist")
 #define OUTPUT_WRS_SYS ("WRS_System")
 #define OUTPUT_WRS_PATH ("WRS_Path")
 #define OUTPUT_WRS_ROW ("WRS_Row")
 #define OUTPUT_SHORT_NAME ("ShortName")
 #define OUTPUT_LOCAL_GRAN_ID ("LocalGranuleID")
 #define OUTPUT_PROD_DATE ("ProductionDate")
-#define OUTPUT_REFL_GAINS ("ReflGains")
-#define OUTPUT_REFL_BIAS ("ReflBias")
-#define OUTPUT_THM_GAINS ("ThermalGains")
-#define OUTPUT_THM_BIAS ("ThermalBias")
-#define OUTPUT_PAN_GAIN ("PanGain")
-#define OUTPUT_PAN_BIAS ("PanBias")
 
 #define OUTPUT_WEST_BOUND  ("WestBoundingCoordinate")
 #define OUTPUT_EAST_BOUND  ("EastBoundingCoordinate")
@@ -88,6 +83,10 @@ Date         Programmer       Reason
 6/17/2014    Gail Schmidt     Updated to support L8
 11/17/2014   Gail Schmidt     Added support for OLI-only instrumentation
                               vs. combined OLI/TIRS scenes.
+3/30/2015    Gail Schmidt     Added support for the earth sun distance.
+                              Removed the gain/bias attributes.  They are in
+                              the XML file and that's a good location for them
+                              to reside.
 
 NOTES:
 ******************************************************************************/
@@ -101,16 +100,7 @@ int write_global_attributes
     char errmsg[STR_SIZE];        /* error message */
     char hdf_version[] = H4_VERSION;  /* version for HDF4 */
     char hdfeos_version[] = PACKAGE_VERSION;  /* version for HDFEOS */
-    int i;                        /* looping variable for each SDS */
-    int ngain_bias = 0;           /* number of gain/bias values for refl */
-    int ngain_bias_thm = 0;       /* number of gain/bias values for thermal */
-    int refl_count = 0;           /* count of reflectance bands */
-    int thm_count = 0;            /* count of thermal bands */
     double dval[MAX_TOTAL_BANDS]; /* attribute values to be written */
-    double gain[MAX_TOTAL_BANDS]; /* gains to be written to the HDF metadata */
-    double bias[MAX_TOTAL_BANDS]; /* biases to be written to the HDF metadata */
-    double gain_thm[2]; /* thermal gains to be written to the HDF metadata */
-    double bias_thm[2]; /* thermal biases to be written to the HDF metadata */
     Espa_hdf_attr_t attr;         /* attribute fields */
     Espa_global_meta_t *gmeta = &xml_metadata->global;
                                   /* pointer to global metadata structure */
@@ -201,6 +191,17 @@ int write_global_attributes
         return (ERROR);
     }
   
+    attr.type = DFNT_FLOAT32;
+    attr.nval = 1;
+    attr.name = OUTPUT_EARTH_SUN_DIST;
+    dval[0] = (double) gmeta->earth_sun_dist;
+    if (put_attr_double(hdf_id, &attr, dval) != SUCCESS)
+    {
+        sprintf (errmsg, "Writing global attribute (earth sun distance)");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
     attr.type = DFNT_INT16;
     attr.nval = 1;
     attr.name = OUTPUT_WRS_SYS;
@@ -232,223 +233,6 @@ int write_global_attributes
         sprintf (errmsg, "Writing global attribute (WRS row)");
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
-    }
-  
-    /* Set up the reflectance gains and biases, if they are available in
-       the XML file.  The gains and biases are written for the reflectance
-       bands themselves, in order from b1-b7.  The thermal gains and biases
-       are written for band 61 and 62 (if ETM+), and the pan band gains and
-       biases are also written. */
-    if (!strcmp (gmeta->instrument, "TM"))
-    {
-        /* Make sure the gain/bias values actually exist.  Use band 1 for this
-           check.  If it doesn't exist then assume none exist. */
-        if (fabs (xml_metadata->band[0].toa_gain - ESPA_FLOAT_META_FILL) >
-            ESPA_EPSILON &&
-            fabs (xml_metadata->band[0].toa_bias - ESPA_FLOAT_META_FILL) >
-            ESPA_EPSILON)
-        {
-            /* Loop through the bands and store the gain and bias for the
-               reflectance bands */
-            refl_count = 0;
-            for (i = 0; i < 7; i++)
-            {
-                if (i != 5 /* band 6 */)
-                {   /* populate the reflectance bands */
-                    gain[refl_count] = xml_metadata->band[i].toa_gain;
-                    bias[refl_count] = xml_metadata->band[i].toa_bias;
-                    refl_count++;
-                }
-                else
-                {   /* populate the thermal band */
-                    gain_thm[0] = xml_metadata->band[i].toa_gain;
-                    bias_thm[0] = xml_metadata->band[i].toa_bias;
-                }
-            }
-
-            /* Identify the number of values to be written */
-            ngain_bias = refl_count;
-            ngain_bias_thm = 1;
-        }
-        else
-        {
-            ngain_bias = 0;
-            ngain_bias_thm = 0;
-        }
-    }
-    else if (!strncmp (gmeta->instrument, "ETM", 3))
-    {
-        /* Make sure the gain/bias values actually exist.  Use band 1 for this
-           check.  If it doesn't exist then assume none exist. */
-        if (fabs (xml_metadata->band[0].toa_gain - ESPA_FLOAT_META_FILL) >
-            ESPA_EPSILON &&
-            fabs (xml_metadata->band[0].toa_bias - ESPA_FLOAT_META_FILL) >
-            ESPA_EPSILON)
-        {
-            /* Loop through the bands and store the gain and bias for the
-               reflectance bands */
-            refl_count = 0;
-            thm_count = 0;
-            for (i = 0; i < 8; i++)  /* skip pan for now */
-            {
-                if (i != 5 /* band 61 */ && i != 6 /* band 62 */)
-                {   /* populate the reflectance bands */
-                    gain[refl_count] = xml_metadata->band[i].toa_gain;
-                    bias[refl_count] = xml_metadata->band[i].toa_bias;
-                    refl_count++;
-                }
-                else
-                {   /* populate the thermal band */
-                    gain_thm[thm_count] = xml_metadata->band[i].toa_gain;
-                    bias_thm[thm_count] = xml_metadata->band[i].toa_bias;
-                    thm_count++;
-                }
-            }
-
-            /* Identify the number of values to be written */
-            ngain_bias = refl_count;
-            ngain_bias_thm = thm_count;
-        }
-        else
-        {
-            ngain_bias = 0;
-            ngain_bias_thm = 0;
-        }
-    }
-    else if (!strncmp (gmeta->instrument, "OLI", 3))
-    {
-        /* Make sure the gain/bias values actually exist.  Use band 1 for this
-           check.  If it doesn't exist then assume none exist. */
-        if (fabs (xml_metadata->band[0].toa_gain - ESPA_FLOAT_META_FILL) >
-            ESPA_EPSILON &&
-            fabs (xml_metadata->band[0].toa_bias - ESPA_FLOAT_META_FILL) >
-            ESPA_EPSILON)
-        {
-            /* Loop through the bands and store the gain and bias for the
-               reflectance bands */
-            refl_count = 0;
-            thm_count = 0;
-            for (i = 0; i < 11; i++)
-            {
-                if (i == 9 /* band 10 */ || i == 10 /* band 11 */)
-                {   /* populate the thermal band */
-                    gain_thm[thm_count] = xml_metadata->band[i].toa_gain;
-                    bias_thm[thm_count] = xml_metadata->band[i].toa_bias;
-                    thm_count++;
-                }
-                else if (i != 7 /* skip pan band */)
-                {   /* populate the reflectance bands */
-                    gain[refl_count] = xml_metadata->band[i].toa_gain;
-                    bias[refl_count] = xml_metadata->band[i].toa_bias;
-                    refl_count++;
-                }
-            }
-
-            /* Identify the number of values to be written */
-            ngain_bias = refl_count;
-            ngain_bias_thm = thm_count;
-        }
-        else
-        {
-            ngain_bias = 0;
-            ngain_bias_thm = 0;
-        }
-    }
-
-    /* Write reflectance gain/bias values */
-    if (ngain_bias > 0)
-    {
-        /* Gains */
-        attr.type = DFNT_FLOAT64;
-        attr.nval = ngain_bias;
-        attr.name = OUTPUT_REFL_GAINS;
-        for (i = 0; i < ngain_bias; i++)
-            dval[i] = (double) gain[i];
-        if (put_attr_double (hdf_id, &attr, dval) != SUCCESS)
-        {
-            sprintf (errmsg, "Writing global attribute (reflectance gains)");
-            error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
-        }
-  
-        /* Biases */
-        attr.type = DFNT_FLOAT64;
-        attr.nval = ngain_bias;
-        attr.name = OUTPUT_REFL_BIAS;
-        for (i = 0; i < ngain_bias; i++)
-            dval[i] = (double) bias[i];
-        if (put_attr_double (hdf_id, &attr, dval) != SUCCESS)
-        {
-            sprintf (errmsg, "Writing global attribute (reflectance biases)");
-            error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
-        }
-    }
-  
-    /* Write thermal gain/bias values */
-    if (ngain_bias_thm > 0)
-    {
-        /* Gains */
-        attr.type = DFNT_FLOAT64;
-        attr.nval = ngain_bias_thm;
-        attr.name = OUTPUT_THM_GAINS;
-        for (i = 0; i < ngain_bias_thm; i++)
-            dval[i] = (double) gain_thm[i];
-        if (put_attr_double (hdf_id, &attr, dval) != SUCCESS)
-        {
-            sprintf (errmsg, "Writing global attribute (thermal gains)");
-            error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
-        }
-  
-        /* Biases */
-        attr.type = DFNT_FLOAT64;
-        attr.nval = ngain_bias_thm;
-        attr.name = OUTPUT_THM_BIAS;
-        for (i = 0; i < ngain_bias_thm; i++)
-            dval[i] = (double) bias_thm[i];
-        if (put_attr_double (hdf_id, &attr, dval) != SUCCESS)
-        {
-            sprintf (errmsg, "Writing global attribute (thermal biases)");
-            error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
-        }
-    }
-
-    /* Write pan gain/bias values if this is ETM+ or OLI_TIRS and the
-       gains/biases exist in the metadata file */
-    if ((!strncmp (gmeta->instrument, "ETM", 3) ||
-         !strncmp (gmeta->instrument, "OLI", 3)) && ngain_bias > 0)
-    {
-        /* Gains */
-        attr.type = DFNT_FLOAT64;
-        attr.nval = 1;
-        attr.name = OUTPUT_PAN_GAIN;
-        if (!strncmp (gmeta->instrument, "ETM", 3))
-            dval[0] = (double) xml_metadata->band[8].toa_gain;
-        else if (!strncmp (gmeta->instrument, "OLI", 3))
-            dval[0] = (double) xml_metadata->band[7].toa_gain;
-        if (put_attr_double (hdf_id, &attr, dval) != SUCCESS)
-        {
-            sprintf (errmsg, "Writing global attribute (pan gains)");
-            error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
-        }
-  
-        /* Biases */
-        attr.type = DFNT_FLOAT64;
-        attr.nval = 1;
-        attr.name = OUTPUT_PAN_BIAS;
-        if (!strncmp (gmeta->instrument, "ETM", 3))
-            dval[0] = (double) xml_metadata->band[8].toa_bias;
-        else if (!strncmp (gmeta->instrument, "OLI", 3))
-            dval[0] = (double) xml_metadata->band[7].toa_bias;
-        if (put_attr_double (hdf_id, &attr, dval) != SUCCESS)
-        {
-            sprintf (errmsg, "Writing global attribute (pan biases)");
-            error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
-        }
     }
   
     attr.type = DFNT_FLOAT64;

@@ -48,6 +48,10 @@ Date         Programmer       Reason
 11/12/2014   Gail Schmidt     Added support for the resample_method
 11/17/2014   Gail Schmidt     Added support for OLI-only instrumentation
                               vs. combined OLI/TIRS scenes.
+3/30/2015    Gail Schmidt     Added support for Earth-Sun Distance, reflectance
+                              gain/bias, and K1/K2 constants. Changed
+                              toa_gain/bias to rad_gain/bias to be consistent
+                              with refl_gain/bias.
 
 NOTES:
 1. The new MTL files contain the gain and bias coefficients for the TOA
@@ -72,8 +76,10 @@ int read_lpgs_mtl
     int i;                    /* looping variable */
     int count;                /* number of chars copied in snprintf */
     bool done_with_mtl;       /* are we done processing the MTL file? */
-    bool gain_bias_available; /* are the TOA reflectance (brightness temp)
-                                 gain/bias values available in the MTL file? */
+    bool gain_bias_available; /* are the radiance gain/bias values available
+                                 in the MTL file? */
+    bool refl_gain_bias_available; /* are TOA reflectance gain/bias values and
+                                 K1/K2 constants available in the MTL file? */
     FILE *mtl_fptr=NULL;      /* file pointer to the MTL metadata file */
     Espa_global_meta_t *gmeta = &metadata->global;  /* pointer to the global
                                                        metadata structure */
@@ -94,10 +100,16 @@ int read_lpgs_mtl
     char band_fname[MAX_LPGS_BANDS][STR_SIZE];  /* filenames for each band */
     int band_min[MAX_LPGS_BANDS];  /* minimum value for each band */
     int band_max[MAX_LPGS_BANDS];  /* maximum value for each band */
-    float band_gain[MAX_LPGS_BANDS]; /* gain values for TOA reflectance (or
-                                        brightness temp) calculations */
-    float band_bias[MAX_LPGS_BANDS]; /* bias values for TOA reflectance (or
-                                        brightness temp) calculations */
+    float band_gain[MAX_LPGS_BANDS]; /* gain values for band radiance
+                                        calculations */
+    float band_bias[MAX_LPGS_BANDS]; /* bias values for band radiance
+                                        calculations */
+    float refl_gain[MAX_LPGS_BANDS]; /* gain values for TOA reflectance 
+                                        calculations */
+    float refl_bias[MAX_LPGS_BANDS]; /* bias values for TOA reflectance
+                                        calculations */
+    float k1[MAX_LPGS_BANDS]; /* K1 consts for brightness temp calculations */
+    float k2[MAX_LPGS_BANDS]; /* K2 consts for brightness temp calculations */
 
     /* vars used in parameter parsing */
     char buffer[STR_SIZE] = "\0";          /* line buffer from MTL file */
@@ -118,6 +130,7 @@ int read_lpgs_mtl
 
     /* Process the MTL file line by line */
     gain_bias_available = false;
+    refl_gain_bias_available = false;
     done_with_mtl = false;
     while (fgets (buffer, STR_SIZE, mtl_fptr) != NULL)
     {
@@ -237,6 +250,8 @@ int read_lpgs_mtl
             }
             else if (!strcmp (label, "SUN_AZIMUTH"))
                 sscanf (tokenptr, "%f", &gmeta->solar_azimuth);
+            else if (!strcmp (label, "EARTH_SUN_DISTANCE"))
+                sscanf (tokenptr, "%f", &gmeta->earth_sun_dist);
             else if (!strcmp (label, "WRS_PATH"))
                 sscanf (tokenptr, "%d", &gmeta->wrs_path);
             else if (!strcmp (label, "WRS_ROW") ||
@@ -703,7 +718,7 @@ int read_lpgs_mtl
             else if (!strcmp (label, "QUANTIZE_CAL_MAX_BAND_11"))
                 sscanf (tokenptr, "%d", &band_max[10]);
 
-            /* Read the reflectance gains */
+            /* Read the radiance gains */
             else if (!strcmp (label, "RADIANCE_MULT_BAND_1"))
             {
                 sscanf (tokenptr, "%f", &band_gain[0]);
@@ -750,7 +765,7 @@ int read_lpgs_mtl
             else if (!strcmp (label, "RADIANCE_MULT_BAND_11"))
                 sscanf (tokenptr, "%f", &band_gain[10]);
 
-            /* Read the reflectance biases */
+            /* Read the radiance biases */
             else if (!strcmp (label, "RADIANCE_ADD_BAND_1"))
                 sscanf (tokenptr, "%f", &band_bias[0]);
             else if (!strcmp (label, "RADIANCE_ADD_BAND_2"))
@@ -790,6 +805,114 @@ int read_lpgs_mtl
                 sscanf (tokenptr, "%f", &band_bias[9]);
             else if (!strcmp (label, "RADIANCE_ADD_BAND_11"))
                 sscanf (tokenptr, "%f", &band_bias[10]);
+
+            /* Read the reflectance gains */
+            else if (!strcmp (label, "REFLECTANCE_MULT_BAND_1"))
+            {
+                sscanf (tokenptr, "%f", &refl_gain[0]);
+
+                /* Assume that if the reflectance gain value for band 1 is
+                   available, then the gain and bias values for all bands will
+                   be available */
+                refl_gain_bias_available = true;
+            }
+            else if (!strcmp (label, "REFLECTANCE_MULT_BAND_2"))
+                sscanf (tokenptr, "%f", &refl_gain[1]);
+            else if (!strcmp (label, "REFLECTANCE_MULT_BAND_3"))
+                sscanf (tokenptr, "%f", &refl_gain[2]);
+            else if (!strcmp (label, "REFLECTANCE_MULT_BAND_4"))
+                sscanf (tokenptr, "%f", &refl_gain[3]);
+            else if (!strcmp (label, "REFLECTANCE_MULT_BAND_5"))
+                sscanf (tokenptr, "%f", &refl_gain[4]);
+            else if (!strcmp (label, "REFLECTANCE_MULT_BAND_6"))
+                sscanf (tokenptr, "%f", &refl_gain[5]);
+            else if (!strcmp (label, "REFLECTANCE_MULT_BAND_7"))
+            {
+                if (!strcmp (gmeta->instrument, "TM") ||
+                    !strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
+                    sscanf (tokenptr, "%f", &refl_gain[6]);
+                else if (!strncmp (gmeta->instrument, "ETM", 3))
+                    sscanf (tokenptr, "%f", &refl_gain[7]);
+            }
+            else if (!strcmp (label, "REFLECTANCE_MULT_BAND_8"))
+            {
+                if (!strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
+                    sscanf (tokenptr, "%f", &refl_gain[7]);
+                else if (!strncmp (gmeta->instrument, "ETM", 3))
+                    sscanf (tokenptr, "%f", &refl_gain[8]);
+            }
+            else if (!strcmp (label, "REFLECTANCE_MULT_BAND_6_VCID_1"))
+                sscanf (tokenptr, "%f", &refl_gain[5]);
+            else if (!strcmp (label, "REFLECTANCE_MULT_BAND_6_VCID_2"))
+                sscanf (tokenptr, "%f", &refl_gain[6]);
+            else if (!strcmp (label, "REFLECTANCE_MULT_BAND_9"))
+                sscanf (tokenptr, "%f", &refl_gain[8]);
+
+            /* Read the reflectance biases */
+            else if (!strcmp (label, "REFLECTANCE_ADD_BAND_1"))
+                sscanf (tokenptr, "%f", &refl_bias[0]);
+            else if (!strcmp (label, "REFLECTANCE_ADD_BAND_2"))
+                sscanf (tokenptr, "%f", &refl_bias[1]);
+            else if (!strcmp (label, "REFLECTANCE_ADD_BAND_3"))
+                sscanf (tokenptr, "%f", &refl_bias[2]);
+            else if (!strcmp (label, "REFLECTANCE_ADD_BAND_4"))
+                sscanf (tokenptr, "%f", &refl_bias[3]);
+            else if (!strcmp (label, "REFLECTANCE_ADD_BAND_5"))
+                sscanf (tokenptr, "%f", &refl_bias[4]);
+            else if (!strcmp (label, "REFLECTANCE_ADD_BAND_6"))
+                sscanf (tokenptr, "%f", &refl_bias[5]);
+            else if (!strcmp (label, "REFLECTANCE_ADD_BAND_7"))
+            {
+                if (!strcmp (gmeta->instrument, "TM") ||
+                    !strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
+                    sscanf (tokenptr, "%f", &refl_bias[6]);
+                else if (!strncmp (gmeta->instrument, "ETM", 3))
+                    sscanf (tokenptr, "%f", &refl_bias[7]);
+            }
+            else if (!strcmp (label, "REFLECTANCE_ADD_BAND_8"))
+            {
+                if (!strcmp (gmeta->instrument, "OLI_TIRS") ||
+                    !strcmp (gmeta->instrument, "OLI"))
+                    sscanf (tokenptr, "%f", &refl_bias[7]);
+                else if (!strncmp (gmeta->instrument, "ETM", 3))
+                    sscanf (tokenptr, "%f", &refl_bias[8]);
+            }
+            else if (!strcmp (label, "REFLECTANCE_ADD_BAND_6_VCID_1"))
+                sscanf (tokenptr, "%f", &refl_bias[5]);
+            else if (!strcmp (label, "REFLECTANCE_ADD_BAND_6_VCID_2"))
+                sscanf (tokenptr, "%f", &refl_bias[6]);
+            else if (!strcmp (label, "REFLECTANCE_ADD_BAND_9"))
+                sscanf (tokenptr, "%f", &refl_bias[8]);
+
+            /* Read the K1, K2 constants */
+            /* TIRS */
+            else if (!strcmp (label, "K1_CONSTANT_BAND_10"))
+                sscanf (tokenptr, "%f", &k1[9]);
+            else if (!strcmp (label, "K1_CONSTANT_BAND_11"))
+                sscanf (tokenptr, "%f", &k1[10]);
+            else if (!strcmp (label, "K2_CONSTANT_BAND_10"))
+                sscanf (tokenptr, "%f", &k2[9]);
+            else if (!strcmp (label, "K2_CONSTANT_BAND_11"))
+                sscanf (tokenptr, "%f", &k2[10]);
+
+            /* ETM+ */
+            else if (!strcmp (label, "K1_CONSTANT_BAND_6_VCID_1"))
+                sscanf (tokenptr, "%f", &k1[5]);
+            else if (!strcmp (label, "K1_CONSTANT_BAND_6_VCID_2"))
+                sscanf (tokenptr, "%f", &k1[6]);
+            else if (!strcmp (label, "K2_CONSTANT_BAND_6_VCID_1"))
+                sscanf (tokenptr, "%f", &k2[5]);
+            else if (!strcmp (label, "K2_CONSTANT_BAND_6_VCID_2"))
+                sscanf (tokenptr, "%f", &k2[6]);
+
+            /* TM */
+            else if (!strcmp (label, "K1_CONSTANT_BAND_6"))
+                sscanf (tokenptr, "%f", &k1[5]);
+            else if (!strcmp (label, "K2_CONSTANT_BAND_6"))
+                sscanf (tokenptr, "%f", &k2[5]);
         } /* end if tokenptr */
 
         /* If we are done */
@@ -918,8 +1041,28 @@ int read_lpgs_mtl
 
         if (gain_bias_available)
         {
-            bmeta[i].toa_gain = band_gain[i];
-            bmeta[i].toa_bias = band_bias[i];
+            bmeta[i].rad_gain = band_gain[i];
+            bmeta[i].rad_bias = band_bias[i];
+        }
+
+        if (refl_gain_bias_available)
+        {
+            /* Reflectance gain/bias values don't exist for the thermal bands */
+            if ((!strncmp (gmeta->instrument, "ETM", 3) &&
+                ((i != 5 /* band 61 */) && (i != 6 /* band 62 */))) ||
+                (!strcmp (gmeta->instrument, "TM") &&
+                (i != 5 /* band 6 */)) ||
+                (!strcmp (gmeta->instrument, "OLI_TIRS") &&
+                ((i != 9 /* band 10 */) && (i != 10 /* band 11 */))))
+            {
+                bmeta[i].refl_gain = refl_gain[i];
+                bmeta[i].refl_bias = refl_bias[i];
+            }
+            else
+            {
+                bmeta[i].k1_const = k1[i];
+                bmeta[i].k2_const = k2[i];
+            }
         }
 
         count = snprintf (bmeta[i].data_units, sizeof (bmeta[i].data_units),
@@ -1134,8 +1277,12 @@ int read_lpgs_mtl
 
             bmeta[i].valid_range[0] = 0;
             bmeta[i].valid_range[1] = 65535;
-            bmeta[i].toa_gain = ESPA_INT_META_FILL;
-            bmeta[i].toa_bias = ESPA_INT_META_FILL;
+            bmeta[i].rad_gain = ESPA_FLOAT_META_FILL;
+            bmeta[i].rad_bias = ESPA_FLOAT_META_FILL;
+            bmeta[i].refl_gain = ESPA_FLOAT_META_FILL;
+            bmeta[i].refl_bias = ESPA_FLOAT_META_FILL;
+            bmeta[i].k1_const = ESPA_FLOAT_META_FILL;
+            bmeta[i].k2_const = ESPA_FLOAT_META_FILL;
 
             if (allocate_bitmap_metadata (&bmeta[i], 16) != SUCCESS)
             {

@@ -13,8 +13,10 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/13/2013   Gail Schmidt     Original development
 11/13/2014   Gail Schmidt     Updated to support the resample_method in the
-                              XML file and a version change of the schema to
-                              v1.1
+                              XML file and a version change of schema to v1.1
+3/30/2015    Gail Schmidt     Updated to support reflectance gain/bias, thermal
+                              constants, and earth sun distance and a version
+                              change of schema to v1.2
 
 NOTES:
 *****************************************************************************/
@@ -35,11 +37,11 @@ NOTES:
 
 /* Defines */
 #define LIBXML_SCHEMAS_ENABLED
-#define ESPA_SCHEMA_VERSION "1.1"
-#define ESPA_NS "http://espa.cr.usgs.gov/v1.1"
-#define ESPA_SCHEMA_LOCATION "http://espa.cr.usgs.gov/v1.1"
-#define ESPA_SCHEMA "http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_1.xsd"
-#define LOCAL_ESPA_SCHEMA "/usr/local/espa-common/schema/espa_internal_metadata_v1_1.xsd"
+#define ESPA_SCHEMA_VERSION "1.2"
+#define ESPA_NS "http://espa.cr.usgs.gov/v1.2"
+#define ESPA_SCHEMA_LOCATION "http://espa.cr.usgs.gov/v1.2"
+#define ESPA_SCHEMA "http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_2.xsd"
+#define LOCAL_ESPA_SCHEMA "/usr/local/espa-common/schema/espa_internal_metadata_v1_2.xsd"
 
 /* Data types */
 enum Espa_data_type
@@ -138,6 +140,7 @@ typedef struct
     float solar_zenith;           /* solar zenith angle (degrees) */
     float solar_azimuth;          /* solar azimuth angle (degrees) */
     char solar_units[STR_SIZE];   /* degrees */
+    float earth_sun_dist;         /* earth-sun distance at the scene center */
     char level1_production_date[STR_SIZE];  /* date the scene was processed
                                                to a level 1 product */
     /* MODIS products */
@@ -169,8 +172,12 @@ typedef struct
     char data_units[STR_SIZE];   /* units of data stored in this band */
     long valid_range[2];         /* use long to support the long data types
                                     min, max */
-    double toa_gain;             /* gain values for top-of-atmosphere refl */
-    double toa_bias;             /* bias values for top-of-atmosphere refl */
+    double rad_gain;             /* gain values for TOA radiance conversion */
+    double rad_bias;             /* bias values for TOA radiance conversion */
+    double refl_gain;            /* gain values for TOA reflectance conversion*/
+    double refl_bias;            /* bias values for TOA reflectance conversion*/
+    double k1_const;             /* K1 thermal constant for BT conversion */
+    double k2_const;             /* K2 thermal constant for BT conversion */
     int nbits;                   /* number of bits in bitmap_description */
     char **bitmap_description;   /* support bit mapping description;
                                     0-based going from right to left in the

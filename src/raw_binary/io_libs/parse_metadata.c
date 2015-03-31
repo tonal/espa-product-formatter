@@ -16,6 +16,11 @@ Date         Programmer       Reason
                               for the band metadata
 4/17/2014    Gail Schmidt     Added support for additional projections
 11/12/2014   Gail Schmidt     Added support for resample_method
+3/31/2015    Gail Schmidt     Added support for Earth-Sun Distance, reflectance
+                              gain/bias, and K1/K2 constants. Changed
+                              toa_gain/bias to rad_gain/bias to be consistent
+                              with refl_gain/bias.
+
 
 NOTES:
   1. The XML metadata format parsed or written via this library follows the
@@ -1092,6 +1097,22 @@ int add_global_metadata
             xmlFree (attr_val);
         }
     }
+    else if (xmlStrEqual (cur_node->name,
+        (const xmlChar *) "earth_sun_distance"))
+    {
+        /* Expect the child node to be a text node containing the value of
+           this field */
+        if (child_node == NULL || child_node->type != XML_TEXT_NODE) 
+        {
+            sprintf (errmsg, "Processing global_metadata element: %s.",
+                cur_node->name);
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        /* Copy the content of the child node into the value for this field */
+        gmeta->earth_sun_dist = atof ((const char *) child_node->content);
+    }
     else if (xmlStrEqual (cur_node->name, (const xmlChar *) "wrs"))
     {
         /* Handle the element attributes */
@@ -1818,16 +1839,56 @@ int add_band_metadata
             }
         }
         else if (xmlStrEqual (cur_node->name,
-            (const xmlChar *) "toa_reflectance"))
+            (const xmlChar *) "radiance"))
         {
             /* Handle the element attributes */
             for (attr = cur_node->properties; attr != NULL; attr = attr->next)
             {
                 attr_val = xmlGetProp (cur_node, attr->name);
                 if (xmlStrEqual (attr->name, (const xmlChar *) "gain"))
-                    bmeta->toa_gain = atof ((const char *) attr_val);
+                    bmeta->rad_gain = atof ((const char *) attr_val);
                 else if (xmlStrEqual (attr->name, (const xmlChar *) "bias"))
-                    bmeta->toa_bias = atof ((const char *) attr_val);
+                    bmeta->rad_bias = atof ((const char *) attr_val);
+                else
+                {
+                    sprintf (errmsg, "WARNING: unknown attribute for element "
+                        "(%s): %s\n", cur_node->name, attr->name);
+                    error_handler (false, FUNC_NAME, errmsg);
+                }
+                xmlFree (attr_val);
+            }
+        }
+        else if (xmlStrEqual (cur_node->name,
+            (const xmlChar *) "reflectance"))
+        {
+            /* Handle the element attributes */
+            for (attr = cur_node->properties; attr != NULL; attr = attr->next)
+            {
+                attr_val = xmlGetProp (cur_node, attr->name);
+                if (xmlStrEqual (attr->name, (const xmlChar *) "gain"))
+                    bmeta->refl_gain = atof ((const char *) attr_val);
+                else if (xmlStrEqual (attr->name, (const xmlChar *) "bias"))
+                    bmeta->refl_bias = atof ((const char *) attr_val);
+                else
+                {
+                    sprintf (errmsg, "WARNING: unknown attribute for element "
+                        "(%s): %s\n", cur_node->name, attr->name);
+                    error_handler (false, FUNC_NAME, errmsg);
+                }
+                xmlFree (attr_val);
+            }
+        }
+        else if (xmlStrEqual (cur_node->name,
+            (const xmlChar *) "thermal_const"))
+        {
+            /* Handle the element attributes */
+            for (attr = cur_node->properties; attr != NULL; attr = attr->next)
+            {
+                attr_val = xmlGetProp (cur_node, attr->name);
+                if (xmlStrEqual (attr->name, (const xmlChar *) "k1"))
+                    bmeta->k1_const = atof ((const char *) attr_val);
+                else if (xmlStrEqual (attr->name, (const xmlChar *) "k2"))
+                    bmeta->k2_const = atof ((const char *) attr_val);
                 else
                 {
                     sprintf (errmsg, "WARNING: unknown attribute for element "

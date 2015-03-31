@@ -15,12 +15,16 @@ Date         Programmer       Reason
 12/26/2013   Gail Schmidt     Original development
 2/25/2014    Gail Schmidt     Added support for source and category attributes
                               for the band metadata
+3/30/2015    Gail Schmidt     Changed 'toa_reflectance' to 'radiance' for gain
+                              and bias since we are supporting both the
+                              radiance and reflectance gain and bias from the
+                              MTL. This is more consistent with their labeling.
 
 NOTES:
   1. The XML metadata format written via this library follows the ESPA internal
-     metadata format found in ESPA Raw Binary Format v1.0.doc.  The schema for
+     metadata format found in ESPA Raw Binary Format v1.2.doc.  The schema for
      the ESPA internal metadata format is available at
-     http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_0.xsd.
+     http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_2.xsd.
 *****************************************************************************/
 
 #include <math.h>
@@ -46,6 +50,11 @@ Date         Programmer       Reason
 4/22/2014    Gail Schmidt     Modified to support additional datums
 5/7/2014     Gail Schmidt     Updated to support modis tiles
 11/12/2014   Gail Schmidt     Updated to support resample_option
+3/30/2015    Gail Schmidt     Added support for Earth-Sun Distance, reflectance
+                              gain/bias, and K1/K2 constants. Changed
+                              toa_gain/bias to rad_gain/bias to be consistent
+                              with refl_gain/bias.
+
 
 NOTES:
   1. If the XML file specified already exists, it will be overwritten.
@@ -121,6 +130,11 @@ int write_metadata
         fprintf (fptr,
         "        <solar_angles zenith=\"%f\" azimuth=\"%f\" units=\"%s\"/>\n",
         gmeta->solar_zenith, gmeta->solar_azimuth, gmeta->solar_units);
+
+    if (fabs (gmeta->earth_sun_dist - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        fprintf (fptr,
+        "        <earth_sun_distance>%f</earth_sun_distance>\n",
+        gmeta->earth_sun_dist);
 
     if (gmeta->wrs_system != ESPA_INT_META_FILL)
         fprintf (fptr,
@@ -335,12 +349,28 @@ int write_metadata
                 bmeta[i].valid_range[0], bmeta[i].valid_range[1]);
         }
 
-        if (fabs (bmeta[i].toa_gain - ESPA_FLOAT_META_FILL) > ESPA_EPSILON &&
-            fabs (bmeta[i].toa_bias - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        if (fabs (bmeta[i].rad_gain - ESPA_FLOAT_META_FILL) > ESPA_EPSILON &&
+            fabs (bmeta[i].rad_bias - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
         {
             fprintf (fptr,
-                "            <toa_reflectance gain=\"%g\" bias=\"%g\"/>\n",
-                bmeta[i].toa_gain, bmeta[i].toa_bias);
+                "            <radiance gain=\"%.5g\" bias=\"%.5g\"/>\n",
+                bmeta[i].rad_gain, bmeta[i].rad_bias);
+        }
+
+        if (fabs (bmeta[i].refl_gain - ESPA_FLOAT_META_FILL) > ESPA_EPSILON &&
+            fabs (bmeta[i].refl_bias - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        {
+            fprintf (fptr,
+                "            <reflectance gain=\"%.5g\" bias=\"%.5g\"/>\n",
+                bmeta[i].refl_gain, bmeta[i].refl_bias);
+        }
+
+        if (fabs (bmeta[i].k1_const - ESPA_FLOAT_META_FILL) > ESPA_EPSILON &&
+            fabs (bmeta[i].k2_const - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        {
+            fprintf (fptr,
+                "            <thermal_const k1=\"%.5g\" k2=\"%.5g\"/>\n",
+                bmeta[i].k1_const, bmeta[i].k2_const);
         }
 
         if (bmeta[i].nbits != ESPA_INT_META_FILL && bmeta[i].nbits > 0)
@@ -576,12 +606,28 @@ int append_metadata
                 bmeta[i].valid_range[0], bmeta[i].valid_range[1]);
         }
 
-        if (fabs (bmeta[i].toa_gain - ESPA_FLOAT_META_FILL) > ESPA_EPSILON &&
-            fabs (bmeta[i].toa_bias - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        if (fabs (bmeta[i].rad_gain - ESPA_FLOAT_META_FILL) > ESPA_EPSILON &&
+            fabs (bmeta[i].rad_bias - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
         {
             fprintf (fptr,
-                "            <toa_reflectance gain=\"%g\" bias=\"%g\"/>\n",
-                bmeta[i].toa_gain, bmeta[i].toa_bias);
+                "            <radiance gain=\"%.5g\" bias=\"%.5g\"/>\n",
+                bmeta[i].rad_gain, bmeta[i].rad_bias);
+        }
+
+        if (fabs (bmeta[i].refl_gain - ESPA_FLOAT_META_FILL) > ESPA_EPSILON &&
+            fabs (bmeta[i].refl_bias - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        {
+            fprintf (fptr,
+                "            <reflectance gain=\"%.5g\" bias=\"%.5g\"/>\n",
+                bmeta[i].refl_gain, bmeta[i].refl_bias);
+        }
+
+        if (fabs (bmeta[i].k1_const - ESPA_FLOAT_META_FILL) > ESPA_EPSILON &&
+            fabs (bmeta[i].k2_const - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
+        {
+            fprintf (fptr,
+                "            <thermal_const k1=\"%.5g\" k2=\"%.5g\"/>\n",
+                bmeta[i].k1_const, bmeta[i].k2_const);
         }
 
         if (bmeta[i].nbits != ESPA_INT_META_FILL && bmeta[i].nbits > 0)
@@ -686,6 +732,7 @@ void print_metadata_struct
     printf ("  solar_zenith: %f\n", metadata->global.solar_zenith);
     printf ("  solar_azimuth: %f\n", metadata->global.solar_azimuth);
     printf ("  solar_units: %s\n", metadata->global.solar_units);
+    printf ("  earth_sun_dist: %f\n", metadata->global.earth_sun_dist);
     printf ("  wrs_system: %d\n", metadata->global.wrs_system);
     printf ("  wrs_path: %d\n", metadata->global.wrs_path);
     printf ("  wrs_row: %d\n", metadata->global.wrs_row);
@@ -817,11 +864,23 @@ void print_metadata_struct
                 metadata->band[i].valid_range[0],
                 metadata->band[i].valid_range[1]);
         }
-        if (metadata->band[i].toa_gain != 0 ||
-            metadata->band[i].toa_bias != 0)
+        if (metadata->band[i].rad_gain != 0 ||
+            metadata->band[i].rad_bias != 0)
         {
-            printf ("    toa_reflectance gain, bias : %g %g\n",
-                metadata->band[i].toa_gain, metadata->band[i].toa_bias);
+            printf ("    radiance gain, bias : %.5g %.5g\n",
+                metadata->band[i].rad_gain, metadata->band[i].rad_bias);
+        }
+        if (metadata->band[i].refl_gain != 0 ||
+            metadata->band[i].refl_bias != 0)
+        {
+            printf ("    reflectance gain, bias : %.5g %.5g\n",
+                metadata->band[i].refl_gain, metadata->band[i].refl_bias);
+        }
+        if (metadata->band[i].k1_const != 0 ||
+            metadata->band[i].k2_const != 0)
+        {
+            printf ("    thermal const k1, k2 : %.5g %.5g\n",
+                metadata->band[i].k1_const, metadata->band[i].k2_const);
         }
         if (metadata->band[i].nbits != 0)
         {

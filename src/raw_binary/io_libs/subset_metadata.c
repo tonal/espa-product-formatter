@@ -17,6 +17,10 @@ Date         Programmer       Reason
 2/25/2014    Gail Schmidt     Added support for source and category attributes
                               for the band metadata
 11/12/2014   Gail Schmidt     Added resample_method to be copied
+3/30/2015    Gail Schmidt     Added support for Earth-Sun Distance, reflectance
+                              gain/bias, and K1/K2 constants. Changed
+                              toa_gain/bias to rad_gain/bias to be consistent
+                              with refl_gain/bias.
 
 NOTES:
   1. The XML metadata format written via this library follows the ESPA internal
@@ -163,6 +167,7 @@ int subset_metadata_by_product
         return (ERROR);
     }
 
+    outmeta->global.earth_sun_dist = inmeta->global.earth_sun_dist;
     outmeta->global.wrs_system = inmeta->global.wrs_system;
     outmeta->global.wrs_path = inmeta->global.wrs_path;
     outmeta->global.wrs_row = inmeta->global.wrs_row;
@@ -369,10 +374,12 @@ int subset_metadata_by_product
         outmeta->band[iband].valid_range[1] = inmeta->band[i].valid_range[1];
         outmeta->band[iband].valid_range[0] = inmeta->band[i].valid_range[0];
         outmeta->band[iband].valid_range[1] = inmeta->band[i].valid_range[1];
-        outmeta->band[iband].toa_gain = inmeta->band[i].toa_gain;
-        outmeta->band[iband].toa_bias = inmeta->band[i].toa_bias;
-        outmeta->band[iband].toa_gain = inmeta->band[i].toa_gain;
-        outmeta->band[iband].toa_bias = inmeta->band[i].toa_bias;
+        outmeta->band[iband].rad_gain = inmeta->band[i].rad_gain;
+        outmeta->band[iband].rad_bias = inmeta->band[i].rad_bias;
+        outmeta->band[iband].refl_gain = inmeta->band[i].refl_gain;
+        outmeta->band[iband].refl_bias = inmeta->band[i].refl_bias;
+        outmeta->band[iband].k1_const = inmeta->band[i].k1_const;
+        outmeta->band[iband].k2_const = inmeta->band[i].k2_const;
 
         /* If there is a bitmap description, then allocate memory and copy
            the information */
@@ -617,6 +624,7 @@ int subset_metadata_by_band
         return (ERROR);
     }
 
+    outmeta->global.earth_sun_dist = inmeta->global.earth_sun_dist;
     outmeta->global.wrs_system = inmeta->global.wrs_system;
     outmeta->global.wrs_path = inmeta->global.wrs_path;
     outmeta->global.wrs_row = inmeta->global.wrs_row;
@@ -832,10 +840,12 @@ int subset_metadata_by_band
         outmeta->band[iband].valid_range[1] = inmeta->band[j].valid_range[1];
         outmeta->band[iband].valid_range[0] = inmeta->band[j].valid_range[0];
         outmeta->band[iband].valid_range[1] = inmeta->band[j].valid_range[1];
-        outmeta->band[iband].toa_gain = inmeta->band[j].toa_gain;
-        outmeta->band[iband].toa_bias = inmeta->band[j].toa_bias;
-        outmeta->band[iband].toa_gain = inmeta->band[j].toa_gain;
-        outmeta->band[iband].toa_bias = inmeta->band[j].toa_bias;
+        outmeta->band[iband].rad_gain = inmeta->band[j].rad_gain;
+        outmeta->band[iband].rad_bias = inmeta->band[j].rad_bias;
+        outmeta->band[iband].refl_gain = inmeta->band[j].refl_gain;
+        outmeta->band[iband].refl_bias = inmeta->band[j].refl_bias;
+        outmeta->band[iband].k1_const = inmeta->band[j].k1_const;
+        outmeta->band[iband].k2_const = inmeta->band[j].k2_const;
 
         /* If there is a bitmap description, then allocate memory and copy
            the information */
