@@ -21,7 +21,7 @@ NOTES:
 
 /* Set up default success/error defines */
 #define SUCCESS 0
-#define ERROR 1
+#define ERROR -1
 
 /* Common string size definition */
 #define STR_SIZE 2048
