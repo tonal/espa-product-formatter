@@ -369,7 +369,7 @@ int write_metadata
             fabs (bmeta[i].k2_const - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
         {
             fprintf (fptr,
-                "            <thermal_const k1=\"%.5g\" k2=\"%.5g\"/>\n",
+                "            <thermal_const k1=\"%.2f\" k2=\"%.2f\"/>\n",
                 bmeta[i].k1_const, bmeta[i].k2_const);
         }
 
@@ -626,7 +626,7 @@ int append_metadata
             fabs (bmeta[i].k2_const - ESPA_FLOAT_META_FILL) > ESPA_EPSILON)
         {
             fprintf (fptr,
-                "            <thermal_const k1=\"%.5g\" k2=\"%.5g\"/>\n",
+                "            <thermal_const k1=\"%.2f\" k2=\"%.2f\"/>\n",
                 bmeta[i].k1_const, bmeta[i].k2_const);
         }
 
@@ -879,7 +879,7 @@ void print_metadata_struct
         if (metadata->band[i].k1_const != 0 ||
             metadata->band[i].k2_const != 0)
         {
-            printf ("    thermal const k1, k2 : %.5g %.5g\n",
+            printf ("    thermal const k1, k2 : %.2f %.2f\n",
                 metadata->band[i].k1_const, metadata->band[i].k2_const);
         }
         if (metadata->band[i].nbits != 0)

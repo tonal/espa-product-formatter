@@ -3,7 +3,7 @@
 # NOTE: when building with this library, make sure to include
 #    LIBS = -L$(XML2LIB) -lxml2 -L$(GEOTIFF_LIB) -lgeotiff -L$(TIFFLIB) -ltiff
 #           -L$(HDFEOS_LIB) -lhdfeos -L$(HDFLIB) -lmfhdf -ldf
-#           -L$(HDFEOS_GCTPLIB) -lGctp -L$(JPEGLIB) -ljpeg -lz
+#           -L$(HDFEOS_GCTPLIB) -lGctp -L$(JPEGLIB) -ljpeg -L$(ZLIBLIB) -lz
 #           
 #    INCS = -I$(XML2INC) -I$(TIFFINC) -I$(GEOTIFF_INC) -I$(HDFINC)
 #           -I$(HDFEOS_INC) -I$(HDFEOS_GCTPINC)

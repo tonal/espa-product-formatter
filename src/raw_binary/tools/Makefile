@@ -39,35 +39,41 @@ OBJ7 = $(SRC7:.c=.o)
 LIB1   = \
     -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(GEOTIFF_LIB) -lgeotiff -L$(TIFFLIB) -ltiff \
-    -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -L$(HDFEOS_GCTPLIB) -lGctp -lz -lm
+    -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -L$(HDFEOS_GCTPLIB) -lGctp \
+    -L$(ZLIBLIB) -lz -lm
 
 LIB2   = \
     -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 \
     -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lGctp \
-    -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
+    -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
+    -L$(ZLIBLIB) -lz -lm
 
 LIB3   = \
     -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
-    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
+    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
+    -L$(ZLIBLIB) -lz -lm
 
 LIB4   = \
     -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
-    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
+    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
+    -L$(ZLIBLIB) -lz -lm
 
 LIB5   = \
     -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
-    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
+    -L$(XML2LIB) -lxml2 -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
+    -L$(ZLIBLIB) -lz -lm
 
 LIB6   = \
     -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 \
     -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lGctp \
-    -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
+    -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
+    -L$(ZLIBLIB) -lz -lm
 
 LIB7   = \
     -L../lib -l_espa_common -l_espa_l8_angles -l_espa_l8_ang \
-    -l_espa_raw_binary -lz -lm
+    -l_espa_raw_binary -L$(ZLIBLIB) -lz -lm
 
 # Define the executable
 EXE = convert_lpgs_to_espa convert_espa_to_hdf convert_espa_to_gtif \
