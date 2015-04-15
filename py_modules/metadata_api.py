@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Tue Nov 18 08:10:10 2014 by generateDS.py version 2.12b.
+# Generated Wed Apr 15 15:40:16 2015 by generateDS.py version 2.12b.
 #
 # Generated with the ESPA modified version of generateDS.py
 # See espa google code project.
@@ -1941,7 +1941,7 @@ class pixel_size(GeneratedsSuper):
 # end class pixel_size
 
 
-class toa_reflectance(GeneratedsSuper):
+class radiance(GeneratedsSuper):
     subclass = None
     superclass = None
     def __init__(self, gain=None, bias=None):
@@ -1949,10 +1949,10 @@ class toa_reflectance(GeneratedsSuper):
         self.bias = _cast(float, bias)
         pass
     def factory(*args_, **kwargs_):
-        if toa_reflectance.subclass:
-            return toa_reflectance.subclass(*args_, **kwargs_)
+        if radiance.subclass:
+            return radiance.subclass(*args_, **kwargs_)
         else:
-            return toa_reflectance(*args_, **kwargs_)
+            return radiance(*args_, **kwargs_)
     factory = staticmethod(factory)
     def get_gain(self): return self.gain
     def set_gain(self, gain): self.gain = gain
@@ -1965,7 +1965,7 @@ class toa_reflectance(GeneratedsSuper):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='toa_reflectance', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='radiance', namespacedef_='', pretty_print=True):
         # Check if we are at the root level and output the XML header
         if level == 0:
             outfile.write('<?xml version="1.0"?>\n')
@@ -1979,28 +1979,28 @@ class toa_reflectance(GeneratedsSuper):
         if level == 0:
             outfile.write('<%s%s' % (namespace_, name_))
             already_processed = set()
-            self.exportAttributes(outfile, level, already_processed, namespace_, name_='toa_reflectance')
+            self.exportAttributes(outfile, level, already_processed, namespace_, name_='radiance')
             outfile.write('%s' % (namespacedef_ and ' ' + namespacedef_ or ''))
         else:
             outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
             already_processed = set()
-            self.exportAttributes(outfile, level, already_processed, namespace_, name_='toa_reflectance')
+            self.exportAttributes(outfile, level, already_processed, namespace_, name_='radiance')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='toa_reflectance', pretty_print=pretty_print)
+            self.exportChildren(outfile, level + 1, namespace_='', name_='radiance', pretty_print=pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='toa_reflectance'):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='radiance'):
         if self.gain is not None and 'gain' not in already_processed:
             already_processed.add('gain')
             outfile.write(' gain="%s"' % self.gds_format_double(self.gain, input_name='gain'))
         if self.bias is not None and 'bias' not in already_processed:
             already_processed.add('bias')
             outfile.write(' bias="%s"' % self.gds_format_double(self.bias, input_name='bias'))
-    def exportChildren(self, outfile, level, namespace_='', name_='toa_reflectance', fromsubclass_=False, pretty_print=True):
+    def exportChildren(self, outfile, level, namespace_='', name_='radiance', fromsubclass_=False, pretty_print=True):
         pass
-    def exportLiteral(self, outfile, level, name_='toa_reflectance'):
+    def exportLiteral(self, outfile, level, name_='radiance'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
@@ -2041,7 +2041,213 @@ class toa_reflectance(GeneratedsSuper):
                 raise ValueError('Bad float/double attribute (bias): %s' % exp)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         pass
-# end class toa_reflectance
+# end class radiance
+
+
+class reflectance(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, gain=None, bias=None):
+        self.gain = _cast(float, gain)
+        self.bias = _cast(float, bias)
+        pass
+    def factory(*args_, **kwargs_):
+        if reflectance.subclass:
+            return reflectance.subclass(*args_, **kwargs_)
+        else:
+            return reflectance(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_gain(self): return self.gain
+    def set_gain(self, gain): self.gain = gain
+    def get_bias(self): return self.bias
+    def set_bias(self, bias): self.bias = bias
+    def hasContent_(self):
+        if (
+
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='reflectance', namespacedef_='', pretty_print=True):
+        # Check if we are at the root level and output the XML header
+        if level == 0:
+            outfile.write('<?xml version="1.0"?>\n')
+            outfile.write('\n')
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        # Check if we are at the root level and output attributes first before namespacedef
+        if level == 0:
+            outfile.write('<%s%s' % (namespace_, name_))
+            already_processed = set()
+            self.exportAttributes(outfile, level, already_processed, namespace_, name_='reflectance')
+            outfile.write('%s' % (namespacedef_ and ' ' + namespacedef_ or ''))
+        else:
+            outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+            already_processed = set()
+            self.exportAttributes(outfile, level, already_processed, namespace_, name_='reflectance')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='', name_='reflectance', pretty_print=pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='reflectance'):
+        if self.gain is not None and 'gain' not in already_processed:
+            already_processed.add('gain')
+            outfile.write(' gain="%s"' % self.gds_format_double(self.gain, input_name='gain'))
+        if self.bias is not None and 'bias' not in already_processed:
+            already_processed.add('bias')
+            outfile.write(' bias="%s"' % self.gds_format_double(self.bias, input_name='bias'))
+    def exportChildren(self, outfile, level, namespace_='', name_='reflectance', fromsubclass_=False, pretty_print=True):
+        pass
+    def exportLiteral(self, outfile, level, name_='reflectance'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.gain is not None and 'gain' not in already_processed:
+            already_processed.add('gain')
+            showIndent(outfile, level)
+            outfile.write('gain=%e,\n' % (self.gain,))
+        if self.bias is not None and 'bias' not in already_processed:
+            already_processed.add('bias')
+            showIndent(outfile, level)
+            outfile.write('bias=%e,\n' % (self.bias,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        pass
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('gain', node)
+        if value is not None and 'gain' not in already_processed:
+            already_processed.add('gain')
+            try:
+                self.gain = float(value)
+            except ValueError, exp:
+                raise ValueError('Bad float/double attribute (gain): %s' % exp)
+        value = find_attr_value_('bias', node)
+        if value is not None and 'bias' not in already_processed:
+            already_processed.add('bias')
+            try:
+                self.bias = float(value)
+            except ValueError, exp:
+                raise ValueError('Bad float/double attribute (bias): %s' % exp)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        pass
+# end class reflectance
+
+
+class thermal_const(GeneratedsSuper):
+    subclass = None
+    superclass = None
+    def __init__(self, k1=None, k2=None):
+        self.k1 = _cast(float, k1)
+        self.k2 = _cast(float, k2)
+        pass
+    def factory(*args_, **kwargs_):
+        if thermal_const.subclass:
+            return thermal_const.subclass(*args_, **kwargs_)
+        else:
+            return thermal_const(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_k1(self): return self.k1
+    def set_k1(self, k1): self.k1 = k1
+    def get_k2(self): return self.k2
+    def set_k2(self, k2): self.k2 = k2
+    def hasContent_(self):
+        if (
+
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='thermal_const', namespacedef_='', pretty_print=True):
+        # Check if we are at the root level and output the XML header
+        if level == 0:
+            outfile.write('<?xml version="1.0"?>\n')
+            outfile.write('\n')
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        # Check if we are at the root level and output attributes first before namespacedef
+        if level == 0:
+            outfile.write('<%s%s' % (namespace_, name_))
+            already_processed = set()
+            self.exportAttributes(outfile, level, already_processed, namespace_, name_='thermal_const')
+            outfile.write('%s' % (namespacedef_ and ' ' + namespacedef_ or ''))
+        else:
+            outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+            already_processed = set()
+            self.exportAttributes(outfile, level, already_processed, namespace_, name_='thermal_const')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_='', name_='thermal_const', pretty_print=pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='thermal_const'):
+        if self.k1 is not None and 'k1' not in already_processed:
+            already_processed.add('k1')
+            outfile.write(' k1="%s"' % self.gds_format_double(self.k1, input_name='k1'))
+        if self.k2 is not None and 'k2' not in already_processed:
+            already_processed.add('k2')
+            outfile.write(' k2="%s"' % self.gds_format_double(self.k2, input_name='k2'))
+    def exportChildren(self, outfile, level, namespace_='', name_='thermal_const', fromsubclass_=False, pretty_print=True):
+        pass
+    def exportLiteral(self, outfile, level, name_='thermal_const'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.k1 is not None and 'k1' not in already_processed:
+            already_processed.add('k1')
+            showIndent(outfile, level)
+            outfile.write('k1=%e,\n' % (self.k1,))
+        if self.k2 is not None and 'k2' not in already_processed:
+            already_processed.add('k2')
+            showIndent(outfile, level)
+            outfile.write('k2=%e,\n' % (self.k2,))
+    def exportLiteralChildren(self, outfile, level, name_):
+        pass
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+        return self
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('k1', node)
+        if value is not None and 'k1' not in already_processed:
+            already_processed.add('k1')
+            try:
+                self.k1 = float(value)
+            except ValueError, exp:
+                raise ValueError('Bad float/double attribute (k1): %s' % exp)
+        value = find_attr_value_('k2', node)
+        if value is not None and 'k2' not in already_processed:
+            already_processed.add('k2')
+            try:
+                self.k2 = float(value)
+            except ValueError, exp:
+                raise ValueError('Bad float/double attribute (k2): %s' % exp)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        pass
+# end class thermal_const
 
 
 class solar_angles(GeneratedsSuper):
@@ -2901,7 +3107,7 @@ class class_values(GeneratedsSuper):
 class band(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, product=None, source=None, name=None, category=None, data_type=None, nlines=None, nsamps=None, fill_value=None, saturate_value=None, scale_factor=None, add_offset=None, short_name=None, long_name=None, file_name=None, pixel_size=None, resample_method=None, data_units=None, valid_range=None, toa_reflectance=None, bitmap_description=None, class_values=None, qa_description=None, calibrated_nt=None, app_version=None, production_date=None):
+    def __init__(self, product=None, source=None, name=None, category=None, data_type=None, nlines=None, nsamps=None, fill_value=None, saturate_value=None, scale_factor=None, add_offset=None, short_name=None, long_name=None, file_name=None, pixel_size=None, resample_method=None, data_units=None, valid_range=None, radiance=None, reflectance=None, thermal_const=None, bitmap_description=None, class_values=None, qa_description=None, calibrated_nt=None, app_version=None, production_date=None):
         self.product = _cast(None, product)
         self.source = _cast(None, source)
         self.name = _cast(None, name)
@@ -2920,7 +3126,9 @@ class band(GeneratedsSuper):
         self.resample_method = resample_method
         self.data_units = data_units
         self.valid_range = valid_range
-        self.toa_reflectance = toa_reflectance
+        self.radiance = radiance
+        self.reflectance = reflectance
+        self.thermal_const = thermal_const
         self.bitmap_description = bitmap_description
         self.class_values = class_values
         self.qa_description = qa_description
@@ -2951,8 +3159,12 @@ class band(GeneratedsSuper):
     def set_data_units(self, data_units): self.data_units = data_units
     def get_valid_range(self): return self.valid_range
     def set_valid_range(self, valid_range): self.valid_range = valid_range
-    def get_toa_reflectance(self): return self.toa_reflectance
-    def set_toa_reflectance(self, toa_reflectance): self.toa_reflectance = toa_reflectance
+    def get_radiance(self): return self.radiance
+    def set_radiance(self, radiance): self.radiance = radiance
+    def get_reflectance(self): return self.reflectance
+    def set_reflectance(self, reflectance): self.reflectance = reflectance
+    def get_thermal_const(self): return self.thermal_const
+    def set_thermal_const(self, thermal_const): self.thermal_const = thermal_const
     def get_bitmap_description(self): return self.bitmap_description
     def set_bitmap_description(self, bitmap_description): self.bitmap_description = bitmap_description
     def get_class_values(self): return self.class_values
@@ -3005,7 +3217,9 @@ class band(GeneratedsSuper):
             self.resample_method is not None or
             self.data_units is not None or
             self.valid_range is not None or
-            self.toa_reflectance is not None or
+            self.radiance is not None or
+            self.reflectance is not None or
+            self.thermal_const is not None or
             self.bitmap_description is not None or
             self.class_values is not None or
             self.qa_description is not None or
@@ -3101,8 +3315,12 @@ class band(GeneratedsSuper):
             outfile.write('<%sdata_units>%s</%sdata_units>%s' % (namespace_, self.gds_format_string(quote_xml(self.data_units).encode(ExternalEncoding), input_name='data_units'), namespace_, eol_))
         if self.valid_range is not None:
             self.valid_range.export(outfile, level, namespace_, name_='valid_range', pretty_print=pretty_print)
-        if self.toa_reflectance is not None:
-            self.toa_reflectance.export(outfile, level, namespace_, name_='toa_reflectance', pretty_print=pretty_print)
+        if self.radiance is not None:
+            self.radiance.export(outfile, level, namespace_, name_='radiance', pretty_print=pretty_print)
+        if self.reflectance is not None:
+            self.reflectance.export(outfile, level, namespace_, name_='reflectance', pretty_print=pretty_print)
+        if self.thermal_const is not None:
+            self.thermal_const.export(outfile, level, namespace_, name_='thermal_const', pretty_print=pretty_print)
         if self.bitmap_description is not None:
             self.bitmap_description.export(outfile, level, namespace_, name_='bitmap_description', pretty_print=pretty_print)
         if self.class_values is not None:
@@ -3198,10 +3416,22 @@ class band(GeneratedsSuper):
             self.valid_range.exportLiteral(outfile, level)
             showIndent(outfile, level)
             outfile.write('),\n')
-        if self.toa_reflectance is not None:
+        if self.radiance is not None:
             showIndent(outfile, level)
-            outfile.write('toa_reflectance=model_.toa_reflectance(\n')
-            self.toa_reflectance.exportLiteral(outfile, level)
+            outfile.write('radiance=model_.radiance(\n')
+            self.radiance.exportLiteral(outfile, level)
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.reflectance is not None:
+            showIndent(outfile, level)
+            outfile.write('reflectance=model_.reflectance(\n')
+            self.reflectance.exportLiteral(outfile, level)
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.thermal_const is not None:
+            showIndent(outfile, level)
+            outfile.write('thermal_const=model_.thermal_const(\n')
+            self.thermal_const.exportLiteral(outfile, level)
             showIndent(outfile, level)
             outfile.write('),\n')
         if self.bitmap_description is not None:
@@ -3330,10 +3560,18 @@ class band(GeneratedsSuper):
             obj_ = valid_range.factory()
             obj_.build(child_)
             self.valid_range = obj_
-        elif nodeName_ == 'toa_reflectance':
-            obj_ = toa_reflectance.factory()
+        elif nodeName_ == 'radiance':
+            obj_ = radiance.factory()
             obj_.build(child_)
-            self.toa_reflectance = obj_
+            self.radiance = obj_
+        elif nodeName_ == 'reflectance':
+            obj_ = reflectance.factory()
+            obj_.build(child_)
+            self.reflectance = obj_
+        elif nodeName_ == 'thermal_const':
+            obj_ = thermal_const.factory()
+            obj_.build(child_)
+            self.thermal_const = obj_
         elif nodeName_ == 'bitmap_description':
             obj_ = bitmap_description.factory()
             obj_.build(child_)
@@ -3483,7 +3721,7 @@ class espa_metadata(GeneratedsSuper):
 class global_metadataType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, data_provider=None, satellite=None, instrument=None, acquisition_date=None, scene_center_time=None, level1_production_date=None, solar_angles=None, wrs=None, modis=None, lpgs_metadata_file=None, corner=None, bounding_coordinates=None, projection_information=None, orientation_angle=None):
+    def __init__(self, data_provider=None, satellite=None, instrument=None, acquisition_date=None, scene_center_time=None, level1_production_date=None, solar_angles=None, earth_sun_distance=None, wrs=None, modis=None, lpgs_metadata_file=None, corner=None, bounding_coordinates=None, projection_information=None, orientation_angle=None):
         self.data_provider = data_provider
         self.satellite = satellite
         self.instrument = instrument
@@ -3503,6 +3741,7 @@ class global_metadataType(GeneratedsSuper):
             initvalue_ = level1_production_date
         self.level1_production_date = initvalue_
         self.solar_angles = solar_angles
+        self.earth_sun_distance = earth_sun_distance
         self.wrs = wrs
         self.modis = modis
         self.lpgs_metadata_file = lpgs_metadata_file
@@ -3533,6 +3772,8 @@ class global_metadataType(GeneratedsSuper):
     def set_level1_production_date(self, level1_production_date): self.level1_production_date = level1_production_date
     def get_solar_angles(self): return self.solar_angles
     def set_solar_angles(self, solar_angles): self.solar_angles = solar_angles
+    def get_earth_sun_distance(self): return self.earth_sun_distance
+    def set_earth_sun_distance(self, earth_sun_distance): self.earth_sun_distance = earth_sun_distance
     def get_wrs(self): return self.wrs
     def set_wrs(self, wrs): self.wrs = wrs
     def get_modis(self): return self.modis
@@ -3558,6 +3799,7 @@ class global_metadataType(GeneratedsSuper):
             self.scene_center_time is not None or
             self.level1_production_date is not None or
             self.solar_angles is not None or
+            self.earth_sun_distance is not None or
             self.wrs is not None or
             self.modis is not None or
             self.lpgs_metadata_file is not None or
@@ -3623,6 +3865,9 @@ class global_metadataType(GeneratedsSuper):
             outfile.write('<%slevel1_production_date>%s</%slevel1_production_date>%s' % (namespace_, self.gds_format_datetime(self.level1_production_date, input_name='level1_production_date'), namespace_, eol_))
         if self.solar_angles is not None:
             self.solar_angles.export(outfile, level, namespace_, name_='solar_angles', pretty_print=pretty_print)
+        if self.earth_sun_distance is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<%searth_sun_distance>%s</%searth_sun_distance>%s' % (namespace_, self.gds_format_float(self.earth_sun_distance, input_name='earth_sun_distance'), namespace_, eol_))
         if self.wrs is not None:
             self.wrs.export(outfile, level, namespace_, name_='wrs', pretty_print=pretty_print)
         if self.modis is not None:
@@ -3672,6 +3917,9 @@ class global_metadataType(GeneratedsSuper):
             self.solar_angles.exportLiteral(outfile, level)
             showIndent(outfile, level)
             outfile.write('),\n')
+        if self.earth_sun_distance is not None:
+            showIndent(outfile, level)
+            outfile.write('earth_sun_distance=%f,\n' % self.earth_sun_distance)
         if self.wrs is not None:
             showIndent(outfile, level)
             outfile.write('wrs=model_.wrs(\n')
@@ -3752,6 +4000,14 @@ class global_metadataType(GeneratedsSuper):
             obj_ = solar_angles.factory()
             obj_.build(child_)
             self.solar_angles = obj_
+        elif nodeName_ == 'earth_sun_distance':
+            sval_ = child_.text
+            try:
+                fval_ = float(sval_)
+            except (TypeError, ValueError), exp:
+                raise_parse_error(child_, 'requires float or double: %s' % exp)
+            fval_ = self.gds_validate_float(fval_, node, 'earth_sun_distance')
+            self.earth_sun_distance = fval_
         elif nodeName_ == 'wrs':
             obj_ = wrs.factory()
             obj_.build(child_)
@@ -4081,10 +4337,10 @@ def validate_xml(rootObj, xmlns=None, xmlns_xsi=None, schema_uri=None):
 
 # ESPA - Added a module method to allow exporting from the module level with
 #        validation
-def export(outFile, rootObj, xmlns='http://espa.cr.usgs.gov/v1.1', xmlns_xsi='http://www.w3.org/2001/XMLSchema-instance', schema_uri='http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_1.xsd'):
+def export(outFile, rootObj, xmlns='http://espa.cr.usgs.gov/v1.2', xmlns_xsi='http://www.w3.org/2001/XMLSchema-instance', schema_uri='http://espa.cr.usgs.gov/schema/espa_internal_metadata_v1_2.xsd'):
     ns_def = build_ns_def(xmlns, xmlns_xsi, schema_uri)
 
-    rootObj.set_version('1.1.0')
+    rootObj.set_version('1.2.0')
 
     xml_text = ''
     try:
@@ -4129,9 +4385,11 @@ __all__ = [
     "pixel_size",
     "projection_information",
     "ps_proj_params",
+    "radiance",
+    "reflectance",
     "sin_proj_params",
     "solar_angles",
-    "toa_reflectance",
+    "thermal_const",
     "utm_proj_params",
     "valid_range",
     "wrs"
