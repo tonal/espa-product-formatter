@@ -276,7 +276,7 @@ int write_hdf_eos_attr
         /* LR corner - go from UL of LR to LR of LR */
         lr_corner[0] = gmeta->proj_info.lr_corner[0] +
             xml_metadata->band[0].pixel_size[0];
-        lr_corner[1] = gmeta->proj_info.lr_corner[1] +
+        lr_corner[1] = gmeta->proj_info.lr_corner[1] -
             xml_metadata->band[0].pixel_size[1];
     }
 
