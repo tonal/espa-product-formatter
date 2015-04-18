@@ -12,12 +12,15 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/24/2013   Gail Schmidt     Original development
+4/18/2015    Gail Schmidt     Added a version number
 
 NOTES:
 *****************************************************************************/
 
 #ifndef COMMON_H_
 #define COMMON_H_
+
+#define ESPA_COMMON_VERSION "1.4.0"
 
 /* Set up default success/error defines */
 #define SUCCESS 0

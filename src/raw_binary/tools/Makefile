@@ -35,6 +35,9 @@ OBJ6 = $(SRC6:.c=.o)
 SRC7 = create_l8_angle_bands.c
 OBJ7 = $(SRC7:.c=.o)
 
+SRC8 = create_land_water_mask.c
+OBJ8 = $(SRC8:.c=.o)
+
 # Define the object libraries
 LIB1   = \
     -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
@@ -75,15 +78,20 @@ LIB7   = \
     -L../lib -l_espa_common -l_espa_l8_angles -l_espa_l8_ang \
     -l_espa_raw_binary -L$(ZLIBLIB) -lz -lm
 
+LIB8   = \
+    -L../lib -l_espa_land_water_mask -l_espa_raw_binary -l_espa_common \
+    -l_espa_l8_ang -L$(XML2LIB) -lxml2 \
+    -lgctp3 -L$(ZLIBLIB) -lz -lm
+
 # Define the executable
 EXE = convert_lpgs_to_espa convert_espa_to_hdf convert_espa_to_gtif \
       espa_band_subset espa_product_subset convert_modis_to_espa \
-      create_l8_angle_bands
+      create_l8_angle_bands create_land_water_mask
 
 # Target for the executable
 all: $(EXE)
-	install -d ../bin
-	install -m 755 $(EXE) ../bin
+	install -d $(BIN)
+	install -m 755 $(EXE) $(BIN)
 
 convert_lpgs_to_espa: $(OBJ1) $(INC)
 	$(CC) $(NCFLAGS) -o convert_lpgs_to_espa $(OBJ1) $(LIB1)
@@ -106,6 +114,9 @@ convert_modis_to_espa: $(OBJ6) $(INC)
 create_l8_angle_bands: $(OBJ7) $(INC)
 	$(CC) $(NCFLAGS) -o create_l8_angle_bands $(OBJ7) $(LIB7)
 
+create_land_water_mask: $(OBJ8) $(INC)
+	$(CC) $(NCFLAGS) -o create_land_water_mask $(OBJ8) $(LIB8)
+
 clean:
 	$(RM) *.o $(EXE)
 
@@ -116,6 +127,7 @@ $(OBJ4): $(INC)
 $(OBJ5): $(INC)
 $(OBJ6): $(INC)
 $(OBJ7): $(INC)
+$(OBJ8): $(INC)
 .c.o:
 	$(CC) $(NCFLAGS) -c $<
 

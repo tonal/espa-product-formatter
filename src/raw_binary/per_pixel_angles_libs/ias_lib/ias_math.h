@@ -718,12 +718,4 @@ int ias_math_point_in_closed_polygon_distance
                                specified direction */
 );
 
-/* math constants */
-double ias_math_get_pi();
-double ias_math_get_two_pi();
-double ias_math_get_arcsec_to_radian_conversion();
-double ias_math_get_radians_per_degree();
-double ias_math_get_degrees_per_radian();
-double ias_math_get_degrees_per_hour();
-
 #endif
