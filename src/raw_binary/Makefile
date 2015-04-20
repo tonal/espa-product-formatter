@@ -1,4 +1,4 @@
-LIBDIRS	= common io_libs format_conversion_libs land_water_mask_libs/GCTP3 land_water_mask_libs per_pixel_angles_libs/ias_lib per_pixel_angles_libs
+LIBDIRS	= common io_libs format_conversion_libs per_pixel_angles_libs/ias_lib per_pixel_angles_libs land_water_mask_libs/GCTP3 land_water_mask_libs
 EXEDIRS = tools
 
 all:
