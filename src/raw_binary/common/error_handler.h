@@ -22,7 +22,7 @@ NOTES:
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include "common.h"
+#include "espa_common.h"
 
 /* Prototypes */
 void error_handler

@@ -1,5 +1,5 @@
 /*****************************************************************************
-FILE: common.h
+FILE: espa_common.h
   
 PURPOSE: Contains ESPA common defines
 
@@ -13,12 +13,13 @@ Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 12/24/2013   Gail Schmidt     Original development
 4/18/2015    Gail Schmidt     Added a version number
+4/20/2015    Gail Schmidt     Renamed common.h to espa_common.h
 
 NOTES:
 *****************************************************************************/
 
-#ifndef COMMON_H_
-#define COMMON_H_
+#ifndef ESPA_COMMON_H_
+#define ESPA_COMMON_H_
 
 #define ESPA_COMMON_VERSION "1.4.0"
 

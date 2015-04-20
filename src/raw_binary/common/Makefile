@@ -12,7 +12,7 @@ AR = ar rcsv
 # Define the include files:
 #--------------------------
 INCS =
-INC = common.h error_handler.h
+INC = espa_common.h error_handler.h
 
 #-----------------------------------------
 # Define the source code and object files:

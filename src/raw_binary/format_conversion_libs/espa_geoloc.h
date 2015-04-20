@@ -23,7 +23,7 @@ NOTES:
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
-#include "common.h"
+#include "espa_common.h"
 #include "error_handler.h"
 #include "espa_metadata.h"
 
