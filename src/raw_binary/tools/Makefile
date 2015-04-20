@@ -90,8 +90,6 @@ EXE = convert_lpgs_to_espa convert_espa_to_hdf convert_espa_to_gtif \
 
 # Target for the executable
 all: $(EXE)
-	install -d $(BIN)
-	install -m 755 $(EXE) $(BIN)
 
 convert_lpgs_to_espa: $(OBJ1) $(INC)
 	$(CC) $(NCFLAGS) -o convert_lpgs_to_espa $(OBJ1) $(LIB1)
@@ -119,6 +117,10 @@ create_land_water_mask: $(OBJ8) $(INC)
 
 clean:
 	$(RM) *.o $(EXE)
+
+install:
+	install -d $(BIN)
+	install -m 755 $(EXE) $(BIN)
 
 $(OBJ1): $(INC)
 $(OBJ2): $(INC)
