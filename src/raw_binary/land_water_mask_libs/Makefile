@@ -50,6 +50,12 @@ $(ARCHIVE): $(OBJ)
 	install -d ../include
 	install -m 644 $(ARCHIVE) ../lib
 	install -m 644 $(INCS) ../include
+ifeq ($(PREFIX),)
+	echo "WARNING: PREFIX environment variable is not defined!  Static data from this library will not be installed."
+else
+	install -d $(PREFIX)/static_data
+	install -m 644 ./land_no_buf.ply $(PREFIX)/static_data
+endif
 
 all: $(ARCHIVE)
 
