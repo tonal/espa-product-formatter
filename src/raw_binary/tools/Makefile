@@ -119,8 +119,12 @@ clean:
 	$(RM) *.o $(EXE)
 
 install:
-	install -d $(BIN)
-	install -m 755 $(EXE) $(BIN)
+ifeq ($(PREFIX),)
+	echo "WARNING: PREFIX environment variable is not defined!  Executables will not be installed."
+else
+	install -d $(PREFIX)/bin
+	install -m 755 $(EXE) $(PREFIX)/bin
+endif
 
 $(OBJ1): $(INC)
 $(OBJ2): $(INC)
