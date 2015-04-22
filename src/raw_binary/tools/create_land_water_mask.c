@@ -171,6 +171,8 @@ HISTORY:
 Date         Programmer       Reason
 ----------   --------------   -------------------------------------
 4/17/2015     Gail Schmidt     Original development
+4/22/2015     Gail Schmidt     Make this band an intermediate_data product
+                               since it won't be delivered
 
 NOTES:
   1. The ESPA_LAND_MASS_POLYGON environment variable needs to be defined and
@@ -299,7 +301,7 @@ int main (int argc, char** argv)
     out_bmeta = &out_meta.band[0];
 
     /* Set up the band metadata for the land/water mask */
-    strcpy (out_bmeta->product, bmeta->product);
+    strcpy (out_bmeta->product, "intermediate_data");
     strcpy (out_bmeta->source, "level1");
     strcpy (out_bmeta->name, "land_water_mask");
     strcpy (out_bmeta->category, "qa");
