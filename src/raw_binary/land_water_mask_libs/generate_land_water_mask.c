@@ -175,8 +175,10 @@ int generate_land_water_mask
             mask_projection.spheroid = SPHERE_CLARKE_1866;
             break;
         case (ESPA_NODATUM):
-            mask_projection.spheroid = -999;
-            break;
+            sprintf (errmsg, "ESPA_NODATUM is not supported for converting "
+                "the land/water polygon to the frame of the current scene.");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
     }
 
     /* Write some summary information */

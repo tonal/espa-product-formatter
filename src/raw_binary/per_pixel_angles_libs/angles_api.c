@@ -1,6 +1,6 @@
 /* IAS Library Includes */
 #include "ias_logging.h"
-#include "ias_angle_gen_distro.h"  
+#include "ias_angle_gen_distro.h"
 
 /* Local Includes */
 #include "l8_angles.h"
@@ -16,7 +16,7 @@ Return: SUCCESS / ERROR
  ******************************************************************************/
 int calculate_angles
 (
-    const IAS_ANGLE_GEN_METADATA *metadata, /* I: Angle metadata structure */ 
+    const IAS_ANGLE_GEN_METADATA *metadata, /* I: Angle metadata structure */
     int line,                               /* I: L1T line coordinate */
     int samp,                               /* I: L1T sample coordinate */
     int band_index,                         /* I: Spectral band number */
@@ -26,7 +26,7 @@ int calculate_angles
 )       
 {
     double elev;            /* Elevation always set at 0 */
-    int outside_image_flag; /* Outside of image flag */ 
+    int outside_image_flag; /* Outside of image flag */
 
     /* Default the elevation to 0 to ensure the full scene coverage */
     elev = 0;
@@ -37,7 +37,7 @@ int calculate_angles
     {
         /* Calculate the satellite viewing angles */
         if (ias_angle_gen_calculate_angles_rpc(metadata, line, samp, &elev,
-            band_index, IAS_ANGLE_GEN_SATELLITE, &outside_image_flag, 
+            band_index, IAS_ANGLE_GEN_SATELLITE, &outside_image_flag,
             sat_angles) != SUCCESS)
         {
             IAS_LOG_ERROR("Evaluating angles for band index %d", band_index);
@@ -50,9 +50,9 @@ int calculate_angles
     if (angle_type != AT_SATELLITE)
     {
         /* Calculate the solar angles */
-        if (ias_angle_gen_calculate_angles_rpc(metadata, line, samp, &elev, 
+        if (ias_angle_gen_calculate_angles_rpc(metadata, line, samp, &elev,
             band_index, IAS_ANGLE_GEN_SOLAR, &outside_image_flag, sun_angles)
-            != SUCCESS) 
+            != SUCCESS)
         {
             IAS_LOG_ERROR("Evaluating solar angles for band index %d",
                 band_index);
@@ -72,7 +72,7 @@ Return: Active lines array
  ******************************************************************************/
 const double *get_active_lines
 (
-    const IAS_ANGLE_GEN_METADATA *metadata, /* I: Angle metadata structure */ 
+    const IAS_ANGLE_GEN_METADATA *metadata, /* I: Angle metadata structure */
     int band_index                          /* I: Band index */
 )
 {
@@ -88,7 +88,7 @@ Return: Active samples array
  ******************************************************************************/
 const double *get_active_samples
 (
-    const IAS_ANGLE_GEN_METADATA *metadata, /* I: Angle metadata structure */ 
+    const IAS_ANGLE_GEN_METADATA *metadata, /* I: Angle metadata structure */
     int band_index                          /* I: Band index */
 )
 {
@@ -104,7 +104,7 @@ Return: SUCCESS / ERROR
  ******************************************************************************/
 int get_frame
 (
-    const IAS_ANGLE_GEN_METADATA *metadata, /* I: Angle metadata structure */ 
+    const IAS_ANGLE_GEN_METADATA *metadata, /* I: Angle metadata structure */
     int band_index,                         /* I: Band index */
     ANGLES_FRAME *frame                     /* O: Image frame info */
 )        

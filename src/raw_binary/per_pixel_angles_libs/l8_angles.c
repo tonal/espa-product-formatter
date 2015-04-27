@@ -192,7 +192,7 @@ int l8_per_pixel_angles
         int curr_tmp_percent;           /* Percentage for current line */
         IAS_MISC_LINE_EXTENT *trim_lut; /* Image trim lookup table */
         int band_number;                /* Band number */ 
-                
+
         /* Retrieve the band number for current index */
         band_number = ias_sat_attr_convert_band_index_to_number(band_index);
         if (band_number == ERROR)
@@ -205,7 +205,7 @@ int l8_per_pixel_angles
         /* Check if this band should be processed */
         if (!parameters.process_band[band_index])
             continue;
-        
+
         /* Get framing information for this band if return is not successful
            then band is not present in metadata so continue */
         if (get_frame(&metadata, band_index, &frame[band_index]) != SUCCESS)
@@ -455,7 +455,7 @@ int process_parameters
     /* Parse the band list */
     band_list_init_value = 1;
     local_band_count = 0;
-    
+
     /* Parse the fill pixel value and band list */
     int offset = 0;
     int character_count = 0;

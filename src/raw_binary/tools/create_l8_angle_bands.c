@@ -1,6 +1,6 @@
 /*****************************************************************************
 FILE: create_l8_angle_bands
-  
+
 PURPOSE: Creates the Landsat 8 solar and view/satellite per-pixel angles.
 Both the zenith and azimuth angles are created for each angle type for each
 Landsat 8 band.
@@ -191,6 +191,7 @@ int main (int argc, char** argv)
 {
     int i;                       /* looping variable */
     int parm;                    /* looping variable */
+    int count;                   /* number of chars copied in snprintf */
     int nlines[L8_NBANDS];       /* number of lines for each band */
     int nsamps[L8_NBANDS];       /* number of samples for each band */
     char FUNC_NAME[] = "create_l8_angle_bands";  /* function name */
@@ -221,8 +222,6 @@ int main (int argc, char** argv)
        image data. */
     if (l8_per_pixel_angles (ang_infile, 1, -9999, "ALL", frame, solar_zenith,
         solar_azimuth, sat_zenith, sat_azimuth, nlines, nsamps) != SUCCESS)
-//    if (l8_per_pixel_angles (ang_infile, 1, -9999, "1,2,3,4,5,6,7,9", solar_zenith,
-//        solar_azimuth, sat_zenith, NULL, nlines, nsamps) != SUCCESS)
     {  /* Error messages already written */
         exit (ERROR);
     }
@@ -232,7 +231,15 @@ int main (int argc, char** argv)
     for (i = 0; i < L8_NBANDS; i++)
     {
         /* Open the output file for this band */
-        sprintf (tmpfile, "%s_B%d_solar_zenith.img", outfile, i+1);
+        count = snprintf (tmpfile, sizeof (tmpfile), "%s_B%d_solar_zenith.img",
+            outfile, i+1);
+        if (count < 0 || count >= sizeof (tmpfile))
+        {
+            sprintf (errmsg, "Overflow of tmpfile");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         fptr = open_raw_binary (tmpfile, "wb");
         if (!fptr)
         {
@@ -255,17 +262,49 @@ int main (int argc, char** argv)
         free (solar_zenith[i]);
 
         /* Create the ENVI header */
-        sprintf (envi_hdr.description, "Solar angle file");
+        count = snprintf (envi_hdr.description, sizeof (envi_hdr.description),
+            "Solar angle file");
+        if (count < 0 || count >= sizeof (envi_hdr.description))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.description");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         envi_hdr.nlines = nlines[i];
         envi_hdr.nsamps = nsamps[i];
         envi_hdr.nbands = 1;
         envi_hdr.header_offset = 0;
         envi_hdr.byte_order = 0;
-        sprintf (envi_hdr.file_type, "ENVI Standard");
+
+        count = snprintf (envi_hdr.file_type, sizeof (envi_hdr.file_type),
+            "ENVI Standard");
+        if (count < 0 || count >= sizeof (envi_hdr.file_type))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.file_type");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         envi_hdr.data_type = 2;
         envi_hdr.data_ignore_value = -9999;
-        sprintf (envi_hdr.interleave, "BSQ");
-        sprintf (envi_hdr.sensor_type, "Landsat OLI/TIRS");
+        count = snprintf (envi_hdr.interleave, sizeof (envi_hdr.interleave),
+            "BSQ");
+        if (count < 0 || count >= sizeof (envi_hdr.interleave))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.interleave");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        count = snprintf (envi_hdr.sensor_type, sizeof (envi_hdr.sensor_type),
+            "Landsat OLI/TIRS");
+        if (count < 0 || count >= sizeof (envi_hdr.sensor_type))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.interleave");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
 
         if (frame[i].projection.spheroid == WGS84_SPHEROID)
             envi_hdr.datum_type = ESPA_WGS84;
@@ -275,7 +314,7 @@ int main (int argc, char** argv)
             error_handler (true, FUNC_NAME, errmsg);
             exit (ERROR);
         }
- 
+
         if (frame[i].projection.proj_code == UTM)
         {
             envi_hdr.proj_type = GCTP_UTM_PROJ;
@@ -303,10 +342,25 @@ int main (int argc, char** argv)
             frame[i].pixel_size * 0.5;
         envi_hdr.xy_start[0] = 1;
         envi_hdr.xy_start[1] = 1;
-        sprintf (envi_hdr.band_names[0], "Solar zenith angle");
- 
+        count = snprintf (envi_hdr.band_names[0],
+            sizeof (envi_hdr.band_names[0]), "Solar zenith angle");
+        if (count < 0 || count >= sizeof (envi_hdr.band_names[0]))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.band_names[0]");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         /* Write the ENVI header */
-        sprintf (tmpfile, "%s_B%d_solar_zenith.hdr", outfile, i+1);
+        count = snprintf (tmpfile, sizeof (tmpfile), "%s_B%d_solar_zenith.hdr",
+            outfile, i+1);
+        if (count < 0 || count >= sizeof (tmpfile))
+        {
+            sprintf (errmsg, "Overflow of tmpfile");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         if (write_envi_hdr (tmpfile, &envi_hdr) != SUCCESS)
         {
             sprintf (errmsg, "Writing the ENVI header file: %s.", tmpfile);
@@ -320,7 +374,15 @@ int main (int argc, char** argv)
     for (i = 0; i < L8_NBANDS; i++)
     {
         /* Open the output file for this band */
-        sprintf (tmpfile, "%s_B%d_solar_azimuth.img", outfile, i+1);
+        count = snprintf (tmpfile, sizeof (tmpfile), "%s_B%d_solar_azimuth.img",
+            outfile, i+1);
+        if (count < 0 || count >= sizeof (tmpfile))
+        {
+            sprintf (errmsg, "Overflow of tmpfile");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         fptr = open_raw_binary (tmpfile, "wb");
         if (!fptr)
         {
@@ -343,17 +405,48 @@ int main (int argc, char** argv)
         free (solar_azimuth[i]);
 
         /* Create the ENVI header */
-        sprintf (envi_hdr.description, "Solar angle file");
+        count = snprintf (envi_hdr.description, sizeof (envi_hdr.description),
+            "Solar angle file");
+        if (count < 0 || count >= sizeof (envi_hdr.description))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.description");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         envi_hdr.nlines = nlines[i];
         envi_hdr.nsamps = nsamps[i];
         envi_hdr.nbands = 1;
         envi_hdr.header_offset = 0;
         envi_hdr.byte_order = 0;
-        sprintf (envi_hdr.file_type, "ENVI Standard");
+        count = snprintf (envi_hdr.file_type, sizeof (envi_hdr.file_type),
+            "ENVI Standard");
+        if (count < 0 || count >= sizeof (envi_hdr.file_type))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.file_type");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         envi_hdr.data_type = 2;
         envi_hdr.data_ignore_value = -9999;
-        sprintf (envi_hdr.interleave, "BSQ");
-        sprintf (envi_hdr.sensor_type, "Landsat OLI/TIRS");
+        count = snprintf (envi_hdr.interleave, sizeof (envi_hdr.interleave),
+            "BSQ");
+        if (count < 0 || count >= sizeof (envi_hdr.interleave))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.interleave");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        count = snprintf (envi_hdr.sensor_type, sizeof (envi_hdr.sensor_type),
+            "Landsat OLI/TIRS");
+        if (count < 0 || count >= sizeof (envi_hdr.sensor_type))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.interleave");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
 
         if (frame[i].projection.spheroid == WGS84_SPHEROID)
             envi_hdr.datum_type = ESPA_WGS84;
@@ -363,7 +456,7 @@ int main (int argc, char** argv)
             error_handler (true, FUNC_NAME, errmsg);
             exit (ERROR);
         }
- 
+
         if (frame[i].projection.proj_code == UTM)
         {
             envi_hdr.proj_type = GCTP_UTM_PROJ;
@@ -391,10 +484,25 @@ int main (int argc, char** argv)
             frame[i].pixel_size * 0.5;
         envi_hdr.xy_start[0] = 1;
         envi_hdr.xy_start[1] = 1;
-        sprintf (envi_hdr.band_names[0], "Solar azimuth angle");
- 
+        count = snprintf (envi_hdr.band_names[0],
+            sizeof (envi_hdr.band_names[0]), "Solar azimuth angle");
+        if (count < 0 || count >= sizeof (envi_hdr.band_names[0]))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.band_names[0]");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         /* Write the ENVI header */
-        sprintf (tmpfile, "%s_B%d_solar_azimuth.hdr", outfile, i+1);
+        count = snprintf (tmpfile, sizeof (tmpfile), "%s_B%d_solar_azimuth.hdr",
+            outfile, i+1);
+        if (count < 0 || count >= sizeof (tmpfile))
+        {
+            sprintf (errmsg, "Overflow of tmpfile");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         if (write_envi_hdr (tmpfile, &envi_hdr) != SUCCESS)
         {
             sprintf (errmsg, "Writing the ENVI header file: %s.", tmpfile);
@@ -408,7 +516,15 @@ int main (int argc, char** argv)
     for (i = 0; i < L8_NBANDS; i++)
     {
         /* Open the output file for this band */
-        sprintf (tmpfile, "%s_B%d_sensor_zenith.img", outfile, i+1);
+        count = snprintf (tmpfile, sizeof (tmpfile), "%s_B%d_sensor_zenith.img",
+            outfile, i+1);
+        if (count < 0 || count >= sizeof (tmpfile))
+        {
+            sprintf (errmsg, "Overflow of tmpfile");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         fptr = open_raw_binary (tmpfile, "wb");
         if (!fptr)
         {
@@ -431,17 +547,49 @@ int main (int argc, char** argv)
         free (sat_zenith[i]);
 
         /* Create the ENVI header */
-        sprintf (envi_hdr.description, "Satellite/View angle file");
+        count = snprintf (envi_hdr.description, sizeof (envi_hdr.description),
+            "Satellite/View angle file");
+        if (count < 0 || count >= sizeof (envi_hdr.description))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.description");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         envi_hdr.nlines = nlines[i];
         envi_hdr.nsamps = nsamps[i];
         envi_hdr.nbands = 1;
         envi_hdr.header_offset = 0;
         envi_hdr.byte_order = 0;
-        sprintf (envi_hdr.file_type, "ENVI Standard");
+
+        count = snprintf (envi_hdr.file_type, sizeof (envi_hdr.file_type),
+            "ENVI Standard");
+        if (count < 0 || count >= sizeof (envi_hdr.file_type))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.file_type");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         envi_hdr.data_type = 2;
         envi_hdr.data_ignore_value = -9999;
-        sprintf (envi_hdr.interleave, "BSQ");
-        sprintf (envi_hdr.sensor_type, "Landsat OLI/TIRS");
+        count = snprintf (envi_hdr.interleave, sizeof (envi_hdr.interleave),
+            "BSQ");
+        if (count < 0 || count >= sizeof (envi_hdr.interleave))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.interleave");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        count = snprintf (envi_hdr.sensor_type, sizeof (envi_hdr.sensor_type),
+            "Landsat OLI/TIRS");
+        if (count < 0 || count >= sizeof (envi_hdr.sensor_type))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.interleave");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
 
         if (frame[i].projection.spheroid == WGS84_SPHEROID)
             envi_hdr.datum_type = ESPA_WGS84;
@@ -451,7 +599,7 @@ int main (int argc, char** argv)
             error_handler (true, FUNC_NAME, errmsg);
             exit (ERROR);
         }
- 
+
         if (frame[i].projection.proj_code == UTM)
         {
             envi_hdr.proj_type = GCTP_UTM_PROJ;
@@ -479,10 +627,25 @@ int main (int argc, char** argv)
             frame[i].pixel_size * 0.5;
         envi_hdr.xy_start[0] = 1;
         envi_hdr.xy_start[1] = 1;
-        sprintf (envi_hdr.band_names[0], "View zenith angle");
- 
+        count = snprintf (envi_hdr.band_names[0],
+            sizeof (envi_hdr.band_names[0]), "View zenith angle");
+        if (count < 0 || count >= sizeof (envi_hdr.band_names[0]))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.band_names[0]");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         /* Write the ENVI header */
-        sprintf (tmpfile, "%s_B%d_sensor_zenith.hdr", outfile, i+1);
+        count = snprintf (tmpfile, sizeof (tmpfile), "%s_B%d_sensor_zenith.hdr",
+            outfile, i+1);
+        if (count < 0 || count >= sizeof (tmpfile))
+        {
+            sprintf (errmsg, "Overflow of tmpfile");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         if (write_envi_hdr (tmpfile, &envi_hdr) != SUCCESS)
         {
             sprintf (errmsg, "Writing the ENVI header file: %s.", tmpfile);
@@ -496,7 +659,15 @@ int main (int argc, char** argv)
     for (i = 0; i < L8_NBANDS; i++)
     {
         /* Open the output file for this band */
-        sprintf (tmpfile, "%s_B%d_sensor_azimuth.img", outfile, i+1);
+        count = snprintf (tmpfile, sizeof (tmpfile),
+            "%s_B%d_sensor_azimuth.img", outfile, i+1);
+        if (count < 0 || count >= sizeof (tmpfile))
+        {
+            sprintf (errmsg, "Overflow of tmpfile");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         fptr = open_raw_binary (tmpfile, "wb");
         if (!fptr)
         {
@@ -519,17 +690,48 @@ int main (int argc, char** argv)
         free (sat_azimuth[i]);
 
         /* Create the ENVI header */
-        sprintf (envi_hdr.description, "Satellite/View angle file");
+        count = snprintf (envi_hdr.description, sizeof (envi_hdr.description),
+            "Satellite/View angle file");
+        if (count < 0 || count >= sizeof (envi_hdr.description))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.description");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         envi_hdr.nlines = nlines[i];
         envi_hdr.nsamps = nsamps[i];
         envi_hdr.nbands = 1;
         envi_hdr.header_offset = 0;
         envi_hdr.byte_order = 0;
-        sprintf (envi_hdr.file_type, "ENVI Standard");
+        count = snprintf (envi_hdr.file_type, sizeof (envi_hdr.file_type),
+            "ENVI Standard");
+        if (count < 0 || count >= sizeof (envi_hdr.file_type))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.file_type");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         envi_hdr.data_type = 2;
         envi_hdr.data_ignore_value = -9999;
-        sprintf (envi_hdr.interleave, "BSQ");
-        sprintf (envi_hdr.sensor_type, "Landsat OLI/TIRS");
+        count = snprintf (envi_hdr.interleave, sizeof (envi_hdr.interleave),
+            "BSQ");
+        if (count < 0 || count >= sizeof (envi_hdr.interleave))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.interleave");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
+        count = snprintf (envi_hdr.sensor_type, sizeof (envi_hdr.sensor_type),
+            "Landsat OLI/TIRS");
+        if (count < 0 || count >= sizeof (envi_hdr.sensor_type))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.interleave");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
 
         if (frame[i].projection.spheroid == WGS84_SPHEROID)
             envi_hdr.datum_type = ESPA_WGS84;
@@ -539,7 +741,7 @@ int main (int argc, char** argv)
             error_handler (true, FUNC_NAME, errmsg);
             exit (ERROR);
         }
- 
+
         if (frame[i].projection.proj_code == UTM)
         {
             envi_hdr.proj_type = GCTP_UTM_PROJ;
@@ -567,10 +769,25 @@ int main (int argc, char** argv)
             frame[i].pixel_size * 0.5;
         envi_hdr.xy_start[0] = 1;
         envi_hdr.xy_start[1] = 1;
-        sprintf (envi_hdr.band_names[0], "View azimuth angle");
- 
+        count = snprintf (envi_hdr.band_names[0],
+            sizeof (envi_hdr.band_names[0]), "View azimuth angle");
+        if (count < 0 || count >= sizeof (envi_hdr.band_names[0]))
+        {
+            sprintf (errmsg, "Overflow of envi_hdr.band_names[0]");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         /* Write the ENVI header */
-        sprintf (tmpfile, "%s_B%d_sensor_azimuth.hdr", outfile, i+1);
+        count = snprintf (tmpfile, sizeof (tmpfile),
+            "%s_B%d_sensor_azimuth.hdr", outfile, i+1);
+        if (count < 0 || count >= sizeof (tmpfile))
+        {
+            sprintf (errmsg, "Overflow of tmpfile");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
+
         if (write_envi_hdr (tmpfile, &envi_hdr) != SUCCESS)
         {
             sprintf (errmsg, "Writing the ENVI header file: %s.", tmpfile);
