@@ -4,7 +4,7 @@
 /* Standard Library Includes */
 #include <limits.h>
 
-/* IAS Library Includes */    
+/* IAS Library Includes */
 #include "ias_angle_gen_distro.h"
 #include "ias_angle_gen_includes.h"
 #include "ias_miscellaneous.h"
@@ -105,7 +105,7 @@ int get_frame
     const IAS_ANGLE_GEN_METADATA *metadata, /* I: Angle metadata structure */ 
     int band_index,                         /* I: Band index */
     ANGLES_FRAME *frame                     /* O: Image frame info */
-);               
+);
 
 int read_parameters
 (
