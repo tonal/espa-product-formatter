@@ -77,6 +77,32 @@ int l8_per_pixel_angles
     int nsamps[L8_NBANDS]   /* O: Number of samples for each band */
 );
 
+int l8_per_pixel_avg_refl_angles
+(
+    char *angle_coeff_name, /* I: Angle coefficient filename */
+    int subsamp_fact,       /* I: Subsample factor used when calculating the
+                                  angles (1=full resolution). OW take every Nth
+                                  sample from the line, where N=subsamp_fact */
+    short fill_pix_value,   /* I: Fill pixel value to use (-32768:32767) */
+    ANGLES_FRAME *avg_frame,  /* O: Image frame info for the scene */
+    short **avg_solar_zenith, /* O: Addr of pointer for the average solar zenith
+                                    angle array (if NULL, don't process),
+                                    degrees scaled by 100 */
+    short **avg_solar_azimuth,/* O: Addr of pointer for the average solar
+                                    azimuth angle array (if NULL, don't
+                                    process), degrees scaled by 100 */
+    short **avg_sat_zenith,   /* O: Addr of pointer for the average satellite
+                                    zenith angle array (if NULL, don't process),
+                                    degrees scaled by 100 */
+    short **avg_sat_azimuth,  /* O: Addr of pointer for the average satellite
+                                    azimuth angle array (if NULL, don't
+                                    process), degrees scaled by 100 */
+    int *avg_nlines,          /* O: Number of lines for the bands, based on
+                                    on the subsample factor */
+    int *avg_nsamps           /* O: Number of samples for the bands, based on
+                                    the subsample factor */
+);
+
 int calculate_angles
 (
     const IAS_ANGLE_GEN_METADATA *metadata, /* I: Angle metadata structure */ 
