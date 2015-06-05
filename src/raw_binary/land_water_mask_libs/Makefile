@@ -51,10 +51,6 @@ $(ARCHIVE): $(OBJ)
 	install -m 644 $(ARCHIVE) ../lib
 	install -m 644 $(INCS) ../include
 
-install: land_no_buf.ply
-	install -d $(PREFIX)/static_data
-	install -m 644 land_no_buf.ply $(PREFIX)/static_data
-
 clean:
 	$(RM) $(OBJ) $(ARCHIVE)
 
