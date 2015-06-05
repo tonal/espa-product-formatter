@@ -18,9 +18,6 @@ install: all
         echo "installing all in $$dir..."; \
         (cd $$dir; $(MAKE) install); done
 
-# Only installs the static land water mask
-	(cd land_water_mask_libs; $(MAKE) -f Makefile install)
-
 # if the ESPALIB environment variable points to the 'lib' directory, then
 # there is no need to install anything
 ifneq ($(ESPALIB), $(CURDIR)/lib)
