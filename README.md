@@ -49,7 +49,7 @@ See git tag [version_1.4.0]
     export PREFIX="path_to_directory_for_format_converter_build_data"
    ```
 
-  * Download the static land/water polygon from http://espa.cr.usgs.gov/downloads/auxiliaries/land\_water\_poly/land\_no\_buf.ply.gz. Unzip the file into $PREFIX/static\_data.  Define the ESPA\_LAND\_MASS\_POLYGON environment variable to point to the $PREFIX/static\_data/land\_no\_buf.ply file in order to run the land/water mask code.
+  * Download the static land/water polygon from http://espa.cr.usgs.gov/downloads/auxiliaries/land_water_poly/land_no_buf.ply.gz. Unzip the file into $PREFIX/static_data.  Define the ESPA_LAND_MASS_POLYGON environment variable to point to the $PREFIX/static_data/land_no_buf.ply file in order to run the land/water mask code.
   ```
     export ESPA_LAND_MASS_POLYGON=$PREFIX/static_data/land_no_buf.ply
   ```
@@ -64,10 +64,12 @@ See git tag [version_1.4.0]
 The following is an example of how to link these libraries into your
 source code. Depending on your needs, some of these libraries may not
 be needed for your application.
-> -L$(ESPALIB) -l\_espa\_format\_conversion -l\_espa\_raw\_binary -l\_espa\_common \
-> -L$(XML2LIB) -lxml2 \
-> -L$(HDFEOS\_LIB) -lhdfeos -L$(HDFEOS\_GCTPLIB) -lGctp \
-> -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
+```
+ -L$(ESPALIB) -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
+ -L$(XML2LIB) -lxml2 \
+ -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lGctp \
+ -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -lz -lm
+```
 
 ### Verification Data
 
