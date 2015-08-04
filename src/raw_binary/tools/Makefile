@@ -42,13 +42,13 @@ OBJ8 = $(SRC8:.c=.o)
 LIB1   = \
     -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 -L$(GEOTIFF_LIB) -lgeotiff -L$(TIFFLIB) -ltiff \
-    -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -L$(HDFEOS_GCTPLIB) -lGctp \
+    -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig -L$(HDFEOS_GCTPLIB) -lgctp \
     -L$(ZLIBLIB) -lz -lm
 
 LIB2   = \
     -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 \
-    -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lGctp \
+    -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lgctp \
     -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
     -L$(ZLIBLIB) -lz -lm
 
@@ -70,7 +70,7 @@ LIB5   = \
 LIB6   = \
     -L../lib -l_espa_format_conversion -l_espa_raw_binary -l_espa_common \
     -L$(XML2LIB) -lxml2 \
-    -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lGctp \
+    -L$(HDFEOS_LIB) -lhdfeos -L$(HDFEOS_GCTPLIB) -lgctp \
     -L$(HDFLIB) -lmfhdf -ldf -L$(JPEGLIB) -ljpeg -L$(JBIGLIB) -ljbig \
     -L$(ZLIBLIB) -lz -lm
 
